@@ -49,6 +49,7 @@
 
     <modules>
         <module>parent</module>
+        <module>configuration</module>
     </modules>
 
     <profiles>
