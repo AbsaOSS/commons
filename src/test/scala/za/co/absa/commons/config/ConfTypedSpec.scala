@@ -19,6 +19,7 @@ package za.co.absa.commons.config
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.language.reflectiveCalls
 
 class ConfTypedSpec extends AnyFlatSpec with Matchers {
 
