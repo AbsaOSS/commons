@@ -1,5 +1,6 @@
 /*
  * Copyright 2019 ABSA Group Limited
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +16,13 @@
 
 package za.co.absa.commons.config
 
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-import org.scalatest.{FlatSpec, Matchers}
 
-class ConfTypedSpec extends FlatSpec with Matchers {
+class ConfTypedSpec extends AnyFlatSpec with Matchers {
+
+  behavior of "`Prop`"
 
   it should "support simple property" in new ConfTyped {
     Prop("x") shouldEqual "x"
@@ -29,7 +33,7 @@ class ConfTypedSpec extends FlatSpec with Matchers {
     object Foo extends Conf("foo") {
 
       object Bar extends Conf("bar") {
-        val innerProp = Prop("inner")
+        val innerProp: String = Prop("inner")
       }
 
     }
@@ -67,7 +71,7 @@ class ConfTypedSpec extends FlatSpec with Matchers {
     val testProps = new java.util.Properties with ConfTyped {
       val foo = new Conf("foo") {
         val bar = new Conf("bar") {
-          lazy val baz = getProperty(Prop("baz"))
+          lazy val baz: String = getProperty(Prop("baz"))
         }
       }
     }
