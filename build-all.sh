@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# THIS SCRIPT IS INTENDED FOR LOCAL DEV USAGE ONLY
+#
 
 BASE_DIR=$(dirname "$0")
 
