@@ -1,5 +1,6 @@
 /*
  * Copyright 2019 ABSA Group Limited
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +18,13 @@ package za.co.absa.commons.io
 
 import java.io.File
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TempDirectorySpec extends FlatSpec with Matchers {
+
+class TempDirectorySpec extends AnyFlatSpec with Matchers {
+
+  behavior of "`apply`"
 
   it should "create a unique temp directory" in {
     val path1 = TempDirectory().deleteOnExit().path
@@ -40,7 +45,9 @@ class TempDirectorySpec extends FlatSpec with Matchers {
     name3 should (startWith("foo") and endWith("bar"))
   }
 
-  "method delete()" should "remove directory with content" in {
+  behavior of "`delete`"
+
+  it should "remove directory with content" in {
     val dir = TempDirectory()
     val subDir = new File(dir.path.toFile, "subdir")
     val testFile = new File(subDir, "testFile")
