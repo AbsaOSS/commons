@@ -31,7 +31,7 @@ class SemanticVersionSpec extends AnyFlatSpec with Matchers {
     Version.asSemVer("1.22.333") should be(Version(
       NumericComponent(1),
       NumericComponent(22),
-      NumericComponent(333),
+      NumericComponent(333)
     ))
     Version.asSemVer("1.22.333-SNAPSHOT.77") should be(Version(
       NumericComponent(1),
@@ -39,8 +39,7 @@ class SemanticVersionSpec extends AnyFlatSpec with Matchers {
       NumericComponent(333),
       PreReleaseComponent(
         StringComponent("SNAPSHOT"),
-        NumericComponent(77),
-      ),
+        NumericComponent(77))
     ))
     Version.asSemVer("1.22.333+foo.bar") should be(Version(
       NumericComponent(1),
@@ -48,8 +47,7 @@ class SemanticVersionSpec extends AnyFlatSpec with Matchers {
       NumericComponent(333),
       BuildMetadataComponent(
         StringComponent("foo"),
-        StringComponent("bar"),
-      ),
+        StringComponent("bar"))
     ))
     Version.asSemVer("1.22.333-SNAPSHOT.77+foo.bar") should be(Version(
       NumericComponent(1),
@@ -57,12 +55,10 @@ class SemanticVersionSpec extends AnyFlatSpec with Matchers {
       NumericComponent(333),
       PreReleaseComponent(
         StringComponent("SNAPSHOT"),
-        NumericComponent(77),
-      ),
+        NumericComponent(77)),
       BuildMetadataComponent(
         StringComponent("foo"),
-        StringComponent("bar"),
-      ),
+        StringComponent("bar"))
     ))
   }
 
@@ -110,7 +106,7 @@ class SemanticVersionSpec extends AnyFlatSpec with Matchers {
       semver"0.1.1-beta.11",
       semver"0.1.1-beta11",
       semver"0.1.1-beta2",
-      semver"0.1.1",
+      semver"0.1.1"
     )
     Random.shuffle(versions).sorted should equal(versions)
   }

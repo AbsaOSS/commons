@@ -32,8 +32,7 @@ class SimpleVersionSpec extends AnyFlatSpec with Matchers {
       NumericComponent(1),
       StringComponent("two"),
       NumericComponent(33),
-      StringComponent("forty-two"),
-    ))
+      StringComponent("forty-two")))
   }
 
   it should "not parse" in {
@@ -63,7 +62,7 @@ class SimpleVersionSpec extends AnyFlatSpec with Matchers {
       ver"1.21",
       ver"1.21.9999",
       ver"1.22.0.1",
-      ver"1.111",
+      ver"1.111"
     )
     Random.shuffle(versions).sorted should equal(versions)
   }
