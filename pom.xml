@@ -45,7 +45,7 @@
     </developers>
 
     <groupId>za.co.absa.commons</groupId>
-    <artifactId>commons_2.12</artifactId>
+    <artifactId>commons_2.11</artifactId>
     <version>0.0.4-SNAPSHOT</version>
 
     <properties>
@@ -54,15 +54,15 @@
         <scm.developerConnection>scm:git:ssh://github.com/AbsaOSS/commons.git</scm.developerConnection>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <default.scala.binary.version>2.12</default.scala.binary.version>
-        <default.scala.version>${scala_2.12.version}</default.scala.version>
+        <default.scala.binary.version>2.11</default.scala.binary.version>
+        <default.scala.version>${scala_2.11.version}</default.scala.version>
 
         <scala_2.11.version>2.11.12</scala_2.11.version>
         <scala_2.12.version>2.12.10</scala_2.12.version>
 
         <!-- Controlled by `scala-cross-build` plugin -->
-        <scala.version>2.12.10</scala.version>
-        <scala.binary.version>2.12</scala.binary.version>
+        <scala.version>2.11.12</scala.version>
+        <scala.binary.version>2.11</scala.binary.version>
     </properties>
 
     <scm>
