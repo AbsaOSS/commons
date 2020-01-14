@@ -33,4 +33,3 @@ trait WhitespaceNormalizations {
     override def toString: String = "whiteSpaceRemoved"
   }
 }
-
