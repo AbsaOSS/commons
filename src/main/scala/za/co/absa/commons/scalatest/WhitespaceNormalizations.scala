@@ -17,18 +17,21 @@
 package za.co.absa.commons.scalatest
 
 import org.scalactic.{AbstractStringUniformity, Uniformity}
+import za.co.absa.commons.scalatest.WhitespaceNormalizations.WhiteSpaceRegex
 
-object WhitespaceNormalizations extends WhitespaceNormalizations
+object WhitespaceNormalizations extends WhitespaceNormalizations {
+  val WhiteSpaceRegex = "[\\s\\h]+"
+}
 
 trait WhitespaceNormalizations {
   val whiteSpaceNormalised: Uniformity[String] = new AbstractStringUniformity {
-    def normalized(s: String): String = s.replaceAll("\\s+", " ")
+    override def normalized(s: String): String = s.replaceAll(WhiteSpaceRegex, " ")
 
     override def toString: String = "whiteSpaceNormalised"
   }
 
   val whiteSpaceRemoved: Uniformity[String] = new AbstractStringUniformity {
-    def normalized(s: String): String = s.replaceAll("\\s", "")
+    override def normalized(s: String): String = s.replaceAll(WhiteSpaceRegex, "")
 
     override def toString: String = "whiteSpaceRemoved"
   }
