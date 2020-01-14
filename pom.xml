@@ -107,14 +107,15 @@
         <!-- Test scope dependencies -->
 
         <dependency>
-            <groupId>org.scalatestplus</groupId>
-            <artifactId>mockito-1-10_${scala.binary.version}</artifactId>
-            <version>3.1.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>3.2.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatestplus</groupId>
+            <artifactId>mockito-1-10_${scala.binary.version}</artifactId>
+            <version>3.1.0.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
