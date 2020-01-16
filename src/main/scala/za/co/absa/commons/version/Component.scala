@@ -17,7 +17,7 @@
 package za.co.absa.commons.version
 
 /**
-  * Represents a one component of a version.
+  * Represents one section of a version string
   * E.g. for the version string "1.foo.42" the components would be "1", "foo" and "42".
   */
 sealed trait Component extends Ordered[Component] {
@@ -37,7 +37,8 @@ object Component {
 }
 
 /**
-  * An empty component that is less that any other component as long as the other component claims the opposite.
+  * An empty component.
+  * It's less than any other component, unless the other component explicitly states otherwise.
   */
 case object EmptyComponent extends Component {
   override def comparator: PartialFunction[Component, Int] = {

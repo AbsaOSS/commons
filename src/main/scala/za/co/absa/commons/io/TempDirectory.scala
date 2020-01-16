@@ -72,4 +72,3 @@ object TempDirectory {
   def apply(prefix: String = "", suffix: String = "", pathOnly: Boolean = false): TempDirectory =
     new TempDirectory(prefix, suffix, pathOnly)
 }
-

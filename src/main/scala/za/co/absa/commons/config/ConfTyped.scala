@@ -25,57 +25,57 @@ import scala.language.implicitConversions
   * </p>
   *
   * <p>
-  *   Example:
+  * Example:
   *
-  *   <pre>
-  *     import za.co.absa.commons.config._
+  * <pre>
+  * import za.co.absa.commons.config._
   *
-  *     object MyAppConfig extends ConfTyped {
-  *       val confSource: java.util.Properties = ???
+  * object MyAppConfig extends ConfTyped {
+  * val confSource: java.util.Properties = ???
   *
-  *       override val rootPrefix = "com.example"
+  * override val rootPrefix = "com.example"
   *
-  *       object Foo extends Conf("foo") {
-  *         object Bar extends Conf("bar") {
-  *           val baz: String = confSource getProperty Prop("baz")
-  *           val qux: String = confSource getProperty Prop("qux")
-  *         }
-  *       }
-  *     }
+  * object Foo extends Conf("foo") {
+  * object Bar extends Conf("bar") {
+  * val baz: String = confSource getProperty Prop("baz")
+  * val qux: String = confSource getProperty Prop("qux")
+  * }
+  * }
+  * }
   *
-  *     // somewhere in your application
+  * // somewhere in your application
   *
-  *     import MyAppConfig._
+  * import MyAppConfig._
   *
-  *     val baz = Foo.Bar.baz // mapped to the key "com.example.foo.bar.baz" in the <code>confSource</code>
-  *     val baz = Foo.Bar.qux // mapped to the key "com.example.foo.bar.qux" in the <code>confSource</code>
-  *   </pre>
+  * val baz = Foo.Bar.baz // mapped to the key "com.example.foo.bar.baz" in the <code>confSource</code>
+  * val baz = Foo.Bar.qux // mapped to the key "com.example.foo.bar.qux" in the <code>confSource</code>
+  * </pre>
   * </p>
   *
   * Note that [[ConfTyped]] doesn't impose or depend on the way how the configuration values are loaded.
   * It only provides a convenient way to implicitly construct the configuration key names from the nested object structure.
   *
   * <p>
-  *   The key names are obtained by calling <code>Prop("...")</code> method.
-  *   It returns a full property key name that reflects the nesting structure of the <code>Conf</code> instances' names,
-  *   concatenated with dot (.) and prefixed with the <code>rootPrefix</code> if one is provided.
+  * The key names are obtained by calling <code>Prop("...")</code> method.
+  * It returns a full property key name that reflects the nesting structure of the <code>Conf</code> instances' names,
+  * concatenated with dot (.) and prefixed with the <code>rootPrefix</code> if one is provided.
   * </p>
   * <p/>
   * <p>
-  *   Another example of usage [[ConfTyped]]:
-  *   <pre>
-  *     val props = new java.util.Properties with ConfTyped {
-  *       val foo = new Conf("foo") {
-  *         val bar = new Conf("bar") {
-  *           lazy val baz = getProperty(Prop("baz"))
-  *         }
-  *       }
-  *     }
+  * Another example of usage [[ConfTyped]]:
+  * <pre>
+  * val props = new java.util.Properties with ConfTyped {
+  * val foo = new Conf("foo") {
+  * val bar = new Conf("bar") {
+  * lazy val baz = getProperty(Prop("baz"))
+  * }
+  * }
+  * }
   *
   *     props.put("foo.bar.baz", "42")
   *
-  *     println(props.foo.bar.baz) // prints 42
-  *   </pre>
+  * println(props.foo.bar.baz) // prints 42
+  * </pre>
   * </p>
   **/
 trait ConfTyped {
