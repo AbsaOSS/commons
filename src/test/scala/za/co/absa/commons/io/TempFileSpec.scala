@@ -17,7 +17,27 @@
 package za.co.absa.commons.io
 
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TempFileSpec extends AnyFlatSpec {
-  //todo: implement me!
+class TempFileSpec extends AnyFlatSpec with Matchers {
+  behavior of "`apply`"
+
+  it should "create a unique temp file" in {
+    val path1 = TempFile().deleteOnExit().path
+    val path2 = TempFile().deleteOnExit().path
+
+    path1 should not equal path2
+    path1.toFile.exists should be(true)
+    path2.toFile.exists should be(true)
+  }
+
+  it should "create files with prefix and suffix" in {
+    val name1 = TempFile("foo").deleteOnExit().path.getFileName.toString
+    val name2 = TempFile("", "bar").deleteOnExit().path.getFileName.toString
+    val name3 = TempFile("foo", "bar").deleteOnExit().path.getFileName.toString
+
+    name1 should startWith("foo")
+    name2 should endWith("bar")
+    name3 should (startWith("foo") and endWith("bar"))
+  }
 }

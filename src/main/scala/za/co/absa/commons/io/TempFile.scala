@@ -16,15 +16,14 @@
 
 package za.co.absa.commons.io
 
-import java.io.File
-import java.nio.file.Files
+import java.nio.file.{Files, Path}
 
 class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
-  val file: File = Files.createTempFile(prefix, suffix).toFile
-  if (pathOnly) file.delete()
+  val path: Path = Files.createTempFile(prefix, suffix)
+  if (pathOnly) Files.delete(path)
 
   def deleteOnExit(): this.type = {
-    file.deleteOnExit()
+    path.toFile.deleteOnExit()
     this
   }
 }
