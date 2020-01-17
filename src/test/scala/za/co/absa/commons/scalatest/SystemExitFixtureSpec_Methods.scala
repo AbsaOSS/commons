@@ -16,14 +16,14 @@
 
 package za.co.absa.commons.scalatest
 
+import java.security.Permission
+
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 
 class SystemExitFixtureSpec_Methods
   extends AnyFlatSpec
     with Matchers
-    with MockitoSugar
     with SystemExitFixture.Methods {
 
   behavior of "SystemExitFixture.Methods"
@@ -40,9 +40,11 @@ class SystemExitFixtureSpec_Methods
     intercept[RuntimeException](captureExitStatus(sys.error("foo error"))).getMessage should be("foo error")
   }
 
-  ignore should "restore previous security manager after return" in {
+  it should "restore previous security manager after return" in {
     val originalSecurityManager = System.getSecurityManager
-    val dummySecurityManager = mock[SecurityManager]
+    val dummySecurityManager = new SecurityManager {
+      override def checkPermission(perm: Permission): Unit = {} // allow restoring security manager after test
+    }
     System.setSecurityManager(dummySecurityManager)
     try {
       captureExitStatus {
