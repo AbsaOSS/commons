@@ -16,8 +16,11 @@
 
 package za.co.absa.commons
 
+import java.util.{MissingResourceException, Properties}
+
 import za.co.absa.commons.lang.ARM.using
 import za.co.absa.commons.lang.ImmutableProperties
+import za.co.absa.commons.lang.OptionImplicits._
 
 /**
   * Returns the project build version taken from the build.properties file.
@@ -25,8 +28,17 @@ import za.co.absa.commons.lang.ImmutableProperties
   * file to your classpath (without 'template'-suffix) and enable Maven resource filtering.
   */
 object BuildInfo {
-  val BuildProps: ImmutableProperties =
-    using(this.getClass.getResourceAsStream("/build.properties"))(ImmutableProperties.fromStream)
+  private val resourceName = "build.properties"
+
+  val BuildProps: ImmutableProperties = {
+    val stream =
+      this.getClass.getResource(s"/$resourceName")
+        .asOption
+        .map(_.openStream)
+        .getOrElse(throw new MissingResourceException(resourceName, classOf[Properties].getName, resourceName))
+
+    using(stream)(ImmutableProperties.fromStream)
+  }
 
   val Version: String = BuildProps.getProperty("build.version")
   val Timestamp: String = BuildProps.getProperty("build.timestamp")
