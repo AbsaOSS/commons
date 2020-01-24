@@ -39,7 +39,10 @@ trait TypeNegationConstraint {
   // Encoding for "A is not a subtype of B"
   trait !<:[A, B]
 
-  type not[T] = {type λ[U] = U !<: T} //NOSONAR
+  type not[T] = {
+    type λ[U] = U !<: T //NOSONAR
+    type lambda[U] = λ[U] // ASCII alias for λ
+  }
 
   // use ambiguous method declarations to rule out excluding type conditions
   implicit def passingProbe[A, B]: A !<: B = null //NOSONAR
