@@ -92,8 +92,16 @@ object ReflectionUtils {
     field.get(o).asInstanceOf[T]
   }
 
-  def extractProductElementsWithNames(product: Product): Map[String, _] = {
-    val pMirror = mirror.reflect(product)
+  /**
+    * Extract object properties as key-value pairs.
+    * Here by `properties` we understand public accessors that match a primary constructor arguments.
+    * As in a case class, for example.
+    *
+    * @param obj a target instance (in most cases an instance of a case class)
+    * @return a map of property names to their values
+    */
+  def extractProperties(obj: AnyRef): Map[String, _] = {
+    val pMirror = mirror.reflect(obj)
     constructorArgSymbols(pMirror.symbol)
       .map(argSymbol => {
         val name = argSymbol.name.toString

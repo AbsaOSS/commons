@@ -36,16 +36,19 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
     plus(Map("x" -> 2, "y" -> 40)) should be(42)
   }
 
-  "extractProductElementsWithNames()" should "for given Product return a map of element names to their values" in {
-    ReflectionUtils.extractProductElementsWithNames(Foo("bar")) should be(Map("x" -> "bar", "y" -> 42))
-    ReflectionUtils.extractProductElementsWithNames(Foo("bar", 777)) should be(Map("x" -> "bar", "y" -> 777))
+  "extractProperties()" should "for given Product return a map of element names to their values" in {
+    // case class
+    ReflectionUtils.extractProperties(Foo("aaa")) should be(Map("x" -> "aaa", "y" -> 42))
+    ReflectionUtils.extractProperties(Foo("aaa", 777)) should be(Map("x" -> "aaa", "y" -> 777))
+    // normal class
+    ReflectionUtils.extractProperties(new Bar("bbb", 42)) should be(Map("a" -> "bbb"))
   }
 
   "extractFieldValue()" should "return a value of a private field" in {
     ReflectionUtils.extractFieldValue[Int](Foo, "privateVal") should be(42)
   }
 
-  "extractFieldValue" should "return values of compiler generated private fields" in {
+  "extractFieldValue()" should "return values of compiler generated private fields" in {
     val bar = new Bar("Pi", 3.14)
     ReflectionUtils.extractFieldValue[String](bar, "a") shouldEqual "Pi"
     ReflectionUtils.extractFieldValue[Double](bar, "b") shouldEqual 3.14
@@ -92,7 +95,7 @@ object ReflectionUtilsSpec {
     private[this] val privateVal = 42
   }
 
-  class Bar(a: String, b: Double) {
+  class Bar(val a: String, b: Double) {
     def methodUsingFields: String = a + b.toString
   }
 
