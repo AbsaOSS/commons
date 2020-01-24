@@ -31,9 +31,11 @@ object OptionImplicits {
     def asOption: Option[A] = if (xs.isEmpty) None else Some(xs)
   }
 
-  implicit class AnyWrapper[A <: Any : not[Option[_]]#λ : Manifest](a: A) {
+  implicit class NonOptionWrapper[A <: Any : not[Option[_]]#λ](a: A) {
     def asOption: Option[A] = Option(a)
+  }
 
+  implicit class AnyWrapper[A <: Any](a: A) {
     def optionally[B](applyFn: (A, B) => A, maybeArg: Option[B]): A = maybeArg.map(applyFn(a, _)).getOrElse(a)
   }
 
