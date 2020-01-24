@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.commons
+package za.co.absa.commons.buildinfo
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -34,4 +34,24 @@ class BuildInfoSpec extends AnyFlatSpec with Matchers {
     BuildInfo.BuildProps.getProperty("build.timestamp") should equal("1234567890")
   }
 
+  behavior of "Customizable BuildInfo"
+
+  it should "read from a custom resource" in {
+    object MyBuildInfo extends BuildInfo(resourcePrefix = "/buildinfo-test/my")
+    MyBuildInfo.Version should equal("My version")
+  }
+
+  it should "support custom property mapping" in {
+    object MyBuildInfo extends BuildInfo(propMapping = PropMapping(
+      version = "bld.ver",
+      timestamp = "bld.ttt"
+    ))
+    MyBuildInfo.Version should equal("Custom version")
+    MyBuildInfo.Timestamp should equal("Custom timestamp")
+  }
+
+  it should "provide apply() method" in {
+    BuildInfo(resourcePrefix = "/buildinfo-test/my").Version should equal("My version")
+    BuildInfo(propMapping = PropMapping(version = "bld.ver")).Version should equal("Custom version")
+  }
 }
