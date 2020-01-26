@@ -20,14 +20,28 @@ import org.json4s.JsonAST.JString
 import org.json4s.prefs.EmptyValueStrategy
 import org.json4s.{Formats, JArray, JField, JNothing, JNull, JObject, JValue}
 
+/**
+ * Removes all empty values from the AST.
+ * By `empty value` we mean `null`, empty string, empty array/object or array/object that only consists of empty items.
+ *
+ * In order to preserve the length and offsets in the arrays that have at least one non-empty item,
+ * the rest empty items are not removed but replaced with `null`.
+ */
 trait NoEmptyValuesSupport extends FormatsBuilder {
   abstract override protected def formats: Formats = super.formats.withEmptyValueStrategy(new EmptyValueStrategy {
 
-    private val replaceEmptyWithJNothing: PartialFunction[JValue, JNothing.type] = {
+    private val replaceEmptyLeaf: PartialFunction[JValue, JNothing.type] = {
       case JNull => JNothing
       case JString("") => JNothing
-      case JArray(items) if items.isEmpty => JNothing
-      case JObject(fields) if fields.isEmpty => JNothing
+    }
+
+    private val replaceEmptyTree: PartialFunction[JValue, JValue] = {
+      case JObject(emptyFields) if emptyFields forall { case (_, v) => v == JNothing } => JNothing
+      case JArray(emptyItems) if emptyItems forall JNothing.== => JNothing
+      case JArray(items) => JArray(items map {
+        case JNothing => JNull // to preserve array length and non-empty items offsets
+        case jValue => jValue
+      })
     }
 
     private def recursively(fn: JValue => JValue): PartialFunction[JValue, JValue] = {
@@ -38,8 +52,8 @@ trait NoEmptyValuesSupport extends FormatsBuilder {
     }
 
     private val recursivelyReplaceEmpty: JValue => JValue =
-      replaceEmptyWithJNothing
-        .orElse(recursively(replaceEmpty))
+      replaceEmptyLeaf
+        .orElse(recursively(replaceEmpty) andThen (replaceEmptyTree orElse PartialFunction(identity)))
         .orElse(PartialFunction(identity))
 
     override def replaceEmpty(value: JValue): JValue = recursivelyReplaceEmpty(value)
