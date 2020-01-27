@@ -18,41 +18,43 @@ package za.co.absa.commons.buildinfo
 
 import java.util.{MissingResourceException, Properties}
 
-import za.co.absa.commons.buildinfo.BuildInfo._
 import za.co.absa.commons.lang.ARM.using
 import za.co.absa.commons.lang.ImmutableProperties
 import za.co.absa.commons.lang.OptionImplicits._
 
 /**
-  * A singleton that holds the project build version info taken from the build.properties file.
-  *
-  * It's particularly convenient for Maven-based projects. Just copy 'build.properties.template'
-  * file to your classpath (without 'template' suffix) and enable Maven resource filtering.
-  *
-  * If BuildInfo defaults don't suit your project you can create your own instance
-  * and parametrize it in one of the following ways:
-  * {{{
-  *   object MyBuildInfo extend BuildInfo(...)
-  * }}}
-  * or
-  * {{{
-  *   val myBuildInfo = BuildInfo(...)
-  * }}}
-  */
+ * A singleton that holds the project build version info taken from the build.properties file.
+ *
+ * It's particularly convenient for Maven-based projects. Just copy 'build.properties.template'
+ * file to your classpath (without 'template' suffix) and enable Maven resource filtering.
+ *
+ * If BuildInfo defaults don't suit your project you can create your own instance
+ * and parametrize it in one of the following ways:
+ * {{{
+ *   object MyBuildInfo extend BuildInfo(...)
+ * }}}
+ * or
+ * {{{
+ *   val myBuildInfo = BuildInfo(...)
+ * }}}
+ */
 object BuildInfo extends BuildInfo(
-  resourcePrefix = DefaultResourcePrefix,
+  resourcePrefix = BuildInfoConst.DefaultResourcePrefix,
   propMapping = PropMapping.Default) {
 
   def apply(
-    resourcePrefix: String = DefaultResourcePrefix,
+    resourcePrefix: String = BuildInfoConst.DefaultResourcePrefix,
     propMapping: PropMapping = PropMapping.Default
   ): BuildInfo = new BuildInfo(resourcePrefix, propMapping) {}
+}
 
-  private final val DefaultResourcePrefix = "/build"
+object BuildInfoConst {
+  // it has to be separated from the `BuildInfo` object due to a bug: https://github.com/scala/bug/issues/5000
+  private[buildinfo] final val DefaultResourcePrefix = "/build"
 }
 
 abstract class BuildInfo(
-  resourcePrefix: String = DefaultResourcePrefix,
+  resourcePrefix: String = BuildInfoConst.DefaultResourcePrefix,
   propMapping: PropMapping = PropMapping.Default) {
 
   val BuildProps: ImmutableProperties = {
