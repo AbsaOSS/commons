@@ -34,5 +34,6 @@ mvn clean
 
 cross_build 2.11
 cross_build 2.12
+cross_build 2.13
 
 mvn scala-cross-build:restore-version

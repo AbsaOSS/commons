@@ -53,8 +53,8 @@ trait NoEmptyValuesSupport extends FormatsBuilder {
 
     private val recursivelyReplaceEmpty: JValue => JValue =
       replaceEmptyLeaf
-        .orElse(recursively(replaceEmpty) andThen (replaceEmptyTree orElse PartialFunction(identity)))
-        .orElse(PartialFunction(identity))
+        .orElse(recursively(replaceEmpty) andThen (replaceEmptyTree orElse { case x => x }))
+        .orElse({ case x => x })
 
     override def replaceEmpty(value: JValue): JValue = recursivelyReplaceEmpty(value)
 

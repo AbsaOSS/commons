@@ -13,7 +13,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -54,13 +55,14 @@
         <scm.developerConnection>scm:git:ssh://github.com/AbsaOSS/commons.git</scm.developerConnection>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <json4s.version>3.2.11</json4s.version>
+        <json4s.version>3.5.5</json4s.version>
 
         <default.scala.binary.version>2.11</default.scala.binary.version>
         <default.scala.version>${scala_2.11.version}</default.scala.version>
 
         <scala_2.11.version>2.11.12</scala_2.11.version>
         <scala_2.12.version>2.12.10</scala_2.12.version>
+        <scala_2.13.version>2.13.1</scala_2.13.version>
 
         <!-- Controlled by `scala-cross-build` plugin -->
         <scala.version>2.11.12</scala.version>
@@ -295,7 +297,7 @@
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
-                    <version>4.2.0</version>
+                    <version>4.3.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.scalatest</groupId>
@@ -324,6 +326,13 @@
             <properties>
                 <scala.binary.version>2.12</scala.binary.version>
                 <scala.version>${scala_2.12.version}</scala.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>scala-2.13</id>
+            <properties>
+                <scala.binary.version>2.13</scala.binary.version>
+                <scala.version>${scala_2.13.version}</scala.version>
             </properties>
         </profile>
 
