@@ -232,7 +232,7 @@
             <plugin>
                 <groupId>com.github.wajda</groupId>
                 <artifactId>scala-cross-build-maven-plugin</artifactId>
-                <version>0.2.0</version>
+                <version>0.2.1</version>
                 <configuration>
                     <defaultScalaBinaryVersion>${default.scala.binary.version}</defaultScalaBinaryVersion>
                     <defaultScalaVersion>${default.scala.version}</defaultScalaVersion>
