@@ -2,8 +2,12 @@ ABSA Commons
 ===
 Selection of useful reusable components
 
-[![TeamCity build](https://teamcity.jetbrains.com/app/rest/builds/aggregated/strob:%28locator:%28buildType:%28id:OpenSourceProjects_AbsaOSS_Commons_AutoBuildWithScala212%29,branch:master%29%29/statusIcon.svg)](https://teamcity.jetbrains.com/viewType.html?buildTypeId=OpenSourceProjects_AbsaOSSSpline_AutomaticBuildsWithTests_Spark24&branch=develop&tab=buildTypeStatusDiv)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/za.co.absa.commons/commons_2.12/badge.svg)](https://search.maven.org/search?q=g:za.co.absa.commons)
+[![TeamCity build](https://teamcity.jetbrains.com/app/rest/builds/aggregated/strob:%28locator:%28buildType:%28id:OpenSourceProjects_AbsaOSS_Commons_AutoBuildWithScala212%29,branch:master%29%29/statusIcon.svg)](https://teamcity.jetbrains.com/viewType.html?buildTypeId=OpenSourceProjects_AbsaOSSSpline_AutomaticBuildsWithTests_Spark24&branch=develop&tab=buildTypeStatusDiv)
+[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=AbsaOSS_commons&metric=alert_status)](https://sonarcloud.io/dashboard?id=AbsaOSS_commons)
+[![SonarCloud Maintainability](https://sonarcloud.io/api/project_badges/measure?project=AbsaOSS_commons&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=AbsaOSS_commons)
+[![SonarCloud Reliability](https://sonarcloud.io/api/project_badges/measure?project=AbsaOSS_commons&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=AbsaOSS_commons)
+[![SonarCloud Security](https://sonarcloud.io/api/project_badges/measure?project=AbsaOSS_commons&metric=security_rating)](https://sonarcloud.io/dashboard?id=AbsaOSS_commons)
 
 ---
 
