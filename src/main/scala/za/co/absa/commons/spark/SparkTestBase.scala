@@ -16,9 +16,9 @@
 
 package za.co.absa.commons.spark
 
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.SparkSession
 
-trait SparkTestBase { self =>
+trait SparkTestBase {
   implicit val spark: SparkSession = SparkSession.builder()
     .master("local[*]")
     .appName(s"Commons unit testing SchemaUtils")
@@ -29,16 +29,5 @@ trait SparkTestBase { self =>
     .config("spark.sql.hive.convertMetastoreParquet", false)
     .config("fs.defaultFS","file:/")
     .getOrCreate()
-
-  /**
-   * Creates a Spark DataFrame from a JSON document(s).
-   *
-   * @param json A json string to convert to a DataFrame
-   * @return A data frame
-   */
-  def getDataFrameFromJson(spark: SparkSession, json: Seq[String]): DataFrame = {
-    import spark.implicits._
-    spark.read.json(json.toDS)
-  }
 }
 

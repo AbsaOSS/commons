@@ -29,16 +29,16 @@ object SchemaUtils {
    * @return true if provided arrays are the same ignoring nullability
    */
   @scala.annotation.tailrec
-  private def isSameArray(array1: ArrayType, array2: ArrayType): Boolean = {
+  private def equalArrayTypes(array1: ArrayType, array2: ArrayType): Boolean = {
     array1.elementType match {
       case arrayType1: ArrayType =>
         array2.elementType match {
-          case arrayType2: ArrayType => isSameArray(arrayType1, arrayType2)
+          case arrayType2: ArrayType => equalArrayTypes(arrayType1, arrayType2)
           case _ => false
         }
       case structType1: StructType =>
         array2.elementType match {
-          case structType2: StructType => isSameSchema(structType1, structType2)
+          case structType2: StructType => equivalentSchemas(structType1, structType2)
           case _ => false
         }
       case _ => array1.elementType == array2.elementType
@@ -77,12 +77,12 @@ object SchemaUtils {
     field1.dataType match {
       case arrayType1: ArrayType =>
         field2.dataType match {
-          case arrayType2: ArrayType => isSameArray(arrayType1, arrayType2)
+          case arrayType2: ArrayType => equalArrayTypes(arrayType1, arrayType2)
           case _ => false
         }
       case structType1: StructType =>
         field2.dataType match {
-          case structType2: StructType => isSameSchema(structType1, structType2)
+          case structType2: StructType => equivalentSchemas(structType1, structType2)
           case _ => false
         }
       case _ => field1.dataType == field2.dataType
@@ -133,12 +133,12 @@ object SchemaUtils {
       curSchema.foldRight(List.empty[Column])((field, acc) => {
         val currentCol: Column = parent match {
           case Some(x) => x.getField(field.name).as(field.name)
-          case None    => col(field.name)
+          case None => col(field.name)
         }
         field.dataType match {
-          case arrType: ArrayType     => processArray(arrType, currentCol, field.name) :: acc
+          case arrType: ArrayType => processArray(arrType, currentCol, field.name) :: acc
           case structType: StructType => struct(processStruct(structType, Some(currentCol)): _*).as(field.name) :: acc
-          case _                      =>  currentCol :: acc
+          case _ =>  currentCol :: acc
         }
       })
     }
@@ -151,10 +151,10 @@ object SchemaUtils {
    * where schema order might be important (e.g. hashing the whole rows and using except)
    *
    * @param df DataFrame to have it's schema aligned/sorted
-   * @param selector Selector for the DataFrame
+   * @param structType model structType for the alignment of df
    * @return Returns aligned and filtered schema
    */
-  def alignSchema(df: DataFrame, selector: List[Column]): DataFrame = df.select(selector: _*)
+  def alignSchema(df: DataFrame, structType: StructType): DataFrame = df.select(getDataFrameSelector(structType): _*)
 
   /**
    * Compares 2 dataframe schemas.
@@ -163,7 +163,7 @@ object SchemaUtils {
    * @param schema2 The second schema to compare
    * @return true if provided schemas are the same ignoring nullability
    */
-  def isSameSchema(schema1: StructType, schema2: StructType): Boolean = {
+  def equivalentSchemas(schema1: StructType, schema2: StructType): Boolean = {
     val fields1 = schema1.map(field => field.name.toLowerCase() -> field).toMap
     val fields2: Map[String, StructField] = schema2.map(field => field.name.toLowerCase() -> field).toMap
 
@@ -171,12 +171,7 @@ object SchemaUtils {
     def checkEveryField(otherFields: Map[String, StructField]): (Boolean, StructField) => Boolean = {
       (stillSame: Boolean, field: StructField) => {
         val firstFieldLc = field.name.toLowerCase()
-        if (otherFields.contains(firstFieldLc)) {
-          val secondField = otherFields(firstFieldLc)
-          stillSame && isSameField(field, secondField)
-        } else {
-          false
-        }
+        stillSame && otherFields.contains(firstFieldLc) && isSameField(field, otherFields(firstFieldLc))
       }
     }
 
