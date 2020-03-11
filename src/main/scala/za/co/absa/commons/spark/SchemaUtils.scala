@@ -17,7 +17,7 @@
 package za.co.absa.commons.spark
 
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{ArrayType, StructField, StructType}
+import org.apache.spark.sql.types.{ArrayType, DataType, StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame}
 
 object SchemaUtils {
@@ -69,23 +69,23 @@ object SchemaUtils {
   /**
    * Compares 2 fields of a dataframe schema.
    *
-   * @param field1 The first field to compare
-   * @param field2 The second field to compare
+   * @param type1 The first field to compare
+   * @param type2 The second field to compare
    * @return true if provided fields are the same ignoring nullability
    */
-  private def isSameField(field1: StructField, field2: StructField): Boolean = {
-    field1.dataType match {
+  private def equivalentTypes(type1: DataType, type2: DataType): Boolean = {
+    type1 match {
       case arrayType1: ArrayType =>
-        field2.dataType match {
+        type2 match {
           case arrayType2: ArrayType => equalArrayTypes(arrayType1, arrayType2)
           case _ => false
         }
       case structType1: StructType =>
-        field2.dataType match {
+        type2 match {
           case structType2: StructType => equivalentSchemas(structType1, structType2)
           case _ => false
         }
-      case _ => field1.dataType == field2.dataType
+      case _ => type1 == type2
     }
   }
 
@@ -164,21 +164,15 @@ object SchemaUtils {
    * @return true if provided schemas are the same ignoring nullability
    */
   def equivalentSchemas(schema1: StructType, schema2: StructType): Boolean = {
-    val fields1 = schema1.map(field => field.name.toLowerCase() -> field).toMap
-    val fields2: Map[String, StructField] = schema2.map(field => field.name.toLowerCase() -> field).toMap
+    val fields1 = schema1.sortBy(_.name.toLowerCase)
+    val fields2 = schema2.sortBy(_.name.toLowerCase)
 
-    // Checking if every field in one schema exists in other schema
-    def checkEveryField(otherFields: Map[String, StructField]): (Boolean, StructField) => Boolean = {
-      (stillSame: Boolean, field: StructField) => {
-        val firstFieldLc = field.name.toLowerCase()
-        stillSame && otherFields.contains(firstFieldLc) && isSameField(field, otherFields(firstFieldLc))
+    fields1.size == fields2.size &&
+      fields1.zip(fields2).forall {
+        case (f1, f2) =>
+          f1.name.equalsIgnoreCase(f2.name) &&
+            equivalentTypes(f1.dataType, f2.dataType)
       }
-    }
-
-    val same1 = fields1.values.foldLeft(true)(checkEveryField(otherFields = fields2))
-    val same2 = fields2.values.foldLeft(true)(checkEveryField(otherFields = fields1))
-
-    same1 && same2
   }
 
   /**
