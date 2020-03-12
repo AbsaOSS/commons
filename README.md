@@ -273,6 +273,35 @@ require(Version.asSemVer(SomeLibVersion) > semver"1.2.3-beta.2")
       )
     ```
 
+# Spark Schema Utils
+
+Provides methods for working with schemas, its comparison and alignment.  
+
+1. Schema comparison returning true/false. Ignores the order of columns
+         
+    ```scala
+      SchemaUtils.equivalentSchemas(schema1, schema2)
+    ```
+
+2. Schema comparison returning difference. Ignores the order of columns
+    
+    ```scala
+      SchemaUtils.diff(schema1, schema2)
+    ```
+   
+3. Schema selector generator which provides a List of columns to be used in a 
+select to order and positionally filter columns of a DataFrame
+    
+    ```scala
+      SchemaUtils.getDataFrameSelector(schema)
+    ```
+   
+4. Dataframe alignment method using the `getDataFrameSelector` method.
+    
+    ```scala
+      SchemaUtils.alignSchema(dataFrameToBeAligned, modelSchema)
+    ```
+
 ---
 
     Copyright 2019 ABSA Group Limited
