@@ -46,7 +46,7 @@
 
     <groupId>za.co.absa.commons</groupId>
     <artifactId>commons_2.11</artifactId>
-    <version>0.0.9</version>
+    <version>0.0.10-SNAPSHOT</version>
 
     <properties>
         <scm.url>http://github.com/AbsaOSS/commons/tree/master</scm.url>
@@ -72,7 +72,7 @@
         <url>${scm.url}</url>
         <connection>${scm.connection}</connection>
         <developerConnection>${scm.developerConnection}</developerConnection>
-        <tag>release/0.0.9</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
