@@ -110,4 +110,22 @@ class SemanticVersionSpec extends AnyFlatSpec with Matchers {
     )
     Random.shuffle(versions).sorted should equal(versions)
   }
+
+  behavior of "asString()"
+
+  it should "render the original version string" in {
+    val versionStrings = Seq(
+      "1.22.333",
+      "1.22.333-beta",
+      "1.22.333-beta.42",
+      "1.22.333+meta",
+      "1.22.333+meta.42",
+      "1.22.333-beta+meta",
+      "1.22.333-beta.42+meta",
+      "1.22.333-beta+meta.42",
+      "1.22.333-beta.42+meta.42",
+      "1.22.333-b.e.t.a+m.e.t.a"
+    )
+    versionStrings.foreach(verStr => Version.asSemVer(verStr).asString should equal(verStr))
+  }
 }

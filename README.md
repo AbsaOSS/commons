@@ -221,12 +221,19 @@ Can be used to compare the versions, for instance when implementing version pred
 ### Example
 
 ```scala
+import Version._
+
 require(Version.asSimple(SPARK_VERSION) > ver"2.4")
-```
-or
-```scala
+// or
 require(Version.asSemVer(SomeLibVersion) > semver"1.2.3-beta.2")
 ```
+
+To get a string representation from a `Version` instance `asString` extension method can be used:
+
+```scala
+val myVer: Version = semver"1.2.3-beta.2+777.42"
+myVer.asString  // returns "1.2.3-beta.2+777.42"
+```  
 
 # Scalatest Utils
 

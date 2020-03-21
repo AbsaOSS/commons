@@ -18,6 +18,8 @@ package za.co.absa.commons.version
 
 import za.co.absa.commons.version.impl.{SemVer20Impl, SimpleVersionImpl}
 
+import scala.annotation.tailrec
+
 case class Version(components: Component*) extends Ordered[Version] {
   override def compare(that: Version): Int = components
     .zipAll(that.components, EmptyComponent, EmptyComponent)
@@ -34,6 +36,22 @@ object Version extends SimpleVersionImpl with SemVer20Impl {
     def ver(args: Any*): Version = Version.asSimple(sc.s(args: _*))
 
     def semver(args: Any*): Version = Version.asSemVer(sc.s(args: _*))
+  }
+
+  implicit class VersionExtensionMethods(val v: Version) extends AnyVal {
+
+    def asString: String = {
+      @tailrec def loop(sb: StringBuilder, delim: String, comps: List[Component]): StringBuilder = comps match {
+        case Nil => sb
+        case EmptyComponent :: cs => loop(sb, ".", cs)
+        case NumericComponent(x) :: cs => loop(sb.append(delim).append(x), ".", cs)
+        case StringComponent(s) :: cs => loop(sb.append(delim).append(s), ".", cs)
+        case PreReleaseComponent(identifiers@_*) :: cs => loop(sb, "-", identifiers.toList ++ cs)
+        case BuildMetadataComponent(identifiers@_*) :: cs => loop(sb, "+", identifiers.toList ++ cs)
+      }
+
+      loop(StringBuilder.newBuilder, "", v.components.toList).result()
+    }
   }
 
 }
