@@ -66,4 +66,12 @@ class SimpleVersionSpec extends AnyFlatSpec with Matchers {
     )
     Random.shuffle(versions).sorted should equal(versions)
   }
+
+  behavior of "asString()"
+
+  it should "render the original version string" in {
+    ver"1".asString should be("1")
+    ver"foo".asString should be("foo")
+    ver"1.two.33.forty-two".asString should be("1.two.33.forty-two")
+  }
 }
