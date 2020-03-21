@@ -43,7 +43,6 @@ object Version extends SimpleVersionImpl with SemVer20Impl {
     def asString: String = {
       @tailrec def loop(sb: StringBuilder, delim: String, comps: List[Component]): StringBuilder = comps match {
         case Nil => sb
-        case EmptyComponent :: cs => loop(sb, ".", cs)
         case NumericComponent(x) :: cs => loop(sb.append(delim).append(x), ".", cs)
         case StringComponent(s) :: cs => loop(sb.append(delim).append(s), ".", cs)
         case PreReleaseComponent(identifiers@_*) :: cs => loop(sb, "-", identifiers.toList ++ cs)
