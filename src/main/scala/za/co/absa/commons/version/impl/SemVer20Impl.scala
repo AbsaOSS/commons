@@ -28,7 +28,7 @@ import scala.util.matching.Regex
   */
 trait SemVer20Impl {
 
-  def asSemVer(verStr: String): Version = verStr match {
+  def asSemVer(verStr: String): SemanticVersion = verStr match {
     case SemVerRegexp(major, minor, patch, preRelease, buildMeta) =>
       val mainComponents = Seq(
         NumericComponent(major.toInt),
@@ -40,7 +40,7 @@ trait SemVer20Impl {
         Option(buildMeta).map(s => BuildMetadataComponent(parseIdentifiers(s): _*))
       ).flatten
 
-      Version(mainComponents ++ optionalComponents: _*)
+      new Version(mainComponents ++ optionalComponents: _*) with SemVerOps
 
     case _ => throw new IllegalArgumentException(s"$verStr does not correspond to the SemVer 2.0 spec")
   }
@@ -50,6 +50,75 @@ trait SemVer20Impl {
 }
 
 object SemVer20Impl {
+  type SemanticVersion = Version with SemVerOps
+
+  implicit val semVerOrdering: Ordering[SemanticVersion] = new Ordering[SemanticVersion] {
+    override def compare(x: SemanticVersion, y: SemanticVersion): Int = x.compare(y)
+  }
+
+  /**
+    * Implements SemVer 2.0 specific operations on the Version class
+    */
+  sealed trait SemVerOps {
+    this: Version =>
+
+    /**
+      * A `core` part of the version number. E.g. "1.2.3" in "1.2.3-alpha.4+build.5"
+      *
+      * @return A new instance of [[SemanticVersion]] with the same `minor`, `major` and `patch`
+      *         components, but without a `pre-release` or `build-meta` components
+      */
+    final def core: SemanticVersion =
+      if (components.length == 3) this
+      else new Version(this.components.take(3): _*) with SemVerOps
+
+    /**
+      * A `pre-release` part of the version number. E.g. "alpha.4" in "1.2.3-alpha.4+build.5"
+      *
+      * @return `Some(Version)` that consists of components from a `pre-release` part of this version,
+      *         or `None` if a `pre-release` component is absent
+      */
+    final def preRelease: Option[Version] = components.collectFirst {
+      case PreReleaseComponent(identifiers@_*) => Version(identifiers: _*)
+    }
+
+    /**
+      * A `build metadata` part of the version number. E.g. "build.5" in "1.2.3-alpha.4+build.5"
+      *
+      * @return `Some(Version)` that consists of components from a `build-meta` part of this version,
+      *         or `None` if a `build-meta` component is absent
+      */
+    final def buildMeta: Option[Version] = components.collectFirst {
+      case BuildMetadataComponent(identifiers@_*) => Version(identifiers: _*)
+    }
+
+    /**
+      * A `major` version number. E.g. "1" in "1.2.3-alpha.4+build.5"
+      *
+      * @return `major` component as a number
+      */
+    final def major: Int = numComponent(0)
+
+    /**
+      * A `minor` version number. E.g. "2" in "1.2.3-alpha.4+build.5"
+      *
+      * @return `minor` component as a number
+      */
+    final def minor: Int = numComponent(1)
+
+    /**
+      * A `patch` version number. E.g. "3" in "1.2.3-alpha.4+build.5"
+      *
+      * @return `patch` component as a number
+      */
+    final def patch: Int = numComponent(2)
+
+    @inline private def numComponent(i: Int) = {
+      val NumericComponent(x) = this.components(i)
+      x
+    }
+  }
+
   private val SemVerRegexp: Regex = ("^" +
     "(0|[1-9]\\d*)\\." +
     "(0|[1-9]\\d*)\\." +

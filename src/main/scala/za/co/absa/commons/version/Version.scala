@@ -16,6 +16,7 @@
 
 package za.co.absa.commons.version
 
+import za.co.absa.commons.version.impl.SemVer20Impl.SemanticVersion
 import za.co.absa.commons.version.impl.{SemVer20Impl, SimpleVersionImpl}
 
 import scala.annotation.tailrec
@@ -35,7 +36,7 @@ object Version extends SimpleVersionImpl with SemVer20Impl {
 
     def ver(args: Any*): Version = Version.asSimple(sc.s(args: _*))
 
-    def semver(args: Any*): Version = Version.asSemVer(sc.s(args: _*))
+    def semver(args: Any*): SemanticVersion = Version.asSemVer(sc.s(args: _*))
   }
 
   implicit class VersionExtensionMethods(val v: Version) extends AnyVal {

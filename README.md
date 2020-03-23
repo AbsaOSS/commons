@@ -235,6 +235,21 @@ val myVer: Version = semver"1.2.3-beta.2+777.42"
 myVer.asString  // returns "1.2.3-beta.2+777.42"
 ```  
 
+Semantic Versioning specific operations:
+
+```scala
+import Version._
+
+val myVer = semver"111.222.333-alpha.444+build.555"
+
+myVer.major      == 111
+myVer.minor      == 222
+myVer.patch      == 333
+myVer.core       == semver"111.222.333"
+myVer.preRelease == ver"alpha.444"
+myVer.buildMeta  == ver"build.555"
+```
+
 # Scalatest Utils
 
 1. `ConditionalTestTags` - runs certain tests conditionally
