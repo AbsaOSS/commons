@@ -128,4 +128,38 @@ class SemanticVersionSpec extends AnyFlatSpec with Matchers {
     )
     versionStrings.foreach(verStr => Version.asSemVer(verStr).asString should equal(verStr))
   }
+
+  behavior of "SemVer specific operations"
+
+  "major(), minor(), patch()" should "return respective components" in {
+    semver"1.22.333".major should be(1)
+    semver"1.22.333".minor should be(22)
+    semver"1.22.333".patch should be(333)
+  }
+
+  "core()" should "return a core version component (major.minor.patch) as a SemanticVersion" in {
+    val versions = Seq(
+      semver"1.22.333",
+      semver"1.22.333-beta",
+      semver"1.22.333+meta",
+      semver"1.22.333-beta+meta"
+    )
+    versions.foreach(version => {
+      val coreVersion = version.core
+      coreVersion should equal(semver"1.22.333")
+      coreVersion.core should be theSameInstanceAs coreVersion
+    })
+  }
+
+  "preRelease()" should "return a pre-release component as a Version" in {
+    semver"1.2.3-beta.4+meta.5".preRelease should equal(Some(ver"beta.4"))
+    semver"1.2.3+meta.5".preRelease should not be defined
+    semver"1.2.3".preRelease should not be defined
+  }
+
+  "buildMeta()" should "return a build-meta component as a Version" in {
+    semver"1.2.3-beta.4+meta.5".buildMeta should equal(Some(ver"meta.5"))
+    semver"1.2.3-beta.4".buildMeta should not be defined
+    semver"1.2.3".buildMeta should not be defined
+  }
 }
