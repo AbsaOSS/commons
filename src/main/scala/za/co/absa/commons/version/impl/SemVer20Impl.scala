@@ -97,21 +97,21 @@ object SemVer20Impl {
       *
       * @return `major` component as a number
       */
-    final def major: Int = numComponent(0)
+    final def major: BigInt = numComponent(0)
 
     /**
       * A `minor` version number. E.g. "2" in "1.2.3-alpha.4+build.5"
       *
       * @return `minor` component as a number
       */
-    final def minor: Int = numComponent(1)
+    final def minor: BigInt = numComponent(1)
 
     /**
       * A `patch` version number. E.g. "3" in "1.2.3-alpha.4+build.5"
       *
       * @return `patch` component as a number
       */
-    final def patch: Int = numComponent(2)
+    final def patch: BigInt = numComponent(2)
 
     @inline private def numComponent(i: Int) = {
       val NumericComponent(x) = this.components(i)
