@@ -35,6 +35,12 @@ class SimpleVersionSpec extends AnyFlatSpec with Matchers {
       StringComponent("forty-two")))
   }
 
+  // bugfix: commons-14
+  it should "handle big numbers" in {
+    val bigStr = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+    Version.asSimple(bigStr) should be(Version(NumericComponent(BigInt(bigStr))))
+  }
+
   it should "not parse" in {
     intercept[IllegalArgumentException](Version.asSimple(""))
   }

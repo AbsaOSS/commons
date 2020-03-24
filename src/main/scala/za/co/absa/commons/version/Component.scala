@@ -32,7 +32,7 @@ sealed trait Component extends Ordered[Component] {
 
 object Component {
   def apply(s: String): Component =
-    if (s.forall(_.isDigit)) NumericComponent(s.toInt)
+    if (s.forall(_.isDigit)) NumericComponent(BigInt(s))
     else StringComponent(s)
 }
 
@@ -50,7 +50,7 @@ case object EmptyComponent extends Component {
   * A numeric component.
   * Compares naturally to itself.
   */
-case class NumericComponent(x: Int) extends Component {
+case class NumericComponent(x: BigInt) extends Component {
   override def comparator: PartialFunction[Component, Int] = {
     case EmptyComponent => +1
     case NumericComponent(y) => x compare y

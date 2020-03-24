@@ -62,6 +62,17 @@ class SemanticVersionSpec extends AnyFlatSpec with Matchers {
     ))
   }
 
+  // bugfix: commons-14
+  it should "handle big numbers" in {
+    Version.asSemVer("1.0.0+20130313144700") should be(Version(
+      NumericComponent(1),
+      NumericComponent(0),
+      NumericComponent(0),
+      BuildMetadataComponent(
+        NumericComponent(20130313144700L))
+    ))
+  }
+
   it should "not parse" in {
     intercept[IllegalArgumentException](Version.asSemVer(""))
     intercept[IllegalArgumentException](Version.asSemVer("1"))
