@@ -57,7 +57,7 @@ abstract class BuildInfo(
   resourcePrefix: String = BuildInfoConst.DefaultResourcePrefix,
   propMapping: PropMapping = PropMapping.Default) {
 
-  val BuildProps: ImmutableProperties = {
+  lazy val BuildProps: ImmutableProperties = {
     val resourceName = s"$resourcePrefix.properties"
     val stream =
       this.getClass.getResource(s"$resourceName")
@@ -68,6 +68,6 @@ abstract class BuildInfo(
     using(stream)(ImmutableProperties.fromStream)
   }
 
-  val Version: String = BuildProps.getProperty(propMapping.version)
-  val Timestamp: String = BuildProps.getProperty(propMapping.timestamp)
+  lazy val Version: String = BuildProps.getProperty(propMapping.version)
+  lazy val Timestamp: String = BuildProps.getProperty(propMapping.timestamp)
 }
