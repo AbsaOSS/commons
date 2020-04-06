@@ -66,6 +66,26 @@ class ARMSpec extends AnyFlatSpec
     verify(Resource.get).close()
   }
 
+  it should "support multiple generators" in {
+    val res1 = mock[TestResource]("RES 1")
+    val res2 = mock[TestResource]("RES 2")
+
+    val result42 = for {
+      res1Managed <- managed(res1) if res1Managed != null // dummy filter
+      res2Managed <- managed(res2) if res2Managed != null // dummy filter
+    } yield {
+      res1 should be theSameInstanceAs res1Managed
+      res2 should be theSameInstanceAs res2Managed
+      verifyNoInteractions(res1)
+      verifyNoInteractions(res2)
+      42
+    }
+
+    result42 should be(42)
+    verify(res1).close()
+    verify(res2).close()
+  }
+
   it should "close the resource in case of an error" in {
     assertThrows[Exception] {
       for (_ <- managed(Resource.init)) sys.error("test exception")
