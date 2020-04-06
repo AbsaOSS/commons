@@ -170,6 +170,27 @@ BuildInfo.Version // returns `build.version` property from the `build.properties
 BuildInfo.Timestamp // returns `build.timestamp` property from the `build.properties` file
 BuildInfo.BuildProps // returns entire `build.properties` content as immutable Java `Properties`
 ```
+### Other ways of usage & customization
+If needed, you can customize a `build.properties` resource path and/or the property mapping.
+
+##### Custom `.properties` file
+```scala
+// loads '/foo/bar.properties' from the classpath
+object MyBuildInfo extends BuildInfo(resourcePrefix = "/foo/bar")
+```
+##### Custom property mapping
+```scala
+object MyBuildInfo extends BuildInfo(propMapping = PropMapping(
+  version = "bld.ver",  // binds "Version" field to "bld.ver" property
+  timestamp = "bld.ttt" // binds "Timestamp" field to "bld.ver" property
+))
+```
+
+You can also use `apply()` method instead of inheritance. It all depends on your preferred code style:
+
+```scala
+val myBuildInfo = BuildInfo(...)
+```
 
 # IO Utils
 An easy way to create a temporary file or directory with the support for automatic recursive deletion (as `rm -rf`) on JVM shutdown.
