@@ -182,7 +182,7 @@ object MyBuildInfo extends BuildInfo(resourcePrefix = "/foo/bar")
 ```scala
 object MyBuildInfo extends BuildInfo(propMapping = PropMapping(
   version = "bld.ver",  // binds "Version" field to "bld.ver" property
-  timestamp = "bld.ttt" // binds "Timestamp" field to "bld.ver" property
+  timestamp = "bld.ttt" // binds "Timestamp" field to "bld.ttt" property
 ))
 ```
 
