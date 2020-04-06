@@ -72,7 +72,7 @@ class ARMSpec extends AnyFlatSpec
 
     val result42 = for {
       res1Managed <- managed(res1) if res1Managed != null // dummy filter
-      res2Managed <- managed(res2) if res1Managed != null // dummy filter
+      res2Managed <- managed(res2) if res2Managed != null // dummy filter
     } yield {
       res1 should be theSameInstanceAs res1Managed
       res2 should be theSameInstanceAs res2Managed
