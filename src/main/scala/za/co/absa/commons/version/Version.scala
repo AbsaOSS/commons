@@ -25,8 +25,7 @@ case class Version(components: Component*) extends Ordered[Version] {
   override def compare(that: Version): Int = components
     .zipAll(that.components, EmptyComponent, EmptyComponent)
     .map({ case (xi, yi) => xi compare yi })
-    .filterNot(0.==)
-    .headOption
+    .find(0.!=)
     .getOrElse(0)
 }
 
