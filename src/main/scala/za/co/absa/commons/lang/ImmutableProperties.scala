@@ -16,37 +16,66 @@
 
 package za.co.absa.commons.lang
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
+import java.io._
 import java.util.function.BiFunction
 import java.util.{Properties, function}
 import java.{util => ju}
 
 object ImmutableProperties {
-  def fromStream(stream: InputStream): ImmutableProperties = new ImmutableProperties(new Properties() {
-    load(stream)
-  })
+
+  def fromStream(stream: InputStream): ImmutableProperties = new ImmutableProperties(stream)
+
+  def fromReader(reader: Reader): ImmutableProperties = new ImmutableProperties(reader)
+
+  def empty: ImmutableProperties = new ImmutableProperties
 
   def apply(props: Properties): ImmutableProperties = {
-    val baos = new ByteArrayOutputStream
-    props.store(baos, "")
-    fromStream(new ByteArrayInputStream(baos.toByteArray))
+    val caw = new CharArrayWriter
+    props.store(caw, null)
+    fromReader(new CharArrayReader(caw.toCharArray))
   }
 }
 
-class ImmutableProperties private(props: Properties) extends Properties(props) {
+class ImmutableProperties private(private[this] var isOngoingInit: Boolean = false) extends Properties {
+
+  private def this(reader: Reader) = {
+    this(isOngoingInit = true)
+    super.load(reader)
+    isOngoingInit = false
+  }
+
+  private def this(in: InputStream) = {
+    this(isOngoingInit = true)
+    super.load(in)
+    isOngoingInit = false
+  }
+
+  /*
+  * Properties methods
+  */
+
   override def setProperty(key: String, value: String): Nothing = throw new UnsupportedOperationException
 
-  override def save(out: OutputStream, comments: String): Nothing = throw new UnsupportedOperationException
+  override def load(reader: Reader): Nothing = throw new UnsupportedOperationException
+
+  override def load(inStream: InputStream): Nothing = throw new UnsupportedOperationException
 
   override def loadFromXML(in: InputStream): Nothing = throw new UnsupportedOperationException
 
-  override def stringPropertyNames(): ju.Set[String] = ju.Collections.unmodifiableSet(props.stringPropertyNames())
+  override def stringPropertyNames(): ju.Set[String] = ju.Collections.unmodifiableSet(super.stringPropertyNames())
 
-  override def rehash(): Unit = {}
+  /*
+  * Hashtable methods
+  */
 
-  override def put(key: AnyRef, value: AnyRef): Nothing = throw new UnsupportedOperationException
+  override def rehash(): Nothing = throw new UnsupportedOperationException
 
-  override def remove(key: AnyRef): Nothing = throw new UnsupportedOperationException
+  override def put(key: AnyRef, value: AnyRef): AnyRef = {
+    if (isOngoingInit) super.put(key, value) // called during initialization
+    else throw new UnsupportedOperationException
+  }
+
+  override def remove(key: Any): Nothing = throw new UnsupportedOperationException
 
   override def putAll(t: ju.Map[_ <: AnyRef, _ <: AnyRef]): Nothing = throw new UnsupportedOperationException
 
@@ -54,11 +83,11 @@ class ImmutableProperties private(props: Properties) extends Properties(props) {
 
   override def clone(): this.type = this
 
-  override def keySet(): ju.Set[AnyRef] = ju.Collections.unmodifiableSet(props.keySet())
+  override def keySet(): ju.Set[AnyRef] = ju.Collections.unmodifiableSet(super.keySet())
 
-  override def entrySet(): ju.Set[ju.Map.Entry[AnyRef, AnyRef]] = ju.Collections.unmodifiableSet(props.entrySet())
+  override def entrySet(): ju.Set[ju.Map.Entry[AnyRef, AnyRef]] = ju.Collections.unmodifiableSet(super.entrySet())
 
-  override def values(): ju.Collection[AnyRef] = ju.Collections.unmodifiableCollection(props.values())
+  override def values(): ju.Collection[AnyRef] = ju.Collections.unmodifiableCollection(super.values())
 
   override def replaceAll(function: BiFunction[_ >: AnyRef, _ >: AnyRef, _ <: AnyRef]): Nothing = throw new UnsupportedOperationException
 
