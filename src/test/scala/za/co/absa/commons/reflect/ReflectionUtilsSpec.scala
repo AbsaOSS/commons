@@ -18,6 +18,7 @@ package za.co.absa.commons.reflect
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import za.co.absa.commons.reflect.ReflectionUtils.ModuleClassSymbolExtractor
 import za.co.absa.commons.reflect.ReflectionUtilsSpec._
 
 import scala.reflect.runtime.universe._
@@ -52,6 +53,18 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
     val bar = new Bar("Pi", 3.14)
     ReflectionUtils.extractFieldValue[String](bar, "a") shouldEqual "Pi"
     ReflectionUtils.extractFieldValue[Double](bar, "b") shouldEqual 3.14
+  }
+
+  "ModuleClassSymbolExtractor" should "extract objects" in {
+    ModuleClassSymbolExtractor.unapply(Foo) should be(defined)
+    ModuleClassSymbolExtractor.unapply("Bar") should not be defined
+    ModuleClassSymbolExtractor.unapply({}) should not be defined
+    ModuleClassSymbolExtractor.unapply(Array()) should not be defined
+  }
+
+  it should "not blow up on nulls or instances of synthetic classes" in {
+    ModuleClassSymbolExtractor.unapply(null)
+    ModuleClassSymbolExtractor.unapply((x: Int) => x + 1)
   }
 
   "directSubClassesOf()" should "return direct subclasses of a sealed class/trait" in {

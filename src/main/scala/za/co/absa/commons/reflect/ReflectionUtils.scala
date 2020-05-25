@@ -30,9 +30,12 @@ object ReflectionUtils {
 
   object ModuleClassSymbolExtractor {
     def unapply(o: Any): Option[ClassSymbol] = {
-      val symbol = mirror.classSymbol(o.getClass)
-      if (symbol.isModuleClass) Some(symbol)
-      else None
+      if (o == null || o.getClass.isSynthetic) None
+      else {
+        val symbol = mirror.classSymbol(o.getClass)
+        if (symbol.isModuleClass) Some(symbol)
+        else None
+      }
     }
   }
 
