@@ -219,13 +219,12 @@ object SchemaUtils {
    * @return true if provided schemas are the same ignoring nullability
    */
   def isSubset(subsetSchema: StructType, originalSchema: StructType): Boolean = {
-    val fields1 = getMapOfFields(subsetSchema)
-    val fields2 = getMapOfFields(originalSchema)
+    val subsetFields = getMapOfFields(subsetSchema)
+    val originalFields = getMapOfFields(originalSchema)
 
-    fields1.values.foldLeft(true)((stillSame, field1) => {
-      val field1NameLc = field1.name.toLowerCase()
-      stillSame && fields2.contains(field1NameLc) && equivalentTypes(field1.dataType, fields2(field1NameLc).dataType)
-    })
+    subsetFields.forall( subsetField =>
+      originalFields.contains(subsetField._1) &&
+        equivalentTypes(subsetField._2.dataType, originalFields(subsetField._1).dataType) )
   }
 
   private def getMapOfFields(schema: StructType): Map[String, StructField] = {

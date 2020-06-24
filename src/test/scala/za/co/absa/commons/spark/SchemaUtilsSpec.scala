@@ -110,9 +110,6 @@ class SchemaUtilsSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAll w
     val schemaD = spark.read.json(Seq(jsonD).toDS).schema
     val schemaE = spark.read.json(Seq(jsonE).toDS).schema
 
-    println(schemaD.prettyJson)
-    println(schemaE.prettyJson)
-
     SchemaUtils.isSubset(schemaD, schemaE) should be(true)
     SchemaUtils.isSubset(schemaE, schemaD) should be(false)
   }
