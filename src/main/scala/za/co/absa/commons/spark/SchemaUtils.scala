@@ -157,6 +157,16 @@ object SchemaUtils {
   def alignSchema(df: DataFrame, structType: StructType): DataFrame = df.select(getDataFrameSelector(structType): _*)
 
   /**
+   * Using schema selector returned from [[getDataFrameSelector]] aligns the schema of a DataFrame to the selector
+   * for operations where schema order might be important (e.g. hashing the whole rows and using except)
+   *
+   * @param df DataFrame to have it's schema aligned/sorted
+   * @param selector model structType for the alignment of df
+   * @return Returns aligned and filtered schema
+   */
+  def alignSchema(df: DataFrame, selector: List[Column]): DataFrame = df.select(selector: _*)
+
+  /**
    * Compares 2 dataframe schemas.
    *
    * @param schema1 The first schema to compare
@@ -185,8 +195,8 @@ object SchemaUtils {
    * @return Returns a Seq of paths to differences in schemas
    */
   def diffSchema(schema1: StructType, schema2: StructType, parent: String = ""): Seq[String] = {
-    val fields1 = schema1.map(field => field.name.toLowerCase() -> field).toMap
-    val fields2 = schema2.map(field => field.name.toLowerCase() -> field).toMap
+    val fields1 = getMapOfFields(schema1)
+    val fields2 = getMapOfFields(schema2)
 
     val diff = fields1.values.foldLeft(Seq.empty[String])((difference, field1) => {
       val field1NameLc = field1.name.toLowerCase()
@@ -199,5 +209,25 @@ object SchemaUtils {
     })
 
     diff.map(_.stripPrefix("."))
+  }
+
+  /**
+   * Checks if the originalSchema is a subset of subsetSchema.
+   *
+   * @param subsetSchema The schema that needs to be extracted
+   * @param originalSchema The schema that needs to have at least all t
+   * @return true if provided schemas are the same ignoring nullability
+   */
+  def isSubset(subsetSchema: StructType, originalSchema: StructType): Boolean = {
+    val subsetFields = getMapOfFields(subsetSchema)
+    val originalFields = getMapOfFields(originalSchema)
+
+    subsetFields.forall( subsetField =>
+      originalFields.contains(subsetField._1) &&
+        equivalentTypes(subsetField._2.dataType, originalFields(subsetField._1).dataType) )
+  }
+
+  private def getMapOfFields(schema: StructType): Map[String, StructField] = {
+    schema.map(field => field.name.toLowerCase() -> field).toMap
   }
 }

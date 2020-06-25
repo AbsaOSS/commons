@@ -28,6 +28,7 @@ class SchemaUtilsSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAll w
   val jsonB = """[{"id":1,"legs":[{"legid":100,"conditions":[{"checks":[{"checkNums":["1","2","3b","4","5c","6"]}],"amount":100,"price":10}]}]}]"""
   val jsonC = """[{"legs":[{"legid":100,"conditions":[{"amount":100,"checks":[{"checkNums":["1","2","3b","4","5c","6"]}]}]}],"id":1, "key" : {"beta": {"beta2": "2"}, "alfa": "1"} }]"""
   val jsonD = """[{"legs":[{"legid":100,"conditions":[{"amount":100,"checks":[{"checkNums":["1","2","3b","4","5c","6"]}]}]}],"id":1, "key" : {"beta": {"beta2": 2}, "alfa": 1} }]"""
+  val jsonE = """[{"legs":[{"legid":100,"conditions":[{"amount":100,"checks":[{"checkNums":["1","2","3b","4","5c","6"]}]}]}],"id":1, "key" : {"beta": {"beta2": 2}, "alfa": 1}, "extra" : "a"}]"""
 
   behavior of "isSameSchema"
 
@@ -101,5 +102,23 @@ class SchemaUtilsSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAll w
 
     SchemaUtils.diffSchema(schemaA, schemaB).isEmpty should be(true)
     SchemaUtils.diffSchema(schemaB, schemaA).isEmpty should be(true)
+  }
+
+  behavior of "isSubset"
+
+  it should "be true for E in D but not vice versa" in {
+    val schemaD = spark.read.json(Seq(jsonD).toDS).schema
+    val schemaE = spark.read.json(Seq(jsonE).toDS).schema
+
+    SchemaUtils.isSubset(schemaD, schemaE) should be(true)
+    SchemaUtils.isSubset(schemaE, schemaD) should be(false)
+  }
+
+  it should "be false for A and B in both directions" in {
+    val schemaA = spark.read.json(Seq(jsonA).toDS).schema
+    val schemaB = spark.read.json(Seq(jsonA).toDS).schema
+
+    SchemaUtils.isSubset(schemaA, schemaB) should be(true)
+    SchemaUtils.isSubset(schemaB, schemaA) should be(true)
   }
 }
