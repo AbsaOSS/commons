@@ -116,6 +116,28 @@ caseClassCtorArgDefaultValue[Int](classOf[Button], "name") // == None
 caseClassCtorArgDefaultValue[Int](classOf[Button], "isPressed") // == Some(false)
 ```
 
+### Enumeration macros
+##### Obtain all instances of a sealed trait
+Can be used to e.g. in a _Case Object Enumeration_ pattern.
+
+A similar solution and the motivation is well describes in the
+[Scala Enumerations hell](https://medium.com/@yuriigorbylov/scala-enumerations-hell-5bdba2c1216) article.
+But unlike the above approach `EnumerationMacros.sealedInstancesOf` utilizes Scala compiler macros,
+so that the instances are lookup at the compile time.  
+
+```scala
+  sealed trait Color
+  
+  object Color {
+    // returns Set(Red, Green, Blue)
+    val values: Set[Color] = EnumerationMacros.sealedInstancesOf[Color]
+
+    case object Red extends Color
+    case object Green extends Color
+    case object Blue extends Color
+  }
+``` 
+
 ### Run-time compilation
 If you wants some code to be linked and executed at run-time, here's a simple way to do it:
 ```scala
