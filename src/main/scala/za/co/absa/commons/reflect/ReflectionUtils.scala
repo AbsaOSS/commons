@@ -17,6 +17,7 @@
 package za.co.absa.commons.reflect
 
 import scala.collection.concurrent.TrieMap
+import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
 import scala.tools.reflect.ToolBox
 
@@ -89,10 +90,17 @@ object ReflectionUtils {
     mirror.reflectModule(moduleSymbol).instance.asInstanceOf[T]
   }
 
+  @inline
   def extractFieldValue[T](o: AnyRef, fieldName: String): T = {
-    val field = o.getClass.getDeclaredField(fieldName)
+    val ct = ClassTag(o.getClass)
+    extractFieldValue[Nothing, T](o, fieldName)(ct)
+  }
+
+  def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
+    val declaringClass = implicitly[ClassTag[A]].runtimeClass
+    val field = declaringClass.getDeclaredField(fieldName)
     field.setAccessible(true)
-    field.get(o).asInstanceOf[T]
+    field.get(o).asInstanceOf[B]
   }
 
   /**

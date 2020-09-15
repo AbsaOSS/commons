@@ -85,6 +85,8 @@ objectForName[MySingleton]("com.example.MySingleton") // == MySingleton
 ##### Get private field value of an arbitrary class. (a typed variant of `field.get(o).asInstanceOf[T]`)
 ```scala
 extractFieldValue[Int](foo, "bar")
+// or if the field `bar` is declared in one of the superclasses of `foo` (e.g. `Doh`)
+extractFieldValue[Doh, Int](foo, "bar")
 ```
 ##### Extract object properties as a key-value map
 ```scala
