@@ -11,6 +11,18 @@ Selection of useful reusable components
 
 ---
 
+# Collection utils
+
+```scala
+import CollectionImplicits._
+
+val iter: Iterator[_] = ???
+val arr: Array[_] = ???
+
+// copy 42 items from the `iter` to the `arr` with array offset 7
+iter.fetch(arr, 7, 42) // returns a number of actually copied items
+```
+
 # Abstract Converters
 A simple stackable `Converter` trait with a simple memoized wrapper.
 ### Usage 
