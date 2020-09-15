@@ -36,6 +36,22 @@ class CachingConverterSpec extends AnyFlatSpec with Matchers {
     TestingConverter.calls should be(2)
   }
 
+  it should "support custom keys" in {
+    object TestingConverter extends StrToIntConverter with CountingConverter with CachingConverter {
+      override protected def key(x: String): Key = x match {
+        case "zero" => "0"
+        case _ => super.key(x)
+      }
+    }
+
+    TestingConverter.calls should be(0)
+    TestingConverter("0") should equal(0)
+    TestingConverter.calls should be(1)
+    TestingConverter("zero") should equal(0)
+    TestingConverter.calls should be(1)
+    TestingConverter("42") should equal(42)
+    TestingConverter.calls should be(2)
+  }
 }
 
 object CachingConverterSpec {
