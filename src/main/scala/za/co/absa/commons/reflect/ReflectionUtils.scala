@@ -16,7 +16,11 @@
 
 package za.co.absa.commons.reflect
 
+import java.lang.reflect.Field
+
+import scala.annotation.tailrec
 import scala.collection.concurrent.TrieMap
+import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
 import scala.tools.reflect.ToolBox
 
@@ -89,10 +93,46 @@ object ReflectionUtils {
     mirror.reflectModule(moduleSymbol).instance.asInstanceOf[T]
   }
 
+  /**
+    * Extract a value from a given field reflexively.
+    * The field is lookup recursively in the target object class hierarchy.
+    *
+    * @param o         target object
+    * @param fieldName field name to extract value from
+    * @tparam T expected type of the field value to return
+    * @return a field value
+    */
   def extractFieldValue[T](o: AnyRef, fieldName: String): T = {
-    val field = o.getClass.getDeclaredField(fieldName)
+    @tailrec def findField(c: Class[_]): Field =
+      try c.getDeclaredField(fieldName)
+      catch {
+        case e: NoSuchFieldException =>
+          val superClass = c.getSuperclass
+          if (superClass == null) throw e
+          else findField(superClass)
+      }
+
+    val field = findField(o.getClass)
     field.setAccessible(true)
     field.get(o).asInstanceOf[T]
+  }
+
+  /**
+    * Potentially faster alternative to {{{extractFieldValue[T](o: AnyRef, fieldName: String)]]}}}
+    * The main difference is that this method doesn't loop through the target superclasses looking up the field.
+    * Instead it uses provided implicit class tag to access the field declaring class directly.
+    * @param o         target object
+    * @param fieldName field name to extract value from
+    * @tparam A type in which the given field is declared
+    * @tparam B expected type of the field value to return
+    * @return a field value
+
+    */
+  def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
+    val declaringClass = implicitly[ClassTag[A]].runtimeClass
+    val field = declaringClass.getDeclaredField(fieldName)
+    field.setAccessible(true)
+    field.get(o).asInstanceOf[B]
   }
 
   /**

@@ -55,6 +55,18 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
     ReflectionUtils.extractFieldValue[Double](bar, "b") shouldEqual 3.14
   }
 
+  "extractFieldValue()" should "extract from a field declared in any of the superclasses" in {
+    class SubBar(a: String, b: Double) extends Bar(a, b)
+    val subSubBar = new SubBar("Pi", 3.14) {}
+    ReflectionUtils.extractFieldValue[String](subSubBar, "a") shouldEqual "Pi"
+    ReflectionUtils.extractFieldValue[Double](subSubBar, "b") shouldEqual 3.14
+  }
+
+  "extractFieldValue()" should "extract from a field using a provided class tag" in {
+    val subBar = new Bar("Pi", 3.14) {}
+    ReflectionUtils.extractFieldValue[Bar, String](subBar, "a") shouldEqual "Pi"
+  }
+
   "ModuleClassSymbolExtractor" should "extract objects" in {
     ModuleClassSymbolExtractor.unapply(Foo) should be(defined)
     ModuleClassSymbolExtractor.unapply("Bar") should not be defined
