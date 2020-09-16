@@ -34,10 +34,16 @@ trait Converter {
   * Memoized converter
   */
 trait CachingConverter extends Converter {
-  private val cache = mutable.LinkedHashMap.empty[From, To]
+  private val cache = mutable.LinkedHashMap.empty[Key, To]
 
   def values: Seq[To] = cache.values.toSeq
 
+  protected type Key = Any
+  protected def keyOf(x: From): Key = x
+
   abstract override def convert(arg: From): To =
-    cache.getOrElseUpdate(arg, super.convert(arg))
+    cache.getOrElseUpdate(
+      keyOf(arg),
+      super.convert(arg)
+    )
 }
