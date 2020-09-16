@@ -29,7 +29,7 @@ object CollectionImplicits {
       * @tparam B the type of the elements of the array.
       * @note Reuse: $consumesIterator
       */
-    def fetch[B >: A](xs: Array[B], start: Int, len: Int): Int = {
+    def fetchToArray[B >: A](xs: Array[B], start: Int, len: Int): Int = {
       require(start >= 0 && (start < xs.length || xs.length == 0), s"start $start out of range ${xs.length}")
       var i = start
       val end = start + math.min(len, xs.length - start)

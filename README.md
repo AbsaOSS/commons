@@ -20,7 +20,7 @@ val iter: Iterator[_] = ???
 val arr: Array[_] = ???
 
 // copy 42 items from the `iter` to the `arr` with array offset 7
-iter.fetch(arr, 7, 42) // returns a number of actually copied items
+iter.fetchToArray(arr, 7, 42) // returns a number of actually copied items
 ```
 
 # Abstract Converters

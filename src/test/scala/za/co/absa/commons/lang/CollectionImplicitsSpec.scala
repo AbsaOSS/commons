@@ -25,13 +25,13 @@ class CollectionImplicitsSpec extends AnyFunSpec with Matchers {
 
   describe("IteratorOps") {
 
-    describe("fetch()") {
+    describe("fetchToArray()") {
 
       it("should fill the array") {
         val arr = Array.ofDim[Char](5)
         val iter = "abcdefghijklmnopqrstuvwxyz".iterator
 
-        val cnt = iter.fetch(arr, 0, 5)
+        val cnt = iter.fetchToArray(arr, 0, 5)
 
         cnt should be(5)
         arr shouldEqual "abcde".toArray
@@ -42,7 +42,7 @@ class CollectionImplicitsSpec extends AnyFunSpec with Matchers {
         val arr = Array.ofDim[Char](5)
         val iter = "abcdefghijklmnopqrstuvwxyz".iterator
 
-        val cnt = iter.fetch(arr, 1, 3)
+        val cnt = iter.fetchToArray(arr, 1, 3)
 
         cnt should be(3)
         arr shouldEqual Array(0, 'a', 'b', 'c', 0)
@@ -53,7 +53,7 @@ class CollectionImplicitsSpec extends AnyFunSpec with Matchers {
         val arr = Array.ofDim[Char](5)
         val iter = "a".iterator
 
-        val cnt = iter.fetch(arr, 1, 3)
+        val cnt = iter.fetchToArray(arr, 1, 3)
 
         cnt should be(1)
         arr shouldEqual Array(0, 'a', 0, 0, 0)
@@ -64,7 +64,7 @@ class CollectionImplicitsSpec extends AnyFunSpec with Matchers {
         val arr = Array.ofDim[Char](5)
         val iter = "abcdefghijklmnopqrstuvwxyz".iterator
 
-        val cnt = iter.fetch(arr, 1, 99)
+        val cnt = iter.fetchToArray(arr, 1, 99)
 
         cnt should be(4)
         arr shouldEqual Array(0, 'a', 'b', 'c', 'd')
@@ -75,7 +75,7 @@ class CollectionImplicitsSpec extends AnyFunSpec with Matchers {
         val arr = Array.ofDim[Char](5)
         val iter = "abcdefghijklmnopqrstuvwxyz".iterator
 
-        val cnt = iter.fetch(arr, 1, 0)
+        val cnt = iter.fetchToArray(arr, 1, 0)
 
         cnt should be(0)
         all(arr) should be(0)
@@ -84,15 +84,15 @@ class CollectionImplicitsSpec extends AnyFunSpec with Matchers {
 
       it("should do nothing on empty iterators") {
         val arr = Array.ofDim[Char](5)
-        val cnt = Iterator[Char]().fetch(arr, 1, 3)
+        val cnt = Iterator[Char]().fetchToArray(arr, 1, 3)
         cnt should be(0)
         all(arr) should be(0)
       }
 
       it("should throw on incorrect array bounds") {
         val arr = Array.ofDim[Char](5)
-        intercept[IllegalArgumentException](Iterator[Char]().fetch(arr, 5, 0))
-        intercept[IllegalArgumentException](Iterator[Char]().fetch(arr, -1, 0))
+        intercept[IllegalArgumentException](Iterator[Char]().fetchToArray(arr, 5, 0))
+        intercept[IllegalArgumentException](Iterator[Char]().fetchToArray(arr, -1, 0))
       }
     }
 
