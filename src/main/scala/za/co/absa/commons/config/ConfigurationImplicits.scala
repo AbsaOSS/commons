@@ -32,7 +32,7 @@ object ConfigurationImplicits {
     * @param conf A configuration instance
     * @tparam T A specific type implementing the [[org.apache.commons.configuration.Configuration Configuration]] interface
     */
-  implicit class ConfigurationRequiredWrapper[T <: Configuration](conf: T) {
+  implicit class ConfigurationRequiredWrapper[T <: Configuration](val conf: T) extends AnyVal {
 
     /**
       * Gets a value of string configuration property and checks whether property exists.
