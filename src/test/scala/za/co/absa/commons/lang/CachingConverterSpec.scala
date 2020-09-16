@@ -38,9 +38,9 @@ class CachingConverterSpec extends AnyFlatSpec with Matchers {
 
   it should "support custom keys" in {
     object TestingConverter extends StrToIntConverter with CountingConverter with CachingConverter {
-      override protected def key(x: String): Key = x match {
+      override protected def keyOf(x: String): Key = x match {
         case "zero" => "0"
-        case _ => super.key(x)
+        case _ => super.keyOf(x)
       }
     }
 

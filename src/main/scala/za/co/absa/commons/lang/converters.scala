@@ -39,11 +39,11 @@ trait CachingConverter extends Converter {
   def values: Seq[To] = cache.values.toSeq
 
   protected type Key = Any
-  protected def key(x: From): Key = x
+  protected def keyOf(x: From): Key = x
 
   abstract override def convert(arg: From): To =
     cache.getOrElseUpdate(
-      key(arg),
+      keyOf(arg),
       super.convert(arg)
     )
 }
