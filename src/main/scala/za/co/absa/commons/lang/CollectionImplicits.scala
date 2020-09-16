@@ -18,7 +18,7 @@ package za.co.absa.commons.lang
 
 object CollectionImplicits {
 
-  implicit class IteratorOps[A](iter: Iterator[A]) {
+  implicit class IteratorOps[A](val iter: Iterator[A]) extends AnyVal {
     /**
       * A better version of <code>Iterator.copyToArray</code>,
       * that returns the number of actually read elements.

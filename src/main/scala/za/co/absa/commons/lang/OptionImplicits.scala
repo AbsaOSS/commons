@@ -35,7 +35,7 @@ object OptionImplicits {
     def asOption: Option[A] = Option(a)
   }
 
-  implicit class AnyWrapper[A <: Any](a: A) {
+  implicit class AnyWrapper[A <: Any](val a: A) extends AnyVal {
     def optionally[B](applyFn: (A, B) => A, maybeArg: Option[B]): A = maybeArg.map(applyFn(a, _)).getOrElse(a)
   }
 
