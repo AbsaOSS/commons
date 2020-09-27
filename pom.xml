@@ -66,6 +66,7 @@
         <!-- Controlled by `scala-cross-build` plugin -->
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
+        <spark.version>2.4.2</spark.version>
     </properties>
 
     <scm>
@@ -142,13 +143,13 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.binary.version}</artifactId>
-            <version>2.4.4</version>
+            <version>${spark.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_${scala.binary.version}</artifactId>
-            <version>2.4.4</version>
+            <version>${spark.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -358,7 +359,20 @@
                 <scala.version>${scala_2.13.version}</scala.version>
             </properties>
         </profile>
-
+        <profile>
+            <id>spark-3.0.0</id>
+            <properties>
+                <spark.version>3.0.0</spark.version>
+                <json4s.version>3.6.6</json4s.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>spark-2.4.2</id>
+            <properties>
+                <spark.version>2.4.2</spark.version>
+                <json4s.version>3.5.3</json4s.version>
+            </properties>
+        </profile>
         <profile>
             <id>release</id>
             <build>
