@@ -19,8 +19,6 @@ package za.co.absa.commons.json
 import org.json4s.jackson
 import za.co.absa.commons.json.format.DefaultFormatsBuilder
 
-object DefaultJacksonJsonSerDe extends DefaultJacksonJsonSerDe
-
 trait DefaultJacksonJsonSerDe
   extends AbstractJsonSerDe
     with jackson.JsonMethods

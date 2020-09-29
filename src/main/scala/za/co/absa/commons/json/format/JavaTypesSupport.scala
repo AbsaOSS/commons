@@ -16,9 +16,12 @@
 
 package za.co.absa.commons.json.format
 
-import org.json4s.Formats
 import org.json4s.ext.JavaTypesSerializers
+import org.json4s.{Formats, Serializer}
 
 trait JavaTypesSupport extends FormatsBuilder {
-  abstract override protected def formats: Formats = super.formats ++ JavaTypesSerializers.all
+  abstract override protected def formats: Formats = {
+    // we can't use `Formats.++` here because of https://github.com/AbsaOSS/commons/issues/27#issuecomment-700953553
+    (JavaTypesSerializers.all: Seq[Serializer[_]]).foldLeft(super.formats)(_ + _)
+  }
 }
