@@ -16,8 +16,6 @@
 
 package za.co.absa.commons.reflect
 
-import java.lang.reflect.Field
-
 import scala.annotation.tailrec
 import scala.collection.concurrent.TrieMap
 import scala.reflect.ClassTag
@@ -99,40 +97,72 @@ object ReflectionUtils {
     *
     * @param o         target object
     * @param fieldName field name to extract value from
-    * @tparam T expected type of the field value to return
-    * @return a field value
-    */
-  def extractFieldValue[T](o: AnyRef, fieldName: String): T = {
-    @tailrec def findField(c: Class[_]): Field =
-      try c.getDeclaredField(fieldName)
-      catch {
-        case e: NoSuchFieldException =>
-          val superClass = c.getSuperclass
-          if (superClass == null) throw e
-          else findField(superClass)
-      }
-
-    val field = findField(o.getClass)
-    field.setAccessible(true)
-    field.get(o).asInstanceOf[T]
-  }
-
-  /**
-    * Potentially faster alternative to {{{extractFieldValue[T](o: AnyRef, fieldName: String)]]}}}
-    * The main difference is that this method doesn't loop through the target superclasses looking up the field.
-    * Instead it uses provided implicit class tag to access the field declaring class directly.
-    * @param o         target object
-    * @param fieldName field name to extract value from
     * @tparam A type in which the given field is declared
     * @tparam B expected type of the field value to return
     * @return a field value
-
     */
   def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
     val declaringClass = implicitly[ClassTag[A]].runtimeClass
-    val field = declaringClass.getDeclaredField(fieldName)
-    field.setAccessible(true)
-    field.get(o).asInstanceOf[B]
+
+    @tailrec
+    def findValue(c: Class[_]): Option[B] = {
+      val maybeValue = mirror
+        .classSymbol(c)
+        .toType
+        .members
+        .collectFirst {
+          case m if !m.isMethod && m.toString.endsWith(s" $fieldName") =>
+            val im = rootMirror.reflect(o)
+            im.reflectField(m.asTerm).get.asInstanceOf[B]
+        }
+      if (maybeValue.isDefined) maybeValue
+      else {
+        val superClass = c.getSuperclass
+        if (superClass == null) None
+        else findValue(superClass)
+      }
+    }
+
+    findValue(declaringClass)
+      .orElse {
+        // The field might be declared in a trait.
+        // Let's try to fetch one using a Java reflection.
+        val altNames = allInterfacesOf(declaringClass)
+          .map(_.getName.replace('.', '$') + "$$" + fieldName)
+
+        declaringClass
+          .getDeclaredFields
+          .collectFirst {
+            case f if altNames contains f.getName =>
+              f.setAccessible(true)
+              f.get(o).asInstanceOf[B]
+          }
+      }
+      .getOrElse(
+        throw new NoSuchFieldException(s"${declaringClass.getName}.$fieldName")
+      )
+  }
+
+  /**
+    * A single type parameter alternative to {{{extractFieldValue[A, B](a, ...)}}} where {{{a.getClass == classOf[A]}}}
+    */
+  def extractFieldValue[T](o: AnyRef, fieldName: String): T = {
+    extractFieldValue[AnyRef, T](o, fieldName)(ClassTag(o.getClass))
+  }
+
+  def allInterfacesOf(c: Class[_]): Set[Class[_]] = {
+    @tailrec
+    def collect(ifs: Set[Class[_]], cs: Iterable[Class[_]]): Set[Class[_]] =
+      if (cs.isEmpty) ifs
+      else {
+        val c0 = cs.head
+        val cN = cs.tail
+        val ifsUpd = if (c0.isInterface) ifs + c0 else ifs
+        val csUpd = cN.toSet ++ (c0.getInterfaces filterNot ifsUpd)
+        collect(ifsUpd, csUpd)
+      }
+
+    collect(Set.empty, c.getInterfaces)
   }
 
   /**

@@ -18,16 +18,18 @@ package za.co.absa.commons.reflect
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import za.co.absa.commons.reflect.ReflectionUtils.ModuleClassSymbolExtractor
 import za.co.absa.commons.reflect.ReflectionUtilsSpec._
 
 import scala.reflect.runtime.universe._
 
-class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
+class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
 
   behavior of "ReflectionUtils"
+  behavior of "compile()"
 
-  "compile()" should "compile a given Scala code block and return an eval() function" in {
+  it should "compile a given Scala code block and return an eval() function" in {
     val plus = ReflectionUtils.compile[Int](
       q"""
           val x: Int = args("x")
@@ -37,7 +39,9 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
     plus(Map("x" -> 2, "y" -> 40)) should be(42)
   }
 
-  "extractProperties()" should "for given Product return a map of element names to their values" in {
+  behavior of "extractProperties()"
+
+  it should "for given Product return a map of element names to their values" in {
     // case class
     ReflectionUtils.extractProperties(Foo("aaa")) should be(Map("x" -> "aaa", "y" -> 42))
     ReflectionUtils.extractProperties(Foo("aaa", 777)) should be(Map("x" -> "aaa", "y" -> 777))
@@ -45,29 +49,54 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
     ReflectionUtils.extractProperties(new Bar("bbb", 42)) should be(Map("a" -> "bbb"))
   }
 
-  "extractFieldValue()" should "return a value of a private field" in {
+  behavior of "extractFieldValue()"
+
+  it should "return a value of a private field of a Scala object" in {
     ReflectionUtils.extractFieldValue[Int](Foo, "privateVal") should be(42)
   }
 
-  "extractFieldValue()" should "return values of compiler generated private fields" in {
+  it should "return a value of a private field of a Java object" in {
+    ReflectionUtils.extractFieldValue[Array[Char]]("foo", "value") should equal("foo".toCharArray)
+  }
+
+  it should "blah" in {
+    case class X(y: Int)
+    ReflectionUtils.extractFieldValue[Int](X(7), "y") should equal(7)
+  }
+
+  it should "return values of compiler generated private fields" in {
     val bar = new Bar("Pi", 3.14)
     ReflectionUtils.extractFieldValue[String](bar, "a") shouldEqual "Pi"
     ReflectionUtils.extractFieldValue[Double](bar, "b") shouldEqual 3.14
   }
 
-  "extractFieldValue()" should "extract from a field declared in any of the superclasses" in {
+  it should "extract from a field declared in any of the superclasses" in {
     class SubBar(a: String, b: Double) extends Bar(a, b)
     val subSubBar = new SubBar("Pi", 3.14) {}
     ReflectionUtils.extractFieldValue[String](subSubBar, "a") shouldEqual "Pi"
     ReflectionUtils.extractFieldValue[Double](subSubBar, "b") shouldEqual 3.14
   }
 
-  "extractFieldValue()" should "extract from a field using a provided class tag" in {
+  it should "extract from a field using a provided class tag" in {
     val subBar = new Bar("Pi", 3.14) {}
     ReflectionUtils.extractFieldValue[Bar, String](subBar, "a") shouldEqual "Pi"
   }
 
-  "ModuleClassSymbolExtractor" should "extract objects" in {
+  it should "extract from a private field used in a lambda" in {
+    class A(x: Int) { () => x }
+    ReflectionUtils.extractFieldValue[Int](new A(42), "x") should equal(42)
+    ReflectionUtils.extractFieldValue[A, Int](new A(42), "x") should equal(42)
+  }
+
+  it should "extract from a private field declared in a trait" in {
+    ReflectionUtils.extractFieldValue[Boolean](MyObject, "z") should be(true)
+    ReflectionUtils.extractFieldValue[Boolean](new MyClass, "z") should be(true)
+    ReflectionUtils.extractFieldValue[MyClass, Boolean](new MyClass, "z") should be(true)
+  }
+
+  behavior of "ModuleClassSymbolExtractor"
+
+  it should "extract objects" in {
     ModuleClassSymbolExtractor.unapply(Foo) should be(defined)
     ModuleClassSymbolExtractor.unapply("Bar") should not be defined
     ModuleClassSymbolExtractor.unapply({}) should not be defined
@@ -79,7 +108,9 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
     ModuleClassSymbolExtractor.unapply((x: Int) => x + 1)
   }
 
-  "directSubClassesOf()" should "return direct subclasses of a sealed class/trait" in {
+  behavior of "directSubClassesOf()"
+
+  it should "return direct subclasses of a sealed class/trait" in {
     ReflectionUtils.directSubClassesOf[MyTrait] should be(Seq(classOf[MyClass], MyObject.getClass))
   }
 
@@ -87,7 +118,9 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
     ReflectionUtils.directSubClassesOf[MyClass]
   }
 
-  "objectsOf()" should "return objects of a sealed class/trait" in {
+  behavior of "objectsOf()"
+
+  it should "return objects of a sealed class/trait" in {
     ReflectionUtils.objectsOf[MyTrait] should be(Seq(MyObject))
   }
 
@@ -95,11 +128,15 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
     ReflectionUtils.objectsOf[MyClass]
   }
 
-  "objectForName()" should "return an 'static' Scala object instance by a full qualified name" in {
+  behavior of "objectForName()"
+
+  it should "return an 'static' Scala object instance by a full qualified name" in {
     ReflectionUtils.objectForName[AnyRef](MyObject.getClass.getName) should be theSameInstanceAs MyObject
   }
 
-  "caseClassCtorArgDefaultValue()" should "return a case class constructor argument default value if declared" in {
+  behavior of "caseClassCtorArgDefaultValue()"
+
+  it should "return a case class constructor argument default value if declared" in {
     ReflectionUtils.caseClassCtorArgDefaultValue[Int](classOf[Foo], "x") should be(None)
     ReflectionUtils.caseClassCtorArgDefaultValue[Int](classOf[Foo], "y") should be(Some(42))
   }
@@ -107,9 +144,12 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers {
 
 object ReflectionUtilsSpec {
 
-  sealed trait MyTrait
+  sealed trait MyTrait extends Serializable {
+    private val z: Boolean = true
+    assert(z)
+  }
 
-  class MyClass extends MyTrait
+  class MyClass extends MyTrait with Serializable
 
   object MyObject extends MyTrait
 
