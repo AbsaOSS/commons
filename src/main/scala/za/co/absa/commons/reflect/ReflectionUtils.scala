@@ -150,6 +150,12 @@ object ReflectionUtils {
     extractFieldValue[AnyRef, T](o, fieldName)(ClassTag(o.getClass))
   }
 
+  /**
+    * Return all interfaces that the given class implements included inherited ones
+    *
+    * @param c a class
+    * @return
+    */
   def allInterfacesOf(c: Class[_]): Set[Class[_]] = {
     @tailrec
     def collect(ifs: Set[Class[_]], cs: Iterable[Class[_]]): Set[Class[_]] =
@@ -158,12 +164,21 @@ object ReflectionUtils {
         val c0 = cs.head
         val cN = cs.tail
         val ifsUpd = if (c0.isInterface) ifs + c0 else ifs
-        val csUpd = cN.toSet ++ (c0.getInterfaces filterNot ifsUpd)
+        val csUpd = cN.toSet ++ (c0.getInterfaces filterNot ifsUpd) ++ Option(c0.getSuperclass)
         collect(ifsUpd, csUpd)
       }
 
-    collect(Set.empty, c.getInterfaces)
+    collect(Set.empty, Seq(c))
   }
+
+  /**
+    * Same as {{{allInterfacesOf(aClass)}}}
+    *
+    * @tparam A a class type
+    * @return
+    */
+  def allInterfacesOf[A <: AnyRef : ClassTag]: Set[Class[_]] =
+    allInterfacesOf(implicitly[ClassTag[A]].runtimeClass)
 
   /**
     * Extract object properties as key-value pairs.

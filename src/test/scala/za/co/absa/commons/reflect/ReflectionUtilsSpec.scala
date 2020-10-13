@@ -140,6 +140,35 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     ReflectionUtils.caseClassCtorArgDefaultValue[Int](classOf[Foo], "x") should be(None)
     ReflectionUtils.caseClassCtorArgDefaultValue[Int](classOf[Foo], "y") should be(Some(42))
   }
+
+  behavior of "allInterfacesOf()"
+
+  it should "return all interfaces that the given class implements included inherited ones" in {
+    trait T1
+    trait T2 extends T1
+    trait T3 extends T2
+    trait T4 extends T3 with T1
+
+    trait TX
+    trait TY
+    trait TZ
+
+    abstract class A extends T4 with TX
+    class B extends A with T1 with TY with TZ
+
+    val expectedSet = Set(
+      classOf[T1],
+      classOf[T2],
+      classOf[T3],
+      classOf[T4],
+      classOf[TX],
+      classOf[TY],
+      classOf[TZ]
+    )
+
+    ReflectionUtils.allInterfacesOf[B] should equal(expectedSet)
+    ReflectionUtils.allInterfacesOf(classOf[B]) should equal(expectedSet)
+  }
 }
 
 object ReflectionUtilsSpec {
