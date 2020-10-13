@@ -26,6 +26,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import za.co.absa.commons.lang.ImmutablePropertiesSpec._
 
 import scala.collection.JavaConverters._
+import scala.io.Source
 
 object ImmutablePropertiesSpec {
   private val Props = ImmutableProperties(new Properties() {
@@ -150,21 +151,18 @@ class ImmutablePropertiesSpec extends AnyFlatSpec with Matchers with MockitoSuga
   "list()" should "list all properties" in {
     val writer = new StringWriter
     Props.list(new PrintWriter(writer))
-    writer.toString should equal(
-      """|-- listing properties --
-         |b=2
-         |a=1
-         |""".stripMargin)
+    Source.fromString(writer.toString).getLines.toSeq should contain allElementsOf Seq("a=1", "b=2")
   }
 
   "toString()" should "list all properties" in {
-    Props.toString should equal("{b=2, a=1}")
+    Props.toString should (include("a=1") and include("b=2"))
   }
 
   "store()" should "export all properties" in {
     val writer = new StringWriter
     Props.store(writer, "foo")
-    writer.toString.split('\n').patch(1, Nil, 1).map(_.trim) should equal(Seq("#foo", "b=2", "a=1"))
+    val result = Source.fromString(writer.toString).getLines.patch(1, Iterator.empty, 1).map(_.trim).toSeq
+    result should contain theSameElementsAs Seq("#foo", "b=2", "a=1")
   }
 
   "All mutable methods" should "be prohibited" in {
