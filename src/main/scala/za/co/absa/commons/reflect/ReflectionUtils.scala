@@ -106,39 +106,41 @@ object ReflectionUtils {
     */
   def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
     @tailrec
-    def reflectClass(c: Class[_]): Option[_] = {
-      val foundMembers = mirror
-        .classSymbol(c)
-        .toType
-        .members
-        .filter(_.toString.endsWith(s" $fieldName"))
-        .toArray
-        .sortBy(!_.isMethod) // method members first
-
-      val maybeValue =
-        foundMembers.headOption
-          .map(m => {
-            val im = mirror.reflect(o)
-            if (m.isMethod) im.reflectMethod(m.asMethod).apply()
-            else im.reflectField(m.asTerm).get
-          })
-          .orElse {
-            // Sometimes certain Scala compiler generated fields aren't return by `TypeApi.members`.
-            // Trying Java reflection.
-            c.getDeclaredFields.collectFirst {
-              case f if f.getName == fieldName =>
-                f.setAccessible(true)
-                f.get(o)
-            }
-          }
-
-      if (maybeValue.isDefined) maybeValue
+    def reflectClass(c: Class[_]): Option[_] =
+      if (c == classOf[AnyRef]) None
       else {
-        val superClass = c.getSuperclass
-        if (superClass == null) None
-        else reflectClass(superClass)
+        val foundMembers = mirror
+          .classSymbol(c)
+          .toType
+          .members
+          .filter(_.toString.endsWith(s" $fieldName"))
+          .toArray
+          .sortBy(!_.isMethod) // method members first
+
+        val maybeValue =
+          foundMembers.headOption
+            .map(m => {
+              val im = mirror.reflect(o)
+              if (m.isMethod) im.reflectMethod(m.asMethod).apply()
+              else im.reflectField(m.asTerm).get
+            })
+            .orElse {
+              // Sometimes certain Scala compiler generated fields aren't return by `TypeApi.members`.
+              // Trying Java reflection.
+              c.getDeclaredFields.collectFirst {
+                case f if f.getName == fieldName =>
+                  f.setAccessible(true)
+                  f.get(o)
+              }
+            }
+
+        if (maybeValue.isDefined) maybeValue
+        else {
+          val superClass = c.getSuperclass
+          if (superClass == null) None
+          else reflectClass(superClass)
+        }
       }
-    }
 
     val declaringClass = implicitly[ClassTag[A]].runtimeClass
     reflectClass(declaringClass)

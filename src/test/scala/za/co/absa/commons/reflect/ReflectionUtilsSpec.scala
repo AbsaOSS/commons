@@ -90,16 +90,21 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
   }
 
   //noinspection ScalaUnusedSymbol
-  it should "extract from a lazy val" in {
+  it should "extract from a lazy val of inner classes" in {
     trait T {
-      lazy val z: Int = 42
+      private lazy val z: Int = 42
     }
     object O extends T {
-      lazy val zz: Seq[Nothing] = Seq.empty
+      private lazy val zz: Seq[Nothing] = Seq.empty
     }
     ReflectionUtils.extractFieldValue[Int](O, "z") should equal(42)
     ReflectionUtils.extractFieldValue[Seq[_]](O, "zz") should equal(Seq.empty)
     ReflectionUtils.extractFieldValue[Int](O, "bitmap$0") should equal(0x3)
+  }
+
+  it should "extract from a lazy val of outer classes" in {
+    ReflectionUtils.extractFieldValue[Boolean](Lazy, "z") should be(42)
+    ReflectionUtils.extractFieldValue[Boolean](Lazy, "bitmap$0") should be(true)
   }
 
   behavior of "ModuleClassSymbolExtractor"
@@ -199,6 +204,10 @@ object ReflectionUtilsSpec {
 
   class Bar(val a: String, b: Double) {
     def methodUsingFields: String = a + b.toString
+  }
+
+  object Lazy {
+    lazy val z = 42
   }
 
 }
