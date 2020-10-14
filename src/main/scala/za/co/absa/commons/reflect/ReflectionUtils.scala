@@ -118,12 +118,12 @@ object ReflectionUtils {
       val maybeValue =
         foundMembers.headOption
           .map(m => {
-            val im = rootMirror.reflect(o)
+            val im = mirror.reflect(o)
             if (m.isMethod) im.reflectMethod(m.asMethod).apply()
             else im.reflectField(m.asTerm).get
           })
           .orElse {
-            // Certain Scala compiler generated fields aren't return by `TypeApi.members` (e.g. `bitmap$0`).
+            // Sometimes certain Scala compiler generated fields aren't return by `TypeApi.members`.
             // Trying Java reflection.
             c.getDeclaredFields.collectFirst {
               case f if f.getName == fieldName =>
