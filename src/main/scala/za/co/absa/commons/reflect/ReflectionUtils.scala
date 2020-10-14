@@ -106,57 +106,60 @@ object ReflectionUtils {
     */
   def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
     @tailrec
-    def reflectClass(c: Class[_]): Option[_] =
+    def reflectClassHierarchy(c: Class[_]): Option[_] =
       if (c == classOf[AnyRef]) None
       else {
-        val foundMembers = mirror
-          .classSymbol(c)
-          .toType
-          .members
-          .filter(_.toString.endsWith(s" $fieldName"))
-          .toArray
-          .sortBy(!_.isMethod) // method members first
-
-        val maybeValue =
-          foundMembers.headOption
-            .map(m => {
-              val im = mirror.reflect(o)
-              if (m.isMethod) im.reflectMethod(m.asMethod).apply()
-              else im.reflectField(m.asTerm).get
-            })
-            .orElse {
-              // Sometimes certain Scala compiler generated fields aren't return by `TypeApi.members`.
-              // Trying Java reflection.
-              c.getDeclaredFields.collectFirst {
-                case f if f.getName == fieldName =>
-                  f.setAccessible(true)
-                  f.get(o)
-              }
-            }
-
+        val maybeValue: Option[Any] = reflectClass(c)
         if (maybeValue.isDefined) maybeValue
         else {
           val superClass = c.getSuperclass
           if (superClass == null) None
-          else reflectClass(superClass)
+          else reflectClassHierarchy(superClass)
         }
       }
 
-    val declaringClass = implicitly[ClassTag[A]].runtimeClass
-    reflectClass(declaringClass)
-      .orElse {
-        // The field might be declared in a trait.
-        // Let's try to fetch one using a Java reflection.
-        val altNames = allInterfacesOf(declaringClass)
-          .map(_.getName.replace('.', '$') + "$$" + fieldName)
+    def reflectClass(c: Class[_]) = {
+      val foundMembers = mirror
+        .classSymbol(c)
+        .toType
+        .members
+        .filter(_.toString.endsWith(s" $fieldName"))
+        .toArray
+        .sortBy(!_.isMethod) // method members first
 
-        declaringClass
-          .getDeclaredFields
-          .collectFirst {
-            case f if altNames contains f.getName =>
+      foundMembers.headOption
+        .map(m => {
+          val im = mirror.reflect(o)
+          if (m.isMethod) im.reflectMethod(m.asMethod).apply()
+          else im.reflectField(m.asTerm).get
+        })
+        .orElse {
+          // Sometimes certain Scala compiler generated fields aren't return by `TypeApi.members`.
+          // Trying Java reflection.
+          c.getDeclaredFields.collectFirst {
+            case f if f.getName == fieldName =>
               f.setAccessible(true)
               f.get(o)
           }
+        }
+    }
+
+    def reflectInterfaces(c: Class[_]) = {
+      val altNames = allInterfacesOf(c)
+        .map(_.getName.replace('.', '$') + "$$" + fieldName)
+
+      c.getDeclaredFields.collectFirst {
+        case f if altNames contains f.getName =>
+          f.setAccessible(true)
+          f.get(o)
+      }
+    }
+
+    val declaringClass = implicitly[ClassTag[A]].runtimeClass
+    reflectClassHierarchy(declaringClass)
+      .orElse {
+        // The field might be declared in a trait.
+        reflectInterfaces(declaringClass)
       }
       .getOrElse(
         throw new NoSuchFieldException(s"${declaringClass.getName}.$fieldName")
