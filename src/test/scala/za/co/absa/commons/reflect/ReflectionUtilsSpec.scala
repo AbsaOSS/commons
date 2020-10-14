@@ -59,11 +59,6 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     ReflectionUtils.extractFieldValue[Array[Char]]("foo", "value") should equal("foo".toCharArray)
   }
 
-  it should "blah" in {
-    case class X(y: Int)
-    ReflectionUtils.extractFieldValue[Int](X(7), "y") should equal(7)
-  }
-
   it should "return values of compiler generated private fields" in {
     val bar = new Bar("Pi", 3.14)
     ReflectionUtils.extractFieldValue[String](bar, "a") shouldEqual "Pi"
@@ -92,6 +87,19 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     ReflectionUtils.extractFieldValue[Boolean](MyObject, "z") should be(true)
     ReflectionUtils.extractFieldValue[Boolean](new MyClass, "z") should be(true)
     ReflectionUtils.extractFieldValue[MyClass, Boolean](new MyClass, "z") should be(true)
+  }
+
+  //noinspection ScalaUnusedSymbol
+  it should "extract from a lazy val" in {
+    trait T {
+      lazy val z: Int = 42
+    }
+    object O extends T {
+      lazy val zz: Seq[Nothing] = Seq.empty
+    }
+    ReflectionUtils.extractFieldValue[Int](O, "z") should equal(42)
+    ReflectionUtils.extractFieldValue[Seq[_]](O, "zz") should equal(Seq.empty)
+    ReflectionUtils.extractFieldValue[Int](O, "bitmap$0") should equal(0x3)
   }
 
   behavior of "ModuleClassSymbolExtractor"

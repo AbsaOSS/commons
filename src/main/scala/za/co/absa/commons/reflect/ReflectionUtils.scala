@@ -92,8 +92,11 @@ object ReflectionUtils {
   }
 
   /**
-    * Extract a value from a given field reflexively.
-    * The field is lookup recursively in the target object class hierarchy.
+    * Extract a value from a given field regardless of its visibility.
+    * This method utilizes a mix of Java and Scala reflection mechanisms,
+    * and can extract from a compiler generated fields as well.
+    * Note: if the field has an associated Scala accessor one will be called.
+    * Consequently if the filed is lazy it will be initialized.
     *
     * @param o         target object
     * @param fieldName field name to extract value from
@@ -102,28 +105,43 @@ object ReflectionUtils {
     * @return a field value
     */
   def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
-    val declaringClass = implicitly[ClassTag[A]].runtimeClass
-
     @tailrec
-    def findValue(c: Class[_]): Option[B] = {
-      val maybeValue = mirror
+    def reflectClass(c: Class[_]): Option[_] = {
+      val foundMembers = mirror
         .classSymbol(c)
         .toType
         .members
-        .collectFirst {
-          case m if !m.isMethod && m.toString.endsWith(s" $fieldName") =>
+        .filter(_.toString.endsWith(s" $fieldName"))
+        .toArray
+        .sortBy(!_.isMethod) // method members first
+
+      val maybeValue =
+        foundMembers.headOption
+          .map(m => {
             val im = rootMirror.reflect(o)
-            im.reflectField(m.asTerm).get.asInstanceOf[B]
-        }
+            if (m.isMethod) im.reflectMethod(m.asMethod).apply()
+            else im.reflectField(m.asTerm).get
+          })
+          .orElse {
+            // Certain Scala compiler generated fields aren't return by `TypeApi.members` (e.g. `bitmap$0`).
+            // Trying Java reflection.
+            c.getDeclaredFields.collectFirst {
+              case f if f.getName == fieldName =>
+                f.setAccessible(true)
+                f.get(o)
+            }
+          }
+
       if (maybeValue.isDefined) maybeValue
       else {
         val superClass = c.getSuperclass
         if (superClass == null) None
-        else findValue(superClass)
+        else reflectClass(superClass)
       }
     }
 
-    findValue(declaringClass)
+    val declaringClass = implicitly[ClassTag[A]].runtimeClass
+    reflectClass(declaringClass)
       .orElse {
         // The field might be declared in a trait.
         // Let's try to fetch one using a Java reflection.
@@ -135,12 +153,13 @@ object ReflectionUtils {
           .collectFirst {
             case f if altNames contains f.getName =>
               f.setAccessible(true)
-              f.get(o).asInstanceOf[B]
+              f.get(o)
           }
       }
       .getOrElse(
         throw new NoSuchFieldException(s"${declaringClass.getName}.$fieldName")
       )
+      .asInstanceOf[B]
   }
 
   /**
