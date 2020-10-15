@@ -16,6 +16,7 @@
 
 package za.co.absa.commons.reflect
 
+import org.apache.hadoop.classification.InterfaceAudience
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -105,6 +106,15 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
   it should "extract from a lazy val of outer classes" in {
     ReflectionUtils.extractFieldValue[Boolean](Lazy, "z") should be(42)
     ReflectionUtils.extractFieldValue[Boolean](Lazy, "bitmap$0") should be(true)
+  }
+
+  // A workaround for https://github.com/scala/bug/issues/12190
+  it should "fallback to Java reflection when Scala one fails" in {
+    @InterfaceAudience.Public
+    object Foo {
+      val x = 42
+    }
+    ReflectionUtils.extractFieldValue[Boolean](Foo, "x") should be(Foo.x)
   }
 
   behavior of "ModuleClassSymbolExtractor"

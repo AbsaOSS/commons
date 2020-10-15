@@ -19,6 +19,7 @@ package za.co.absa.commons.reflect
 import scala.annotation.tailrec
 import scala.collection.concurrent.TrieMap
 import scala.reflect.ClassTag
+import scala.reflect.internal.Symbols
 import scala.reflect.runtime.universe._
 import scala.tools.reflect.ToolBox
 
@@ -119,15 +120,20 @@ object ReflectionUtils {
       }
 
     def reflectClass(c: Class[_]) = {
-      val foundMembers = mirror
-        .classSymbol(c)
-        .toType
-        .members
+      val members =
+        try mirror.classSymbol(c).toType.members
+        catch {
+          // a workaround for Scala bug #12190
+          case _: Symbols#CyclicReference => Nil
+        }
+
+      val maybeMember = members
         .filter(_.toString.endsWith(s" $fieldName"))
         .toArray
         .sortBy(!_.isMethod) // method members first
+        .headOption
 
-      foundMembers.headOption
+      maybeMember
         .map(m => {
           val im = mirror.reflect(o)
           if (m.isMethod) im.reflectMethod(m.asMethod).apply()
