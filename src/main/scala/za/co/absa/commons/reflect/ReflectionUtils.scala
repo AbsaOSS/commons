@@ -16,11 +16,10 @@
 
 package za.co.absa.commons.reflect
 
-import java.lang.reflect.Field
-
 import scala.annotation.tailrec
 import scala.collection.concurrent.TrieMap
 import scala.reflect.ClassTag
+import scala.reflect.internal.Symbols
 import scala.reflect.runtime.universe._
 import scala.tools.reflect.ToolBox
 
@@ -94,46 +93,122 @@ object ReflectionUtils {
   }
 
   /**
-    * Extract a value from a given field reflexively.
-    * The field is lookup recursively in the target object class hierarchy.
+    * Extract a value from a given field regardless of its visibility.
+    * This method utilizes a mix of Java and Scala reflection mechanisms,
+    * and can extract from a compiler generated fields as well.
+    * Note: if the field has an associated Scala accessor one will be called.
+    * Consequently if the filed is lazy it will be initialized.
     *
-    * @param o         target object
-    * @param fieldName field name to extract value from
-    * @tparam T expected type of the field value to return
-    * @return a field value
-    */
-  def extractFieldValue[T](o: AnyRef, fieldName: String): T = {
-    @tailrec def findField(c: Class[_]): Field =
-      try c.getDeclaredField(fieldName)
-      catch {
-        case e: NoSuchFieldException =>
-          val superClass = c.getSuperclass
-          if (superClass == null) throw e
-          else findField(superClass)
-      }
-
-    val field = findField(o.getClass)
-    field.setAccessible(true)
-    field.get(o).asInstanceOf[T]
-  }
-
-  /**
-    * Potentially faster alternative to {{{extractFieldValue[T](o: AnyRef, fieldName: String)]]}}}
-    * The main difference is that this method doesn't loop through the target superclasses looking up the field.
-    * Instead it uses provided implicit class tag to access the field declaring class directly.
     * @param o         target object
     * @param fieldName field name to extract value from
     * @tparam A type in which the given field is declared
     * @tparam B expected type of the field value to return
     * @return a field value
-
     */
   def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
+    @tailrec
+    def reflectClassHierarchy(c: Class[_]): Option[_] =
+      if (c == classOf[AnyRef]) None
+      else {
+        val maybeValue: Option[Any] = reflectClass(c)
+        if (maybeValue.isDefined) maybeValue
+        else {
+          val superClass = c.getSuperclass
+          if (superClass == null) None
+          else reflectClassHierarchy(superClass)
+        }
+      }
+
+    def reflectClass(c: Class[_]) = {
+      val members =
+        try mirror.classSymbol(c).toType.members
+        catch {
+          // a workaround for Scala bug #12190
+          case _: Symbols#CyclicReference => Nil
+        }
+
+      val maybeMember = members
+        .filter(_.toString.endsWith(s" $fieldName"))
+        .toArray
+        .sortBy(!_.isMethod) // method members first
+        .headOption
+
+      maybeMember
+        .map(m => {
+          val im = mirror.reflect(o)
+          if (m.isMethod) im.reflectMethod(m.asMethod).apply()
+          else im.reflectField(m.asTerm).get
+        })
+        .orElse {
+          // Sometimes certain Scala compiler generated fields aren't return by `TypeApi.members`.
+          // Trying Java reflection.
+          c.getDeclaredFields.collectFirst {
+            case f if f.getName == fieldName =>
+              f.setAccessible(true)
+              f.get(o)
+          }
+        }
+    }
+
+    def reflectInterfaces(c: Class[_]) = {
+      val altNames = allInterfacesOf(c)
+        .map(_.getName.replace('.', '$') + "$$" + fieldName)
+
+      c.getDeclaredFields.collectFirst {
+        case f if altNames contains f.getName =>
+          f.setAccessible(true)
+          f.get(o)
+      }
+    }
+
     val declaringClass = implicitly[ClassTag[A]].runtimeClass
-    val field = declaringClass.getDeclaredField(fieldName)
-    field.setAccessible(true)
-    field.get(o).asInstanceOf[B]
+    reflectClassHierarchy(declaringClass)
+      .orElse {
+        // The field might be declared in a trait.
+        reflectInterfaces(declaringClass)
+      }
+      .getOrElse(
+        throw new NoSuchFieldException(s"${declaringClass.getName}.$fieldName")
+      )
+      .asInstanceOf[B]
   }
+
+  /**
+    * A single type parameter alternative to {{{extractFieldValue[A, B](a, ...)}}} where {{{a.getClass == classOf[A]}}}
+    */
+  def extractFieldValue[T](o: AnyRef, fieldName: String): T = {
+    extractFieldValue[AnyRef, T](o, fieldName)(ClassTag(o.getClass))
+  }
+
+  /**
+    * Return all interfaces that the given class implements included inherited ones
+    *
+    * @param c a class
+    * @return
+    */
+  def allInterfacesOf(c: Class[_]): Set[Class[_]] = {
+    @tailrec
+    def collect(ifs: Set[Class[_]], cs: Set[Class[_]]): Set[Class[_]] =
+      if (cs.isEmpty) ifs
+      else {
+        val c0 = cs.head
+        val cN = cs.tail
+        val ifsUpd = if (c0.isInterface) ifs + c0 else ifs
+        val csUpd = cN ++ (c0.getInterfaces filterNot ifsUpd) ++ Option(c0.getSuperclass)
+        collect(ifsUpd, csUpd)
+      }
+
+    collect(Set.empty, Set(c))
+  }
+
+  /**
+    * Same as {{{allInterfacesOf(aClass)}}}
+    *
+    * @tparam A a class type
+    * @return
+    */
+  def allInterfacesOf[A <: AnyRef : ClassTag]: Set[Class[_]] =
+    allInterfacesOf(implicitly[ClassTag[A]].runtimeClass)
 
   /**
     * Extract object properties as key-value pairs.

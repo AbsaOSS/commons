@@ -84,36 +84,41 @@ conf.getRequiredXXX(...)
 ### Basics
 ##### Get direct sub-types of a sealed type
 ```scala
-directSubClassesOf[Food] // == Seq(classOf[Vegetables], classOf[Meat], classOf[Fish])
+ReflectionUtils.directSubClassesOf[Food] // == Seq(classOf[Vegetables], classOf[Meat], classOf[Fish])
 ```
 ##### Get `object` instances extending a sealed type
 ```scala
-objectsOf[Currency] // == Seq(classOf[EUR], classOf[USD], classOf[CZK])
+ReflectionUtils.objectsOf[Currency] // == Seq(classOf[EUR], classOf[USD], classOf[CZK])
 ```
 ##### Get `object` instance by it's full type name (similar to `Class.forName(...)`, but for objects)
 ```scala
-objectForName[MySingleton]("com.example.MySingleton") // == MySingleton
+ReflectionUtils.objectForName[MySingleton]("com.example.MySingleton") // == MySingleton
 ```
 ##### Get private field value of an arbitrary class. (a typed variant of `field.get(o).asInstanceOf[T]`)
 ```scala
-extractFieldValue[Int](foo, "bar")
-
-// or if the field `bar` is declared in one of the superclasses of `foo` (e.g. `Doh`),
-// and you want to save some CPU time by avoiding reflexive lookup in the hierarchy.
-extractFieldValue[Doh, Int](foo, "bar")
+ReflectionUtils.extractFieldValue[Int](foo, "bar")
+// or if you know a type where the field is declared
+ReflectionUtils.extractFieldValue[Doh, Int](foo, "bar")
 ```
 ##### Extract object properties as a key-value map
 ```scala
 case class Person(name: String, age: Int, sex: Sex)
 val aPerson = Person("Alex", 41, Male)
 
-extractProperties(aPerson) // == Map("name" -> "Alex, "age" -> 42, "sex" -> Male)
+ReflectionUtils.extractProperties(aPerson) // == Map("name" -> "Alex, "age" -> 42, "sex" -> Male)
 ```
 ##### Extract a case class argument default value (if exists)
 ```scala
 case class Button(title: String, isPressed = false)
-caseClassCtorArgDefaultValue[Int](classOf[Button], "name") // == None
-caseClassCtorArgDefaultValue[Int](classOf[Button], "isPressed") // == Some(false)
+ReflectionUtils.caseClassCtorArgDefaultValue[Int](classOf[Button], "name") // == None
+ReflectionUtils.caseClassCtorArgDefaultValue[Int](classOf[Button], "isPressed") // == Some(false)
+```
+
+##### Get all interfaces/traits of a given class including inherited ones
+```scala
+ReflectionUtils.ReflectionUtils.allInterfacesOf[A]
+// or
+ReflectionUtils.ReflectionUtils.allInterfacesOf(aClass)
 ```
 
 ### Enumeration macros
