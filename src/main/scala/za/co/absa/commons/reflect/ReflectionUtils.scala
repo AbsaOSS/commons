@@ -188,17 +188,17 @@ object ReflectionUtils {
     */
   def allInterfacesOf(c: Class[_]): Set[Class[_]] = {
     @tailrec
-    def collect(ifs: Set[Class[_]], cs: Iterable[Class[_]]): Set[Class[_]] =
+    def collect(ifs: Set[Class[_]], cs: Set[Class[_]]): Set[Class[_]] =
       if (cs.isEmpty) ifs
       else {
         val c0 = cs.head
         val cN = cs.tail
         val ifsUpd = if (c0.isInterface) ifs + c0 else ifs
-        val csUpd = cN.toSet ++ (c0.getInterfaces filterNot ifsUpd) ++ Option(c0.getSuperclass)
+        val csUpd = cN ++ (c0.getInterfaces filterNot ifsUpd) ++ Option(c0.getSuperclass)
         collect(ifsUpd, csUpd)
       }
 
-    collect(Set.empty, Seq(c))
+    collect(Set.empty, Set(c))
   }
 
   /**
