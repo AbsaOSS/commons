@@ -128,7 +128,12 @@ object ReflectionUtils {
         }
 
       val maybeMember = members
-        .filter(_.toString.endsWith(s" $fieldName"))
+        .filter(smb => (
+          smb.toString.endsWith(s" $fieldName")
+            && smb.isTerm
+            && !smb.isConstructor
+            && (!smb.isMethod || smb.asMethod.paramLists.forall(_.isEmpty))
+          ))
         .toArray
         .sortBy(!_.isMethod) // method members first
         .headOption

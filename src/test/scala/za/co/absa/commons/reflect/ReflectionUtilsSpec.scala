@@ -23,6 +23,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import za.co.absa.commons.reflect.ReflectionUtils.ModuleClassSymbolExtractor
 import za.co.absa.commons.reflect.ReflectionUtilsSpec._
 
+import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
 
 class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
@@ -106,6 +107,24 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
   it should "extract from a lazy val of outer classes" in {
     ReflectionUtils.extractFieldValue[Boolean](Lazy, "z") should be(42)
     ReflectionUtils.extractFieldValue[Boolean](Lazy, "bitmap$0") should be(true)
+  }
+
+  it should "not confuse accessors with methods" in {
+    object AAA {
+      private def x[A: ClassTag]: Int = sys.error("don't call me")
+    }
+    intercept[NoSuchFieldException] {
+      ReflectionUtils.extractFieldValue[Int](AAA, "x")
+    }
+  }
+
+  it should "call accessors if available" in {
+    object AAA {
+      private def x[A: ClassTag]: Int = sys.error("don't call me")
+
+      private def x: Int = 42
+    }
+    ReflectionUtils.extractFieldValue[Int](AAA, "x") should be(42)
   }
 
   // A workaround for https://github.com/scala/bug/issues/12190
