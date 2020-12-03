@@ -327,12 +327,12 @@ myVer.buildMeta  == ver"build.555"
       }
     ```
 
-2. `ConsoleStubs` - stubs console IO
+1. `ConsoleStubs` - stubs console IO
     ```scala
       captureStdOut(Console.out.print("foo")) should be("foo")
     ```
 
-3. `SystemExitFixture` - intercepts `System.exit()` and asserts status
+1. `SystemExitFixture` - intercepts `System.exit()` and asserts status
     ```scala
       captureExitStatus(System.exit(42)) should be(42)
     
@@ -342,8 +342,19 @@ myVer.buildMeta  == ver"build.555"
           // run some code that calls System.exit(...)
       }
     ```
+   
+1. `EnvFixture` - adds an API to set an environment variable for the scope of a single test method
+    ```scala
+    class MySpec ... with EnvFixture {
+      it should "set FOO variable for this test body only" in {
+        setEnv("FOO", 42)
+        // execute some test code that reads FOO environment variable
+        // via the standard Java API like System.getenv("FOO")
+      }
+    }
+    ```
 
-4. `WhitespaceNormalizations` - extends Scalatest DSL with some whitespace treatment methods
+1. `WhitespaceNormalizations` - extends Scalatest DSL with some whitespace treatment methods
     ```scala
       (
         """
