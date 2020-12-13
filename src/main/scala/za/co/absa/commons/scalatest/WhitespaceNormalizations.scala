@@ -19,6 +19,8 @@ package za.co.absa.commons.scalatest
 import org.scalactic.{AbstractStringUniformity, Uniformity}
 import za.co.absa.commons.scalatest.WhitespaceNormalizations.WhiteSpaceRegex
 
+import scala.collection.immutable.StringLike
+
 object WhitespaceNormalizations extends WhitespaceNormalizations {
   val WhiteSpaceRegex = "[\\s\\h]+"
 }
@@ -38,7 +40,8 @@ trait WhitespaceNormalizations {
 
   val lineWhiteSpaceRemoved: Uniformity[String] = new AbstractStringUniformity {
     override def normalized(s: String): String = {
-      s.lines
+      (s: StringLike[String])
+        .lines
         .map(_.replaceAll(WhiteSpaceRegex, ""))
         .filter(_.nonEmpty)
         .toArray
