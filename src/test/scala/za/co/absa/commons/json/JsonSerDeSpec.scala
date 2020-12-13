@@ -16,13 +16,14 @@
 
 package za.co.absa.commons.json
 
-import java.util
-import java.util.UUID
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import za.co.absa.commons.json.JsonSerDeSpec._
 import za.co.absa.commons.json.format.{JavaTypesSupport, NoEmptyValuesSupport}
+import za.co.absa.commons.scalatest.WhitespaceNormalizations.whiteSpaceRemoved
+
+import java.util
+import java.util.UUID
 
 class JsonSerDeSpec extends AnyFlatSpec with Matchers {
 
@@ -48,6 +49,15 @@ class JsonSerDeSpec extends AnyFlatSpec with Matchers {
     Foo(Some(Foo(Some(7)))).toJson should equal("""{"any":{"any":7,"anySeq":[],"quxSeq":[]},"anySeq":[],"quxSeq":[]}""")
     Foo(anySeq = Seq(Map("a" -> 1, "b" -> 2), Map("c" -> 3))).toJson should equal("""{"anySeq":[{"a":1,"b":2},{"c":3}],"quxSeq":[]}""")
     Foo(quxSeq = Seq(Qux(1), Qux(2))).toJson should equal("""{"anySeq":[],"quxSeq":[{"z":1},{"z":2}]}""")
+  }
+
+  it should "serialize to pretty JSON" in new DefaultJacksonJsonSerDe {
+    Foo(Some(42)).toPrettyJson should equal(
+      """{
+        |  "any" : 42,
+        |  "anySeq" : [ ],
+        |  "quxSeq" : [ ]
+        |}""".stripMargin)
   }
 
   behavior of "deserializer"
@@ -79,9 +89,21 @@ class JsonSerDeSpec extends AnyFlatSpec with Matchers {
     """{"map":{"z":[42]}}""".fromJson[Bar] should equal(Bar(None, Map("z" -> Seq(42))))
   }
 
+  behavior of "formatter"
+
+  it should "prettify JSON string" in new DefaultJacksonJsonSerDe {
+    """{"any":42,"anySeq":[],"quxSeq":[]}"""
+      .asPrettyJson should equal(
+      """{
+        |  "any" : 42,
+        |  "anySeq" : [ ],
+        |  "quxSeq" : [ ]
+        |}""".stripMargin)
+  }
+
   behavior of "NoEmptyValuesSupport"
 
-  it should "omit empty values" in new DefaultJacksonJsonSerDe with NoEmptyValuesSupport {
+  it should "omit empty values in `toJson`" in new DefaultJacksonJsonSerDe with NoEmptyValuesSupport {
     Foo().toJson should be(empty)
     Foo(Some(42)).toJson should equal("""{"any":42}""")
     Foo(Some(Bar)).toJson should be(empty)
@@ -98,6 +120,31 @@ class JsonSerDeSpec extends AnyFlatSpec with Matchers {
       "d" -> "",
       "e" -> new AnyRef)
     ).toJson should be(empty)
+  }
+
+  it should "omit empty values in `toPrettyJson`" in new DefaultJacksonJsonSerDe with NoEmptyValuesSupport {
+    Foo()
+      .toPrettyJson should be(empty)
+    Foo(Some(42))
+      .toPrettyJson should equal("""{"any":42}""")(after being whiteSpaceRemoved)
+    Foo(Some(Bar))
+      .toPrettyJson should be(empty)
+    Foo(Some(Foo(Some(7))))
+      .toPrettyJson should equal("""{"any":{"any":7}}""")(after being whiteSpaceRemoved)
+    Foo(anySeq = Seq(Map("a" -> 1, "b" -> 2), Map("c" -> 3)))
+      .toPrettyJson should equal("""{"anySeq":[{"a":1,"b":2},{"c":3}]}""")(after being whiteSpaceRemoved)
+    Foo(quxSeq = Seq(Qux(1), Qux(2)))
+      .toPrettyJson should equal("""{"quxSeq":[{"z":1},{"z":2}]}""")(after being whiteSpaceRemoved)
+    Bar(None, map = Map(
+      "00" -> Seq(),
+      "01" -> Seq(Seq.empty, Map.empty, null, ""),
+      "02" -> Seq(Seq(Map("x" -> Map("y" -> Seq.empty, "z" -> Map.empty)))),
+      "a" -> null,
+      "b" -> None,
+      "c" -> Nil,
+      "d" -> "",
+      "e" -> new AnyRef)
+    ).toPrettyJson should be(empty)
   }
 
   it should "preserve sparse arrays length and order" in new DefaultJacksonJsonSerDe with NoEmptyValuesSupport {

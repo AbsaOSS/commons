@@ -34,24 +34,29 @@ trait AbstractJsonSerDe {
   implicit class EntityToJson[A <: AnyRef](entity: A) {
     def toJson: String = compact(render(decompose(entity)))
 
+    def toPrettyJson: String = pretty(render(decompose(entity)))
+
     def toJsonAs[B: Manifest]: B = render(decompose(entity)).extract[B]
   }
 
   implicit class JsonToEntity(json: String) {
-    def fromJson[A: Manifest]: A = {
+    private def toJValue: JValue = {
       val args = Map(
         "this" -> AbstractJsonSerDe.this,
         "json" -> StringInput(json),
         "wbd" -> formats.wantsBigDecimal
       )
-      val jValue = formats match {
+      formats match {
         case WantsBigIntExtractor(wantsBigInt) =>
           parse_json4s_33(args + ("wbi" -> wantsBigInt))
         case _ =>
           parse_json4s_32(args)
       }
-      jValue.extract(formats, implicitly[Manifest[A]])
     }
+
+    def fromJson[A: Manifest]: A = toJValue.extract(formats, implicitly[Manifest[A]])
+
+    def asPrettyJson: String = pretty(toJValue)
   }
 
 }
