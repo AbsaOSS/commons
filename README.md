@@ -251,31 +251,34 @@ TempFile("myPrefix", "mySuffix")
 A set of stackable traits, serving a wrapper around the way how Json4s (de)serializers are created. Instead of relying on implicit `Formats` objects a stackable traits are used.
 This API is also binary compatible to Json4s 3.2 and 3.3+ versions (Jackson and Native)
 ### Usage
-If you use Jackson impl and default formats, then you can simply do this:
+There are two default SerDe implementation that you can use out of the box:
+  - `DefaultJacksonJsonSerDe`
+  - `DefaultNativeJsonSerDe`
+
 ```scala
 class MyApp extends App with DefaultJacksonJsonSerDe {
   FooBar.toJson // returns JSON string
+  FooBar.toPrettyJson // returns formatted JSON string
   "{...}".fromJson[FooBar] // returns a FooBar instance
 }
 ```
 Or you can create a singleton and use that instead:
 ```scala
-object JsonSerDe extends DefaultJacksonJsonSerDe
+object JsonSerDe extends DefaultNativeJsonSerDe
 import JsonSerDe._
 fooBar.toJson
 ```
-If you want another parser impl (e.g. Native), then you do this:
+If you want another parser impl, then you do this:
 ```scala
-class MyApp extends App 
-  with AbstractJsonSerDe
-  with native.JsonMethods
-  with DefaultFormatsBuilder {
-  ...
-  fooBar.toJson
-  ...
-}
+object MyJsonSerDe 
+  extends AbstractJsonSerDe[MyJson]
+  with my.JsonMethods
+  with DefaultFormatsBuilder
+
+import MyJsonSerDe._
+fooBar.toJson
 ```
-If you want custom formats than instead of mixing in `DefaultFormatsBuilder` simply override `def formats` method.
+If you want custom formats then instead of mixing in `DefaultFormatsBuilder` simply override `def formats` method.
 
 # Version Utils
 A simple utility that parses version strings.

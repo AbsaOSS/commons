@@ -35,4 +35,16 @@ trait WhitespaceNormalizations {
 
     override def toString: String = "whiteSpaceRemoved"
   }
+
+  val lineWhiteSpaceRemoved: Uniformity[String] = new AbstractStringUniformity {
+    override def normalized(s: String): String = {
+      s.lines
+        .map(_.replaceAll(WhiteSpaceRegex, ""))
+        .filter(_.nonEmpty)
+        .toArray
+        .mkString("\n")
+    }
+
+    override def toString: String = "lineWhiteSpaceRemoved"
+  }
 }

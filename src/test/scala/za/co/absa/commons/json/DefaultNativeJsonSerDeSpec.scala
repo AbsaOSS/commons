@@ -16,11 +16,5 @@
 
 package za.co.absa.commons.json
 
-import org.json4s.JsonAST.JValue
-import org.json4s.jackson
-import za.co.absa.commons.json.format.DefaultFormatsBuilder
-
-trait DefaultJacksonJsonSerDe
-  extends AbstractJsonSerDe[JValue]
-    with jackson.JsonMethods
-    with DefaultFormatsBuilder
+class DefaultNativeJsonSerDeSpec
+  extends AbstractJsonSerDeSpec(new DefaultNativeJsonSerDe {})
