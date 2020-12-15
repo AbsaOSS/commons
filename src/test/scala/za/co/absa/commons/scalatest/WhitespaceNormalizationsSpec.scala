@@ -33,6 +33,17 @@ class WhitespaceNormalizationsSpec
     "  foo   \rbar \n  42  \t\t  " should equal("foobar42")(after being whiteSpaceRemoved)
   }
 
+  it should "remove whitespaces in lines" in {
+    "  foo  \n \rbar \n \n  \t\t   \n \n 42  \t\t  " should (
+      (equal(
+        """foo
+          |bar
+          |42""".stripMargin)
+        and (not equal "foobar42"))
+        (after being lineWhiteSpaceRemoved)
+      )
+  }
+
   it should "support unicode separators" in {
     val allSeparators = UnicodeTabulationSymbols ++ UnicodeTabulationSymbols
     whiteSpaceRemoved.normalized(allSeparators.mkString) should equal("")

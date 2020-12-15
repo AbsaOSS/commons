@@ -26,21 +26,21 @@ import za.co.absa.commons.reflect.extractors.AccessorMethodValueExtractor
 import scala.reflect.Manifest
 import scala.reflect.runtime.universe._
 
-trait AbstractJsonSerDe {
-  this: FormatsBuilder with JsonMethods[JValue] =>
+trait AbstractJsonSerDe[A] {
+  this: FormatsBuilder with JsonMethods[A] =>
 
-  private[this] implicit val _formats: Formats = formats
+  implicit class EntityToJson[B <: AnyRef](entity: B) {
+    implicit val _formats: Formats = formats
 
-  implicit class EntityToJson[A <: AnyRef](entity: A) {
     def toJson: String = compact(render(decompose(entity)))
 
     def toPrettyJson: String = pretty(render(decompose(entity)))
 
-    def toJsonAs[B: Manifest]: B = render(decompose(entity)).extract[B]
+    def toJsonAs[C: Manifest]: C = decompose(entity).extract[C]
   }
 
   implicit class JsonToEntity(json: String) {
-    private def toJValue: JValue = {
+    private def parse: JValue = {
       val args = Map(
         "this" -> AbstractJsonSerDe.this,
         "json" -> StringInput(json),
@@ -54,9 +54,9 @@ trait AbstractJsonSerDe {
       }
     }
 
-    def fromJson[A: Manifest]: A = toJValue.extract(formats, implicitly[Manifest[A]])
+    def fromJson[B: Manifest]: B = parse.extract(formats, implicitly[Manifest[B]])
 
-    def asPrettyJson: String = pretty(toJValue)
+    def asPrettyJson: String = pretty(render(parse))
   }
 
 }
