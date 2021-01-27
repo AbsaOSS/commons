@@ -52,4 +52,9 @@ class OptionImplicitsSpec extends AnyFlatSpec with Matchers {
   "optionally()" should "not call the supplied function and return original value" in {
     42.optionally((_: Int) + (_: Int), None) should equal(42)
   }
+
+  "having()" should "behave the same as `optionally()`" in {
+    42.having[Int](None)(_ + _) should equal(42)
+    42.having(Option(5))(_ + _) should equal(47)
+  }
 }
