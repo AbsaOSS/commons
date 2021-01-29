@@ -303,9 +303,9 @@ This way the exception `e` is silently logged into the server logs with the mess
 For example:
 ```json
 {
-   errorId: "123e4567-e89b-12d3-a456-426614174000",
-   timestamp: 1611945666787,
-   message: "oops!"
+   "errorId": "123e4567-e89b-12d3-a456-426614174000",
+   "timestamp": 1611945666787,
+   "message": "oops!"
 }
 ```
 
