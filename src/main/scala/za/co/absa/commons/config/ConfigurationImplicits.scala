@@ -22,86 +22,86 @@ import org.apache.commons.lang.StringUtils.isNotBlank
 import scala.util.Try
 
 /**
- * The object contains extension methods for the [[org.apache.commons.configuration.Configuration Configuration]] interface.
- */
+  * The object contains extension methods for the [[org.apache.commons.configuration.Configuration Configuration]] interface.
+  */
 object ConfigurationImplicits {
 
   /**
-   * The class wraps the [[org.apache.commons.configuration.Configuration Configuration]] interface in order to provide extension methods.
-   *
-   * @param conf A configuration instance
-   * @tparam T A specific type implementing the [[org.apache.commons.configuration.Configuration Configuration]] interface
-   */
+    * The class wraps the [[org.apache.commons.configuration.Configuration Configuration]] interface in order to provide extension methods.
+    *
+    * @param conf A configuration instance
+    * @tparam T A specific type implementing the [[org.apache.commons.configuration.Configuration Configuration]] interface
+    */
   implicit class ConfigurationRequiredWrapper[T <: Configuration](val conf: T) extends AnyVal {
 
     /**
-     * Gets a value of string configuration property and checks whether property exists.
-     *
-     * @return A value of string configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of string configuration property and checks whether property exists.
+      *
+      * @return A value of string configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredString: String => String = getRequired(conf.getString, isNotBlank)
 
     /**
-     * Gets a value of string array configuration property and checks whether the array is not empty.
-     *
-     * @return A value of string array configuration property if not empty, otherwise throws an exception.
-     */
+      * Gets a value of string array configuration property and checks whether the array is not empty.
+      *
+      * @return A value of string array configuration property if not empty, otherwise throws an exception.
+      */
     def getRequiredStringArray: String => Array[String] = getRequired(conf.getStringArray, (i: Array[String]) => i.nonEmpty)
 
     /**
-     * Gets a value of boolean configuration property and checks whether property exists.
-     *
-     * @return A value of boolean configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of boolean configuration property and checks whether property exists.
+      *
+      * @return A value of boolean configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredBoolean: String => Boolean = getRequired(conf.getBoolean(_, null), null.!=) //NOSONAR
 
     /**
-     * Gets a value of big decimal configuration property and checks whether property exists.
-     *
-     * @return A value of big decimal configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of big decimal configuration property and checks whether property exists.
+      *
+      * @return A value of big decimal configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredBigDecimal: String => BigDecimal = getRequired(conf.getBigDecimal(_, null), null.!=) //NOSONAR
 
     /**
-     * Gets a value of byte configuration property and checks whether property exists.
-     *
-     * @return A value of byte configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of byte configuration property and checks whether property exists.
+      *
+      * @return A value of byte configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredByte: String => Byte = getRequired(conf.getByte(_, null), null.!=) //NOSONAR
 
     /**
-     * Gets a value of short configuration property and checks whether property exists.
-     *
-     * @return A value of short configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of short configuration property and checks whether property exists.
+      *
+      * @return A value of short configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredShort: String => Short = getRequired(conf.getShort(_, null), null.!=) //NOSONAR
 
     /**
-     * Gets a value of int configuration property and checks whether property exists.
-     *
-     * @return A value of int configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of int configuration property and checks whether property exists.
+      *
+      * @return A value of int configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredInt: String => Int = getRequired(conf.getInteger(_, null), null.!=) //NOSONAR
 
     /**
-     * Gets a value of long configuration property and checks whether property exists.
-     *
-     * @return A value of long configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of long configuration property and checks whether property exists.
+      *
+      * @return A value of long configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredLong: String => Long = getRequired(conf.getLong(_, null), null.!=) //NOSONAR
 
     /**
-     * Gets a value of float configuration property and checks whether property exists.
-     *
-     * @return A value of float configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of float configuration property and checks whether property exists.
+      *
+      * @return A value of float configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredFloat: String => Float = getRequired(conf.getFloat(_, null), null.!=) //NOSONAR
 
     /**
-     * Gets a value of double configuration property and checks whether property exists.
-     *
-     * @return A value of double configuration property if exists, otherwise throws an exception.
-     */
+      * Gets a value of double configuration property and checks whether property exists.
+      *
+      * @return A value of double configuration property if exists, otherwise throws an exception.
+      */
     def getRequiredDouble: String => Double = getRequired(conf.getDouble(_, null), null.!=) //NOSONAR
 
     private def getRequired[V](get: String => V, check: V => Boolean)(key: String): V =
@@ -111,88 +111,91 @@ object ConfigurationImplicits {
   }
 
   /**
-   * The class wraps the [[org.apache.commons.configuration.Configuration Configuration]] interface in order to provide extension methods.
-   *
-   * @param conf A configuration instance
-   * @tparam T A specific type implementing the [[org.apache.commons.configuration.Configuration Configuration]] interface
-   */
+    * The class wraps the [[org.apache.commons.configuration.Configuration Configuration]] interface in order to provide extension methods.
+    *
+    * @param conf A configuration instance
+    * @tparam T A specific type implementing the [[org.apache.commons.configuration.Configuration Configuration]] interface
+    */
   implicit class ConfigurationOptionalWrapper[T <: Configuration](val conf: T) extends AnyVal {
 
     /**
-     * Gets a value of string configuration property.
-     *
-     * @return A Some wrapped value of string configuration property if exists, otherwise None.
-     */
+      * Gets a value of string configuration property.
+      *
+      * @return A Some wrapped value of string configuration property if exists, otherwise None.
+      */
     def getOptionalString: String => Option[String] = getOptional(conf.getString)(_).filter(isNotBlank)
 
 
     /**
-     * Gets a value of string array configuration property and checks whether the array is not empty.
-     *
-     * @return A Some wrapped value of string array configuration property if not empty, otherwise None.
-     */
+      * Gets a value of string array configuration property and checks whether the array is not empty.
+      *
+      * @return A Some wrapped value of string array configuration property if not empty, otherwise None.
+      */
     def getOptionalStringArray: String => Option[Array[String]] = getOptional(conf.getStringArray)(_).filter(_.nonEmpty)
 
     /**
-     * Gets a value of boolean configuration property.
-     *
-     * @return A Some wrapped value of boolean configuration property if exists, otherwise None.
-     */
+      * Gets a value of boolean configuration property.
+      *
+      * @return A Some wrapped value of boolean configuration property if exists, otherwise None.
+      */
     def getOptionalBoolean: String => Option[Boolean] = getOptional(conf.getBoolean)
 
     /**
-     * Gets a value of big decimal configuration property.
-     *
-     * @return A Some wrapped value of big decimal configuration property if exists, otherwise None.
-     */
+      * Gets a value of big decimal configuration property.
+      *
+      * @return A Some wrapped value of big decimal configuration property if exists, otherwise None.
+      */
     def getOptionalBigDecimal: String => Option[BigDecimal] = getOptional(conf.getBigDecimal(_))
 
     /**
-     * Gets a value of byte configuration property.
-     *
-     * @return A Some wrapped value of byte configuration property if exists, otherwise None.
-     */
+      * Gets a value of byte configuration property.
+      *
+      * @return A Some wrapped value of byte configuration property if exists, otherwise None.
+      */
     def getOptionalByte: String => Option[Byte] = getOptional(conf.getByte)
 
     /**
-     * Gets a value of short configuration property.
-     *
-     * @return A Some wrapped value of short configuration property if exists, otherwise None.
-     */
+      * Gets a value of short configuration property.
+      *
+      * @return A Some wrapped value of short configuration property if exists, otherwise None.
+      */
     def getOptionalShort: String => Option[Short] = getOptional(conf.getShort)
 
     /**
-     * Gets a value of int configuration property.
-     *
-     * @return A Some wrapped value of int configuration property if exists, otherwise None.
-     */
+      * Gets a value of int configuration property.
+      *
+      * @return A Some wrapped value of int configuration property if exists, otherwise None.
+      */
     def getOptionalInt: String => Option[Int] = getOptional(conf.getInt)
 
     /**
-     * Gets a value of long configuration property.
-     *
-     * @return A Some wrapped value of long configuration property if exists, otherwise None.
-     */
+      * Gets a value of long configuration property.
+      *
+      * @return A Some wrapped value of long configuration property if exists, otherwise None.
+      */
     def getOptionalLong: String => Option[Long] = getOptional(conf.getLong)
 
     /**
-     * Gets a value of float configuration property.
-     *
-     * @return A Some wrapped value of float configuration property if exists, otherwise None.
-     */
+      * Gets a value of float configuration property.
+      *
+      * @return A Some wrapped value of float configuration property if exists, otherwise None.
+      */
     def getOptionalFloat: String => Option[Float] = getOptional(conf.getFloat)
 
     /**
-     * Gets a value of double configuration property.
-     *
-     * @return A Some wrapped value of double configuration property if exists, otherwise None.
-     */
+      * Gets a value of double configuration property.
+      *
+      * @return A Some wrapped value of double configuration property if exists, otherwise None.
+      */
     def getOptionalDouble: String => Option[Double] = getOptional(conf.getDouble)
 
-    private def getOptional[V](get: String => V)(key: String): Option[V] =
-      Try(get(key))
-        .map(Option(_))
-        .getOrElse(None)
+    private def getOptional[V](get: String => V)(key: String): Option[V] = {
+      if (conf.containsKey(key))
+        Option(get(key))
+      else
+        None
+    }
+
   }
 
 }
