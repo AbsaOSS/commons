@@ -26,17 +26,19 @@ class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
 
   import scala.collection.JavaConverters._
 
-  behavior of "ConfigurationImplicits"
+  behavior of "ConfigurationRequiredWrapper"
 
   it should "implement getRequiredString()" in {
-    val configuration = new MapConfiguration(Map("foo" -> "bar").asJava)
+    val configuration = new MapConfiguration(Map("foo" -> "bar", "bla" -> "").asJava)
     configuration getRequiredString "foo" should be("bar")
+    intercept[IllegalArgumentException](configuration getRequiredString "bla").getMessage should include("bla")
     intercept[IllegalArgumentException](configuration getRequiredString "oops").getMessage should include("oops")
   }
 
   it should "implement getRequiredStringArray()" in {
-    val configuration = new MapConfiguration(Map("foo" -> "bar").asJava)
+    val configuration = new MapConfiguration(Map("foo" -> "bar", "bla" -> "").asJava)
     configuration getRequiredStringArray "foo" should be(Array("bar"))
+    intercept[IllegalArgumentException](configuration getRequiredString "bla").getMessage should include("bla")
     intercept[IllegalArgumentException](configuration getRequiredStringArray "oops").getMessage should include("oops")
   }
 
@@ -94,6 +96,79 @@ class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
         setThrowExceptionOnMissing(b)
       }
       intercept[IllegalArgumentException](conf getRequiredString "oops").getMessage should include("oops")
+    }
+  }
+
+  behavior of "ConfigurationOptionalWrapper"
+
+  it should "implement getOptionalString()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "bar", "bla" -> "").asJava)
+    configuration getOptionalString "foo" should be(Some("bar"))
+    configuration getOptionalString "bla" should be(None)
+    configuration getOptionalString "oops" should be(None)
+  }
+
+  it should "implement getOptionalStringArray()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "bar", "bla" -> "").asJava)
+    configuration.getOptionalStringArray("foo").get should be(Array("bar"))
+    configuration getOptionalString "bla" should be(None)
+    configuration getOptionalStringArray "oops" should be(None)
+  }
+
+  it should "implement getOptionalBoolean()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "true").asJava)
+    configuration getOptionalBoolean "foo" should be(Some(true))
+    configuration getOptionalBoolean "oops" should be(None)
+  }
+
+  it should "implement getOptionalBigDecimal()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "4.2").asJava)
+    configuration getOptionalBigDecimal "foo" should be(Some(BigDecimal(4.2)))
+    configuration getOptionalBigDecimal "oops" should be(None)
+  }
+
+  it should "implement getOptionalByte()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "42").asJava)
+    configuration getOptionalByte "foo" should be(Some(42.byteValue))
+    configuration getOptionalByte "oops" should be(None)
+  }
+
+  it should "implement getOptionalShort()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "42").asJava)
+    configuration getOptionalShort "foo" should be(Some(42.shortValue))
+    configuration getOptionalShort "oops" should be(None)
+  }
+
+  it should "implement getOptionalInt()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "42").asJava)
+    configuration getOptionalInt "foo" should be(Some(42.intValue))
+    configuration getOptionalInt "oops" should be(None)
+  }
+
+  it should "implement getOptionalLong()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "42").asJava)
+    configuration getOptionalLong "foo" should be(Some(42.longValue))
+    configuration getOptionalLong "oops" should be(None)
+  }
+
+  it should "implement getOptionalFloat()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "4.2").asJava)
+    configuration getOptionalFloat "foo" should be(Some(4.2.floatValue))
+    configuration getOptionalFloat "oops" should be(None)
+  }
+
+  it should "implement getOptionalDouble()" in {
+    val configuration = new MapConfiguration(Map("foo" -> "4.2").asJava)
+    configuration getOptionalDouble "foo" should be(Some(4.2.doubleValue))
+    configuration getOptionalDouble "oops" should be(None)
+  }
+
+  it should "behave the same way regardless of `throwExceptionOnMissing` property settings" in {
+    Seq(false, true) foreach { b =>
+      val conf = new BaseConfiguration {
+        setThrowExceptionOnMissing(b)
+      }
+      conf getOptionalString "oops" should be(None)
     }
   }
 }
