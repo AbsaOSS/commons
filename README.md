@@ -73,9 +73,20 @@ new MyBuilder
   .withY(77)
   .optionally(_.withZ, maybeZ) // <---- withZ is called with a `value` if `maybeZ` is `Some(value)`
   .optionally(_.withABC(a, _, c), maybeB) // <---- it also works with n-ary methods
+
+// Alternatively `having()` method can be used. It does the same thing as `optionally()`,
+// but because of re-arranged method parameters it's easier for the compiler to infer types.
+// See: https://github.com/AbsaOSS/commons/issues/56
+new MyBuilder
+  .withX(42)
+  .withY(77)
+  .having(maybeZ)(_.withZ)
+  ...
+
 ```
 
-# Configuration implicits
+# Commons Configuration
+### Implicits
 Useful methods for `org.apache.commons.configuration.Configuration`.
 
 ```scala
@@ -89,6 +100,20 @@ conf.getOptionalInt("property.key")
 
 ```
 Available for String, Array[String], Boolean, BigDecimal, Byte, Short, Int, Float, Long and Double.
+
+### Configuration sub-classes
+
+##### UpperSnakeCaseEnvironmentConfiguration
+This is an extension of `EnvironmentConfiguration` that converts key names between 
+dot-separated _camelCase_ notation and _UPPER_SNAKE_CASE_ notation which is common for naming environment variables.
+
+See: https://github.com/AbsaOSS/commons/issues/54
+```scala
+// Any of the following calls returns a value of FOO_BAR_BAZ environment variable
+(new UpperSnakeCaseEnvironmentConfiguration).getString("foo.bar.baz")
+(new UpperSnakeCaseEnvironmentConfiguration).getString("fooBarBaz")
+(new UpperSnakeCaseEnvironmentConfiguration).getString("foo.barBaz")
+```
 
 # Reflection Utils
 ### Basics
@@ -245,6 +270,45 @@ You can also use `apply()` method instead of inheritance. It all depends on your
 val myBuildInfo = BuildInfo(...)
 ```
 
+# Error handling utils
+
+### Client/Server error cross-linking
+In client-server application the errors sent to a client is often sanitised for privacy and security reasons.
+This however complicates troubleshooting because it's difficult to find a much between a client error message
+and the corresponding exception details in the server logs.
+
+One way to solve this issue is to generate a unique identifier that is then incorporated into
+the server log on one hand, and is sent to the client along with a client friendly error message on the other hand.
+Such unique ID will be easy to lookup in logs, and will precisely identify the root cause of the error seen by the client.
+
+```scala
+// somewhere on the server
+try {
+  service.doSomething()
+} catch {
+  case NonFatal(e) =>
+    import za.co.absa.commons.error
+    val errorRef = ErrorRef(e, "oops!")   
+    clientResponse.sendError(errorRef)
+}
+```
+This way the exception `e` is silently logged into the server logs with the message
+```
+[ERROR] ... ERROR_ID [123e4567-e89b-12d3-a456-426614174000] oops!
+            caused by: NullPointerException in ...
+            <stack trace>
+```
+... while the client receives a serialized representation that only contains the error UUID, timestamp and the message "oops!".
+
+For example:
+```json
+{
+   errorId: "123e4567-e89b-12d3-a456-426614174000",
+   timestamp: 1611945666787,
+   message: "oops!"
+}
+```
+
 # IO Utils
 An easy way to create a temporary file or directory with the support for automatic recursive deletion (as `rm -rf`) on JVM shutdown.
 ### Usage
@@ -382,8 +446,23 @@ myVer.buildMeta  == ver"build.555"
         (after being trimmed and whitespaceNormalized)
       )
     ```
+   
+# Spark Utils
 
-# Spark Schema Utils
+### NonFatalQueryExecutionListenerAdapter
+
+A trait that when is mixed with another `QueryExecutionListener` implementation, 
+makes sure the later is not called with any fatal exception.   
+
+See https://github.com/AbsaOSS/commons/issues/50
+
+```scala
+val myListener = new MyQueryExecutionListener with NonFatalQueryExecutionListenerAdapter
+
+spark.listenerManager.register(myListener)
+```
+
+### Spark Schema Utils
 
 Provides methods for working with schemas, its comparison and alignment.  
 
