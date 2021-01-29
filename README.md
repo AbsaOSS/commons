@@ -76,9 +76,19 @@ new MyBuilder
 ```
 
 # Configuration implicits
+Useful methods for `org.apache.commons.configuration.Configuration`.
+
 ```scala
-conf.getRequiredXXX(...)
+import za.co.absa.commons.config.ConfigurationImplicits._
+
+// return value or throw
+conf.getRequiredInt("property.key")
+
+// return Some(value) or None
+conf.getOptionalInt("property.key")
+
 ```
+Available for String, Array[String], Boolean, BigDecimal, Byte, Short, Int, Float, Long and Double.
 
 # Reflection Utils
 ### Basics
