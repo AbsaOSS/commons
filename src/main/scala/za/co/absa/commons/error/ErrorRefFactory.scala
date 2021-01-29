@@ -33,7 +33,9 @@ abstract class ErrorRefFactory(log: Logger) {
     * @return a new instance of `ErrorRef`.
     */
   protected[error] def createRef(e: Throwable, maybeMessage: Option[String]): ErrorRef = {
-    val errRef = ErrorRef(randomUUID, maybeMessage)
+    val id = randomUUID
+    val time = System.currentTimeMillis
+    val errRef = ErrorRef(id, time, maybeMessage)
     if (log.isErrorEnabled) {
       val logMsg = {
         val sb = new StringBuilder()

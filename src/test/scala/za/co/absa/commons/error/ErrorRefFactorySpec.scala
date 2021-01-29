@@ -37,6 +37,7 @@ class ErrorRefFactorySpec
     val errRef = errRefFactory.createRef(dummyException, None)
 
     errRef.errorId should not be null
+    errRef.timestamp should (be > 0L and be <= System.currentTimeMillis)
     errRef.message should be(None)
     verify(logMock).error(s"ERROR_ID [${errRef.errorId}]", dummyException)
   }
@@ -51,6 +52,7 @@ class ErrorRefFactorySpec
     val errRef = errRefFactory.createRef(dummyException, Some("foo bar"))
 
     errRef.errorId should not be null
+    errRef.timestamp should (be > 0L and be <= System.currentTimeMillis)
     errRef.message should be(Some("foo bar"))
     verify(logMock).error(s"ERROR_ID [${errRef.errorId}] foo bar", dummyException)
   }

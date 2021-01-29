@@ -41,6 +41,7 @@ import java.util.UUID
   */
 case class ErrorRef(
   errorId: UUID,
+  timestamp: Long,
   message: Option[String]
 )
 
