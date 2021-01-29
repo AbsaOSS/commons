@@ -60,7 +60,7 @@ object ConfigurationImplicits {
       *
       * @return A value of big decimal configuration property if exists, otherwise throws an exception.
       */
-    def getRequiredBigDecimal: String => BigDecimal = getRequired(conf.getBigDecimal, null.!=) //NOSONAR
+    def getRequiredBigDecimal: String => BigDecimal = getRequired(conf.getBigDecimal(_, null), null.!=) //NOSONAR
 
     /**
       * Gets a value of byte configuration property and checks whether property exists.
@@ -108,6 +108,91 @@ object ConfigurationImplicits {
       Try(get(key))
         .filter(check)
         .getOrElse(throw new IllegalArgumentException(s"Missing configuration property $key"))
+  }
+
+  /**
+   * The class wraps the [[org.apache.commons.configuration.Configuration Configuration]] interface in order to provide extension methods.
+   *
+   * @param conf A configuration instance
+   * @tparam T A specific type implementing the [[org.apache.commons.configuration.Configuration Configuration]] interface
+   */
+  implicit class ConfigurationOptionalWrapper[T <: Configuration](val conf: T) extends AnyVal {
+
+    /**
+     * Gets a value of string configuration property.
+     *
+     * @return A Some wrapped value of string configuration property if exists, otherwise None.
+     */
+    def getOptionalString: String => Option[String] = getOptional(conf.getString)(_).filter(isNotBlank)
+
+
+    /**
+     * Gets a value of string array configuration property and checks whether the array is not empty.
+     *
+     * @return A Some wrapped value of string array configuration property if not empty, otherwise None.
+     */
+    def getOptionalStringArray: String => Option[Array[String]] = getOptional(conf.getStringArray)(_).filter(_.nonEmpty)
+
+    /**
+     * Gets a value of boolean configuration property.
+     *
+     * @return A Some wrapped value of boolean configuration property if exists, otherwise None.
+     */
+    def getOptionalBoolean: String => Option[Boolean] = getOptional(conf.getBoolean(_, null)) //NOSONAR
+
+    /**
+     * Gets a value of big decimal configuration property.
+     *
+     * @return A Some wrapped value of big decimal configuration property if exists, otherwise None.
+     */
+    def getOptionalBigDecimal: String => Option[BigDecimal] = getOptional(conf.getBigDecimal(_, null)) //NOSONAR
+
+    /**
+     * Gets a value of byte configuration property.
+     *
+     * @return A Some wrapped value of byte configuration property if exists, otherwise None.
+     */
+    def getOptionalByte: String => Option[Byte] = getOptional(conf.getByte(_, null)) //NOSONAR
+
+    /**
+     * Gets a value of short configuration property.
+     *
+     * @return A Some wrapped value of short configuration property if exists, otherwise None.
+     */
+    def getOptionalShort: String => Option[Short] = getOptional(conf.getShort(_, null)) //NOSONAR
+
+    /**
+     * Gets a value of int configuration property.
+     *
+     * @return A Some wrapped value of int configuration property if exists, otherwise None.
+     */
+    def getOptionalInt: String => Option[Int] = getOptional(conf.getInteger(_, null)) //NOSONAR
+
+    /**
+     * Gets a value of long configuration property.
+     *
+     * @return A Some wrapped value of long configuration property if exists, otherwise None.
+     */
+    def getOptionalLong: String => Option[Long] = getOptional(conf.getLong(_, null)) //NOSONAR
+
+    /**
+     * Gets a value of float configuration property.
+     *
+     * @return A Some wrapped value of float configuration property if exists, otherwise None.
+     */
+    def getOptionalFloat: String => Option[Float] = getOptional(conf.getFloat(_, null)) //NOSONAR
+
+    /**
+     * Gets a value of double configuration property.
+     *
+     * @return A Some wrapped value of double configuration property if exists, otherwise None.
+     */
+    def getOptionalDouble: String => Option[Double] = getOptional(conf.getDouble(_, null)) //NOSONAR
+
+    private def getOptional[V](get: String => V)(key: String): Option[V] =
+      Try(get(key))
+        .map(Option(_))
+        .getOrElse(None)
   }
 
 }
