@@ -37,6 +37,9 @@ object OptionImplicits {
 
   implicit class AnyWrapper[A <: Any](val a: A) extends AnyVal {
     def optionally[B](applyFn: (A, B) => A, maybeArg: Option[B]): A = maybeArg.map(applyFn(a, _)).getOrElse(a)
+
+    // Slightly another version of "optionally" that is more type inferer friendly
+    def having[B](maybeArg: Option[B])(applyFn: (A, B) => A): A = optionally(applyFn, maybeArg)
   }
 
 }
