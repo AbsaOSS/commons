@@ -23,6 +23,20 @@ val arr: Array[_] = ???
 iter.fetchToArray(arr, 7, 42) // returns a number of actually copied items
 ```
 
+```scala
+import CollectionImplicits._
+
+// Get distinct elements by only comparing certain property(-es)
+val xs = Seq(
+   Foo(x = 1, ...), // A
+   Foo(x = 2, ...), // B
+   Foo(x = 1, ...), // C
+   Foo(x = 2, ...), // D
+   Foo(x = 3, ...), // E
+)
+xs.distinctBy(_.x) // returns elements A, B, E
+```
+
 # Abstract Converters
 A simple stackable `Converter` trait with a simple memoized wrapper.
 ### Usage 
