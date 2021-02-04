@@ -16,6 +16,11 @@
 
 package za.co.absa.commons.lang
 
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
+import scala.language.higherKinds
+import scala.reflect.ClassTag
+
 object CollectionImplicits {
 
   implicit class IteratorOps[A](val iter: Iterator[A]) extends AnyVal {
@@ -39,6 +44,40 @@ object CollectionImplicits {
       }
       i - start
     }
+  }
+
+  implicit class TraversableOnceOps[A, M[X] <: TraversableOnce[X]](val xs: M[A]) extends AnyVal {
+
+    /**
+      * Almost like `distinct`, but instead of comparing elements itself it compares their projections,
+      * returned by a given function `f`.
+      *
+      * It's logically equivalent to doing stable grouping by `f` followed by selecting the first value of each key.
+      *
+      * @param f   projection function
+      * @param cbf collection builder factory
+      * @return a new sequence of elements which projection (obtained by applying the function `f`)
+      *         are the first occurrence of every other elements' projection of this sequence.
+      */
+    def distinctBy[B](f: A => B)(implicit cbf: CanBuildFrom[M[A], A, M[A]]): M[A] = {
+      val seen = mutable.Set.empty[B]
+      val b = cbf(xs)
+      for (x <- xs) {
+        val y = f(x)
+        if (!seen(y)) {
+          b += x
+          seen += y
+        }
+      }
+      b.result()
+    }
+  }
+
+  implicit class ArrayOps[A](val xs: Array[A]) extends AnyVal {
+    /**
+      * @see [[TraversableOnceOps.distinctBy]]
+      */
+    def distinctBy[B](f: A => B)(implicit ct: ClassTag[A]): Array[A] = (xs: Seq[A]).distinctBy(f).toArray
   }
 
 }
