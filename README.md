@@ -37,8 +37,8 @@ val sortedNodes = myNodes.sortedTopologicallyBy(_.id, _.refIds) // arguments are
 // ... or using implicit `DAGNodeIDMapping` instance instead of explicitly passing mapping functions as arguments
 
 implicit object MyNodeIdMapping extends DAGNodeIdMapping[MyNode, NodeId] {
-   override def currentId(n: MyNode): NodeId = ???
-   override def outboundIds(n: MyNode): Seq[NodeId] = ???
+   override def selfId(n: MyNode): NodeId = ???
+   override def refIds(n: MyNode): Traversable[NodeId] = ???
 }
 
 val sortedNodes = myNodes.sortedTopologically()

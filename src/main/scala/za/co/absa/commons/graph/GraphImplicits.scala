@@ -26,31 +26,44 @@ import scala.language.higherKinds
 object GraphImplicits {
 
   trait DAGNodeIdMapping[Node, Id] {
-    def currentId(n: Node): Id
-    def outboundIds(n: Node): Traversable[Id]
+    /**
+      * Returns a node identifier that is referenced by other nodes (edges)
+      *
+      * @param n graph node
+      * @return a node identifier
+      */
+    def selfId(n: Node): Id
+
+    /**
+      * Returns outbound node identifiers
+      *
+      * @param n graph node
+      * @return referenced nodes' identifiers
+      */
+    def refIds(n: Node): Traversable[Id]
   }
 
   implicit class DAGNodeTraversableOps[Node, M[X] <: Seq[X]](val xs: M[Node]) extends AnyVal {
 
-    def sortedTopologicallyBy[Id](
-      currentIdFn: Node => Id,
-      outboundIdsFn: Node => Traversable[Id],
-      reverse: Boolean = false
-    )(implicit cbf: CanBuildFrom[M[Node], Node, M[Node]]): M[Node] = {
-      implicit val nav: DAGNodeIdMapping[Node, Id] = new DAGNodeIdMapping[Node, Id] {
-
-        override def currentId(n: Node): Id = currentIdFn(n)
-
-        override def outboundIds(n: Node): Traversable[Id] = outboundIdsFn(n)
-      }
-
-      sortedTopologically(reverse)
+    def sortedTopologically[Id](reverse: Boolean = false)
+      (implicit
+        nim: DAGNodeIdMapping[Node, Id],
+        cbf: CanBuildFrom[M[Node], Node, M[Node]]): M[Node] = {
+      sortedTopologicallyBy(nim.selfId, nim.refIds, reverse)
     }
 
-    def sortedTopologically[Id](reverse: Boolean = false)(implicit nav: DAGNodeIdMapping[Node, Id], cbf: CanBuildFrom[M[Node], Node, M[Node]]): M[Node] =
-      if (xs.size < 2) xs
-      else {
-        val itemById = xs.map(op => nav.currentId(op) -> op).toMap
+    def sortedTopologicallyBy[Id](
+      selfIdFn: Node => Id,
+      refIdsFn: Node => Traversable[Id],
+      reverse: Boolean = false
+    )(implicit cbf: CanBuildFrom[M[Node], Node, M[Node]]): M[Node] =
+      if (xs.size < 2) {
+        // nothing to sort
+        // return a clone instead of `xs` for semantic consistency reasons when a mutable collection is used
+        (cbf.apply(xs) ++= xs).result()
+
+      } else {
+        val itemById = xs.map(op => selfIdFn(op) -> op).toMap
 
         val createEdge: (Node, Id) => DiEdge[Node] =
           if (reverse)
@@ -61,7 +74,7 @@ object GraphImplicits {
         val edges: Traversable[DiEdge[Node]] =
           for {
             item <- xs
-            nextId <- nav.outboundIds(item)
+            nextId <- refIdsFn(item)
           } yield createEdge(item, nextId)
 
         val sortResult = Graph
@@ -76,7 +89,7 @@ object GraphImplicits {
             b ++= res.toOuter
             b.result()
           case Left(cycleNode) =>
-            throw new IllegalArgumentException(s"Expected DAG but a cycle was detected on the node: $cycleNode")
+            throw new IllegalArgumentException(s"Expected DAG but a cycle was detected on the node ID: ${selfIdFn(cycleNode.toOuter)}")
         }
       }
   }

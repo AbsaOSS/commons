@@ -21,6 +21,8 @@ import org.scalatest.matchers._
 import org.scalatest.matchers.should.Matchers
 import za.co.absa.commons.graph.AbstractGraphImplicits_SortedTopologicallySpec._
 
+import scala.collection.mutable.ListBuffer
+
 abstract class AbstractGraphImplicits_SortedTopologicallySpec(
   topologicalSortMethodName: String,
   executeTopologicalSortMethod: Seq[TestNode] => Seq[TestNode]
@@ -31,7 +33,7 @@ abstract class AbstractGraphImplicits_SortedTopologicallySpec(
 
   behavior of topologicalSortMethodName
 
-  it should "soft node collection in topological order" in {
+  it should "sort node collection in topological order" in {
     val originalCollection = Seq(
       4 -> Seq(5),
       2 -> Seq(4),
@@ -46,7 +48,7 @@ abstract class AbstractGraphImplicits_SortedTopologicallySpec(
     sortedCollection should be(topologicallySorted)
   }
 
-  it should "should support disconnected graphs" in {
+  it should "support disconnected graphs" in {
     val disconnectedGraph = Seq(
       // graph A
       1 -> Seq(2, 3),
@@ -64,18 +66,21 @@ abstract class AbstractGraphImplicits_SortedTopologicallySpec(
     sortedGraph should be(topologicallySorted)
   }
 
-  it should "should not remove disconnected nodes" in {
+  it should "not remove disconnected nodes" in {
     val col2 = Seq(1 -> Nil, 2 -> Nil, 3 -> Nil)
     executeTopologicalSortMethod(col2) should contain theSameElementsAs col2
   }
 
-  it should "return the argument if its size is < 2" in {
+  it should "do nothing on empty collections" in {
     val col0 = Seq.empty
-    val col1 = Seq(1 -> Nil)
-    val col2 = Seq(1 -> Seq(2), 2 -> Nil)
     executeTopologicalSortMethod(col0) should be theSameInstanceAs col0
-    executeTopologicalSortMethod(col1) should be theSameInstanceAs col1
-    executeTopologicalSortMethod(col2) should not(be theSameInstanceAs col2)
+  }
+
+  it should "always return another instance of mutable collections" in {
+    val arr0 = Array.empty[TestNode]
+    val buf1 = ListBuffer(1 -> Nil)
+    executeTopologicalSortMethod(arr0) should (have length 0 and not(be theSameInstanceAs arr0))
+    executeTopologicalSortMethod(buf1) should (contain theSameElementsAs buf1 and not(be theSameInstanceAs buf1))
   }
 
   it should "fail due to a cycle in the graph" in {

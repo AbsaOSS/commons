@@ -25,7 +25,7 @@ class GraphImplicits_SortedTopologicallySpec
   extends AbstractGraphImplicits_SortedTopologicallySpec(
     "sortedTopologically",
     (xs: Seq[(TestNodeId, TestRefNodeIds)]) => {
-      implicit val nodeIdMapping: DAGNodeIdMapping[TestNode, TestNodeId] = TestNodeIdMapping
+      implicit val nim: DAGNodeIdMapping[TestNode, TestNodeId] = TestNodeIdMapping
       xs.sortedTopologically()
     }
   )
@@ -34,9 +34,9 @@ object GraphImplicits_SortedTopologicallySpec {
 
   implicit object TestNodeIdMapping extends DAGNodeIdMapping[TestNode, TestNodeId] {
 
-    override def currentId(n: TestNode): TestNodeId = n._1
+    override def selfId(n: TestNode): TestNodeId = n._1
 
-    override def outboundIds(n: TestNode): Seq[TestNodeId] = n._2
+    override def refIds(n: TestNode): Seq[TestNodeId] = n._2
   }
 
 }
