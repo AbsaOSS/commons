@@ -23,6 +23,27 @@ val arr: Array[_] = ???
 iter.fetchToArray(arr, 7, 42) // returns a number of actually copied items
 ```
 
+# Graph Utils
+
+### Topological sorting (DAG only)
+```scala
+val myNodes: Seq[MyNode] = ??? // an arbitrary sequence of objects that can represent graph nodes 
+
+// import extension methods
+import za.co.absa.commons.graph.GraphImplicits._
+
+val sortedNodes = myNodes.sortedTopologicallyBy(_.id, _.refIds) // arguments are functions that return a self ID and outbound IDs for every node in the collection 
+
+// ... or using implicit `DAGNodeIDMapping` instance instead of explicitly passing mapping functions as arguments
+
+implicit object MyNodeIdMapping extends DAGNodeIdMapping[MyNode, NodeId] {
+   override def currentId(n: MyNode): NodeId = ???
+   override def outboundIds(n: MyNode): Seq[NodeId] = ???
+}
+
+val sortedNodes = myNodes.sortedTopologically()
+```
+
 # Abstract Converters
 A simple stackable `Converter` trait with a simple memoized wrapper.
 ### Usage 
