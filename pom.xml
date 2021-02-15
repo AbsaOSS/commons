@@ -165,6 +165,12 @@
             <version>2.6.7</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.scala-graph</groupId>
+            <artifactId>graph-core_${scala.binary.version}</artifactId>
+            <version>1.12.5</version>
+            <optional>true</optional>
+        </dependency>
 
         <!-- Test scope dependencies -->
 

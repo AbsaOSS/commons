@@ -37,6 +37,27 @@ val xs = Seq(
 xs.distinctBy(_.x) // returns elements A, B, E
 ```
 
+# Graph Utils
+
+### Topological sorting (DAG only)
+```scala
+val myNodes: Seq[MyNode] = ??? // an arbitrary sequence of objects that can represent graph nodes 
+
+// import extension methods
+import za.co.absa.commons.graph.GraphImplicits._
+
+val sortedNodes = myNodes.sortedTopologicallyBy(_.id, _.refIds) // arguments are functions that return a self ID and outbound IDs for every node in the collection 
+
+// ... or using implicit `DAGNodeIDMapping` instance instead of explicitly passing mapping functions as arguments
+
+implicit object MyNodeIdMapping extends DAGNodeIdMapping[MyNode, NodeId] {
+   override def selfId(n: MyNode): NodeId = ???
+   override def refIds(n: MyNode): Traversable[NodeId] = ???
+}
+
+val sortedNodes = myNodes.sortedTopologically()
+```
+
 # Abstract Converters
 A simple stackable `Converter` trait with a simple memoized wrapper.
 ### Usage 
