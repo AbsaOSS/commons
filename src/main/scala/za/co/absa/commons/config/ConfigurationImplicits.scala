@@ -17,8 +17,9 @@
 package za.co.absa.commons.config
 
 import org.apache.commons.configuration.Configuration
-import org.apache.commons.lang.StringUtils.isNotBlank
+import org.apache.commons.lang.StringUtils._
 
+import java.util.NoSuchElementException
 import scala.util.Try
 
 /**
@@ -46,7 +47,7 @@ object ConfigurationImplicits {
       *
       * @return A value of string array configuration property if not empty, otherwise throws an exception.
       */
-    def getRequiredStringArray: String => Array[String] = getRequired(conf.getStringArray, (i: Array[String]) => i.nonEmpty)
+    def getRequiredStringArray: String => Array[String] = getRequired(conf.getStringArray, (arr: Array[String]) => !arr.forall(isBlank))
 
     /**
       * Gets a value of boolean configuration property and checks whether property exists.
@@ -107,7 +108,14 @@ object ConfigurationImplicits {
     private def getRequired[V](get: String => V, check: V => Boolean)(key: String): V =
       Try(get(key))
         .filter(check)
-        .getOrElse(throw new IllegalArgumentException(s"Missing configuration property $key"))
+        .recover {
+          case _: NoSuchElementException =>
+            // rewrite exception message for clarity
+            throw new NoSuchElementException(s"Missing configuration property $key")
+          case e: Exception =>
+            throw new RuntimeException(s"Error in retrieving configuration property $key", e)
+        }
+        .get
   }
 
   /**
