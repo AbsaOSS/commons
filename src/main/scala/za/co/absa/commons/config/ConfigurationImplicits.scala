@@ -16,7 +16,8 @@
 
 package za.co.absa.commons.config
 
-import org.apache.commons.configuration.Configuration
+import org.apache.commons.configuration.SubsetConfigurationMethods._
+import org.apache.commons.configuration.{Configuration, SubsetConfiguration}
 import org.apache.commons.lang.StringUtils._
 
 import java.util.NoSuchElementException
@@ -105,17 +106,23 @@ object ConfigurationImplicits {
       */
     def getRequiredDouble: String => Double = getRequired(conf.getDouble(_, null), null.!=) //NOSONAR
 
-    private def getRequired[V](get: String => V, check: V => Boolean)(key: String): V =
+    private def getRequired[V](get: String => V, check: V => Boolean)(key: String): V = {
       Try(get(key))
         .filter(check)
         .recover {
           case _: NoSuchElementException =>
             // rewrite exception message for clarity
-            throw new NoSuchElementException(s"Missing configuration property $key")
+            throw new NoSuchElementException(s"Missing configuration property ${getFullPropName(key)}")
           case e: Exception =>
-            throw new RuntimeException(s"Error in retrieving configuration property $key", e)
+            throw new RuntimeException(s"Error in retrieving configuration property ${getFullPropName(key)}", e)
         }
         .get
+    }
+
+    private def getFullPropName(key: String) = conf match {
+      case sc: SubsetConfiguration => sc.getParentKey(key)
+      case _ => key
+    }
   }
 
   /**
