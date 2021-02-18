@@ -99,6 +99,11 @@ class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
     }
   }
 
+  it should "report the full missing property name in case of SubsetConfiguration" in {
+    val fooBarConf = new BaseConfiguration() subset "foo" subset "bar"
+    intercept[NoSuchElementException](fooBarConf getRequiredString "baz").getMessage should include("foo.bar.baz")
+  }
+
   it should "propagate exceptions other than missing property" in {
     object TestException extends Exception
 
