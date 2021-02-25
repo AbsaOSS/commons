@@ -340,6 +340,11 @@
                     <artifactId>apache-rat-plugin</artifactId>
                     <version>0.13</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.spurint.maven.plugins</groupId>
+                    <artifactId>mima-maven-plugin</artifactId>
+                    <version>0.8.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -419,6 +424,26 @@
                                 <exclude>.sonarcloud.properties</exclude>
                             </excludes>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>mima</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.spurint.maven.plugins</groupId>
+                        <artifactId>mima-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>check-abi</id>
+                                <goals>
+                                    <goal>check-abi</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
