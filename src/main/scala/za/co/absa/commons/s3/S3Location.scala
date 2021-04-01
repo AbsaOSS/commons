@@ -24,29 +24,23 @@ object S3Location {
    * Protocols `s3`, `s3n`, and `s3a` are allowed.
    * Bucket naming rules defined at [[https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules]] are instilled.
    */
-  private val S3LocationRx: Regex = "(s3[an]?)://([-a-z0-9.]{3,63})/(.*)".r
+  private val S3LocationRx: Regex = "^(s3[an]?)://([-a-z0-9.]{3,63})/(.*)$".r
 
   implicit class StringS3LocationExt(val path: String) extends AnyVal {
 
-    def toS3Location: Option[SimpleS3Location] = PartialFunction.condOpt(path) {
-      case S3LocationRx(protocol, bucketName, relativePath) => 
-        SimpleS3Location(protocol, bucketName, relativePath)
+    def toS3Location: Option[S3Location] = PartialFunction.condOpt(path) {
+      case S3LocationRx(protocol, bucketName, relativePath) =>
+        S3Location(protocol, bucketName, relativePath)
     }
 
     def isValidS3Path: Boolean = S3LocationRx.pattern.matcher(path).matches
   }
+
+  def apply(path: String): S3Location = {
+    path.toS3Location.getOrElse(throw new IllegalArgumentException(s"Could not parse S3 location from $path!"))
+  }
 }
 
-trait S3Location {
-  def protocol: String
-  def bucketName: String
-  def path: String
-
-  /**
-   * Returns formatted S3 string, e.g. `s3://myBucket/path/to/somewhere`
-   * @return formatted s3 string
-   */
+case class S3Location(protocol: String, bucketName: String, path: String) {
   def s3String: String = s"$protocol://$bucketName/$path"
 }
-
-case class SimpleS3Location(protocol: String, bucketName: String, path: String) extends S3Location
