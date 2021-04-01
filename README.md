@@ -555,14 +555,14 @@ That way, one can easily obtain the `protocol`, `bucketName`, and `path`.
 
 ```scala
 import za.co.absa.commons.s3._
-import za.co.absa.commons.s3.S3Location._
+import za.co.absa.commons.s3.SimpleS3Location._
 
 "s3a://mybucket.some.where/my/path1".isValidS3Path // yields true
 
-val s3loc: S3Location = "s3://mybucket-123/path/to/file.ext".toS3Location.get
+val s3loc: S3Location = "s3://mybucket-123/path/to/file.ext".toSimpleS3Location.get
 s3loc.protocol // holds "s3"
 s3loc.bucketName // holds "mybucket-123"
 s3loc.path // holds "path/to/file.ext"
 
-"s3x://bogus#$%/xxx".toS3Location // yields None
+"s3x://bogus#$%/xxx".toSimpleS3Location // yields None
 ```

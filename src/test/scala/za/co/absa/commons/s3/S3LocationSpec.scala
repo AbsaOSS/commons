@@ -17,32 +17,32 @@ package za.co.absa.commons.s3
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import S3Location.StringS3LocationExt
+import SimpleS3Location.SimpleS3LocationExt
 
 class S3LocationSpec extends AnyFlatSpec with Matchers {
 
   "S3Location" should "parse S3 path from String apply" in {
-    S3Location("s3://mybucket-123/path/to/file.ext") shouldBe SimpleS3Location("s3", "mybucket-123", "path/to/file.ext")
-    S3Location("s3n://mybucket-123/path/to/ends/with/slash/") shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
-    S3Location("s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext") shouldBe SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext")
+    SimpleS3Location("s3://mybucket-123/path/to/file.ext") shouldBe SimpleS3Location("s3", "mybucket-123", "path/to/file.ext")
+    SimpleS3Location("s3n://mybucket-123/path/to/ends/with/slash/") shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
+    SimpleS3Location("s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext") shouldBe SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext")
   }
 
   it should "correctly express the s3 string" in {
-    SimpleS3Location("s3", "mybucket-123", "path/to/file.ext").s3String shouldBe "s3://mybucket-123/path/to/file.ext"
-    SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/").s3String shouldBe "s3n://mybucket-123/path/to/ends/with/slash/"
-    SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext").s3String shouldBe "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext"
+    SimpleS3Location("s3", "mybucket-123", "path/to/file.ext").asSimpleS3LocationString shouldBe "s3://mybucket-123/path/to/file.ext"
+    SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/").asSimpleS3LocationString shouldBe "s3n://mybucket-123/path/to/ends/with/slash/"
+    SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext").asSimpleS3LocationString shouldBe "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext"
   }
 
   "StringS3LocationExt" should "parse S3 path from String using toS3Location" in {
-    "s3://mybucket-123/path/to/file.ext".toS3Location shouldBe Some(SimpleS3Location("s3", "mybucket-123", "path/to/file.ext"))
-    "s3n://mybucket-123/path/to/ends/with/slash/".toS3Location shouldBe Some(SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/"))
-    "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".toS3Location shouldBe Some(SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext"))
+    "s3://mybucket-123/path/to/file.ext".toSimpleS3Location shouldBe Some(SimpleS3Location("s3", "mybucket-123", "path/to/file.ext"))
+    "s3n://mybucket-123/path/to/ends/with/slash/".toSimpleS3Location shouldBe Some(SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/"))
+    "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".toSimpleS3Location shouldBe Some(SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext"))
   }
 
   it should "find no valid S3 path when parsing invalid S3 path from String using toS3Location" in {
-    "s3x://mybucket-123/path/to/file/on/invalid/prefix".toS3Location shouldBe None
-    "s3://bb/some/path/but/bucketname/too/short".toS3Location shouldBe None
-    "  s3://otherwise-valid/but/has/extra/blanks  ".toS3Location shouldBe None
+    "s3x://mybucket-123/path/to/file/on/invalid/prefix".toSimpleS3Location shouldBe None
+    "s3://bb/some/path/but/bucketname/too/short".toSimpleS3Location shouldBe None
+    "  s3://otherwise-valid/but/has/extra/blanks  ".toSimpleS3Location shouldBe None
   }
 
   it should "check path using isValidS3Path" in {

@@ -17,7 +17,22 @@ package za.co.absa.commons.s3
 
 import scala.util.matching.Regex
 
-object S3Location {
+trait S3Location {
+  def protocol: String
+  def bucketName: String
+  def path: String
+
+  /**
+   * Returns formatted S3 string, e.g. `s3a://myBucket/path/to/somewhere` that
+   * [[za.co.absa.commons.s3.SimpleS3Location.SimpleS3LocationExt.toSimpleS3Location]] parses from
+   *
+   * @return formatted s3 string
+   */
+  def asSimpleS3LocationString: String = s"$protocol://$bucketName/$path"
+
+}
+
+object SimpleS3Location {
 
   /**
    * Generally usable regex for validating S3 path, e.g. `s3://my-cool-bucket1/path/to/file/on/s3.txt`
@@ -26,9 +41,9 @@ object S3Location {
    */
   private val S3LocationRx: Regex = "^(s3[an]?)://([-a-z0-9.]{3,63})/(.*)$".r
 
-  implicit class StringS3LocationExt(val path: String) extends AnyVal {
+  implicit class SimpleS3LocationExt(val path: String) extends AnyVal {
 
-    def toS3Location: Option[S3Location] = PartialFunction.condOpt(path) {
+    def toSimpleS3Location: Option[SimpleS3Location] = PartialFunction.condOpt(path) {
       case S3LocationRx(protocol, bucketName, relativePath) =>
         SimpleS3Location(protocol, bucketName, relativePath)
     }
@@ -36,25 +51,9 @@ object S3Location {
     def isValidS3Path: Boolean = S3LocationRx.pattern.matcher(path).matches
   }
 
-  def apply(path: String): S3Location = {
-    path.toS3Location.getOrElse(throw new IllegalArgumentException(s"Could not parse S3 location from $path!"))
+  def apply(path: String): SimpleS3Location = {
+    path.toSimpleS3Location.getOrElse(throw new IllegalArgumentException(s"Could not parse S3 location from $path!"))
   }
 }
 
-trait S3Location {
-  def protocol: String
-  def bucketName: String
-  def path: String
-
-  /**
-   * Returns formatted S3 string, e.g. `s3://myBucket/path/to/somewhere`
-   *
-   * @return formatted s3 string
-   */
-  def s3String: String
-
-}
-
-case class SimpleS3Location(protocol: String, bucketName: String, path: String) extends S3Location {
-  def s3String: String = s"$protocol://$bucketName/$path"
-}
+case class SimpleS3Location(protocol: String, bucketName: String, path: String) extends S3Location
