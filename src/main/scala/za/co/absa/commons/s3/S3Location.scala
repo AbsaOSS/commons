@@ -30,7 +30,7 @@ object S3Location {
 
     def toS3Location: Option[S3Location] = PartialFunction.condOpt(path) {
       case S3LocationRx(protocol, bucketName, relativePath) =>
-        S3Location(protocol, bucketName, relativePath)
+        SimpleS3Location(protocol, bucketName, relativePath)
     }
 
     def isValidS3Path: Boolean = S3LocationRx.pattern.matcher(path).matches
@@ -41,6 +41,20 @@ object S3Location {
   }
 }
 
-case class S3Location(protocol: String, bucketName: String, path: String) {
+trait S3Location {
+  def protocol: String
+  def bucketName: String
+  def path: String
+
+  /**
+   * Returns formatted S3 string, e.g. `s3://myBucket/path/to/somewhere`
+   *
+   * @return formatted s3 string
+   */
+  def s3String: String
+
+}
+
+case class SimpleS3Location(protocol: String, bucketName: String, path: String) extends S3Location {
   def s3String: String = s"$protocol://$bucketName/$path"
 }

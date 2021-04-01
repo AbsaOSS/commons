@@ -22,21 +22,21 @@ import S3Location.StringS3LocationExt
 class S3LocationSpec extends AnyFlatSpec with Matchers {
 
   "S3Location" should "parse S3 path from String apply" in {
-    S3Location("s3://mybucket-123/path/to/file.ext") shouldBe S3Location("s3", "mybucket-123", "path/to/file.ext")
-    S3Location("s3n://mybucket-123/path/to/ends/with/slash/") shouldBe S3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
-    S3Location("s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext") shouldBe S3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext")
+    S3Location("s3://mybucket-123/path/to/file.ext") shouldBe SimpleS3Location("s3", "mybucket-123", "path/to/file.ext")
+    S3Location("s3n://mybucket-123/path/to/ends/with/slash/") shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
+    S3Location("s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext") shouldBe SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext")
   }
 
   it should "correctly express the s3 string" in {
-    S3Location("s3", "mybucket-123", "path/to/file.ext").s3String shouldBe "s3://mybucket-123/path/to/file.ext"
-    S3Location("s3n", "mybucket-123", "path/to/ends/with/slash/").s3String shouldBe "s3n://mybucket-123/path/to/ends/with/slash/"
-    S3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext").s3String shouldBe "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext"
+    SimpleS3Location("s3", "mybucket-123", "path/to/file.ext").s3String shouldBe "s3://mybucket-123/path/to/file.ext"
+    SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/").s3String shouldBe "s3n://mybucket-123/path/to/ends/with/slash/"
+    SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext").s3String shouldBe "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext"
   }
 
   "StringS3LocationExt" should "parse S3 path from String using toS3Location" in {
-    "s3://mybucket-123/path/to/file.ext".toS3Location shouldBe Some(S3Location("s3", "mybucket-123", "path/to/file.ext"))
-    "s3n://mybucket-123/path/to/ends/with/slash/".toS3Location shouldBe Some(S3Location("s3n", "mybucket-123", "path/to/ends/with/slash/"))
-    "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".toS3Location shouldBe Some(S3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext"))
+    "s3://mybucket-123/path/to/file.ext".toS3Location shouldBe Some(SimpleS3Location("s3", "mybucket-123", "path/to/file.ext"))
+    "s3n://mybucket-123/path/to/ends/with/slash/".toS3Location shouldBe Some(SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/"))
+    "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".toS3Location shouldBe Some(SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext"))
   }
 
   it should "find no valid S3 path when parsing invalid S3 path from String using toS3Location" in {
