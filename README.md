@@ -541,3 +541,28 @@ select to order and positionally filter columns of a DataFrame
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+# S3 Utils
+
+### S3 Location Utils
+Provides simple means of checking a string to appear to be a valid S3 Location and parsing it into a `S3Location`. 
+That way, one can easily obtain the `protocol`, `bucketName`, and `path`.
+ - recognized `protocol`s are `s3`, `s3n` and `s3a`
+ - `bucketName` is checked according to the 
+ [official naming rules](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules)
+ (aphanum chars / `.` / `-`, min length: 3, max length: 63)
+ - `path` content is not checked in any way 
+
+```scala
+import za.co.absa.commons.s3._
+import za.co.absa.commons.s3.SimpleS3Location._
+
+"s3a://mybucket.some.where/my/path1".isValidS3Path // yields true
+
+val s3loc: S3Location = "s3://mybucket-123/path/to/file.ext".toSimpleS3Location.get
+s3loc.protocol // holds "s3"
+s3loc.bucketName // holds "mybucket-123"
+s3loc.path // holds "path/to/file.ext"
+
+"s3x://bogus#$%/xxx".toSimpleS3Location // yields None
+```
