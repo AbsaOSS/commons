@@ -121,7 +121,7 @@ object ReflectionUtils {
 
     def reflectClass(c: Class[_]) = {
       val members =
-        try mirror.classSymbol(c).toType.members
+        try mirror.classSymbol(c).toType.decls
         catch {
           // a workaround for Scala bug #12190
           case _: Symbols#CyclicReference => Nil
