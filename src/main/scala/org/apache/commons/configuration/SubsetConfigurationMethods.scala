@@ -20,10 +20,14 @@ object SubsetConfigurationMethods {
 
   implicit class SubsetConfigurationOps(val conf: SubsetConfiguration) extends AnyVal {
 
-    // The `SubsetConfiguration.getParentKey()` method is protected,
-    // so we apply this implicit proxy to make the method publicly
-    // accessible without resorting to the reflection.
-    def getParentKey: String => String = conf.getParentKey
+    // The `SubsetConfiguration.getParentKey()` method is protected.
+    // We have to use reflection call due to IllegalAccessError in some environments.
+    // See: https://github.com/AbsaOSS/commons/issues/75
+    def getParentKey: String => String = {
+      val method = classOf[SubsetConfiguration].getDeclaredMethod("getParentKey", classOf[String])
+      method.setAccessible(true)
+      s => method.invoke(conf, s).asInstanceOf[String]
+    }
   }
 
 }
