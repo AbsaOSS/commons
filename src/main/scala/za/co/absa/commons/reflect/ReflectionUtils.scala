@@ -125,6 +125,9 @@ object ReflectionUtils {
         catch {
           // a workaround for Scala bug #12190
           case _: Symbols#CyclicReference => Nil
+          // error reading Scala signature
+          case e: RuntimeException
+            if e.getMessage.toLowerCase.contains("scala signature") => Nil
         }
 
       val maybeMember = members
