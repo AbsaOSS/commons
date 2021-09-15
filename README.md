@@ -150,6 +150,59 @@ See: https://github.com/AbsaOSS/commons/issues/54
 (new UpperSnakeCaseEnvironmentConfiguration).getString("foo.barBaz")
 ```
 
+### Typed Configuration
+
+Trait `ConfTyped` provides a DSL for creating a typed hierarchical configuration object.
+It provides access to two main abstractions: `Conf` and `Prop`
+
+Example:
+
+```scala
+import za.co.absa.commons.config._
+
+object MyAppConfig extends ConfTyped {
+   val confSource: java.util.Properties = ???
+
+   override val rootPrefix = "com.example"
+
+   object Foo extends Conf("foo") {
+      object Bar extends Conf("bar") {
+         val baz: String = confSource getProperty Prop("baz")
+         val qux: String = confSource getProperty Prop("qux")
+      }
+   }
+}
+
+// somewhere in your application
+
+import MyAppConfig._
+
+val baz = Foo.Bar.baz // mapped to the key "com.example.foo.bar.baz" in the <code>confSource</code>
+val baz = Foo.Bar.qux // mapped to the key "com.example.foo.bar.qux" in the <code>confSource</code>
+```
+
+Note that `ConfTyped` doesn't impose or depend on the way how the configuration values are loaded.
+It only provides a convenient way to implicitly construct the configuration key names from the nested object structure.
+
+The key names are obtained by calling `Prop("...")` method.
+It returns a full property key name that reflects the nesting structure of the `Conf` instances' names,
+concatenated with dot (`.`) and prefixed with the `rootPrefix` if one is provided.
+
+Another example of usage `ConfTyped`:
+```scala
+val props = new java.util.Properties with ConfTyped {
+   val foo = new Conf("foo") {
+      val bar = new Conf("bar") {
+         lazy val baz = getProperty(Prop("baz"))
+      }
+   }
+}
+
+props.put("foo.bar.baz", "42")
+
+println(props.foo.bar.baz) // prints 42
+```
+
 # Reflection Utils
 ### Basics
 ##### Get direct sub-types of a sealed type
