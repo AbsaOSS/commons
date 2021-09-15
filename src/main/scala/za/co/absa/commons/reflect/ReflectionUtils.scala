@@ -19,7 +19,6 @@ package za.co.absa.commons.reflect
 import scala.annotation.tailrec
 import scala.collection.concurrent.TrieMap
 import scala.reflect.ClassTag
-import scala.reflect.internal.Symbols
 import scala.reflect.runtime.universe._
 import scala.tools.reflect.ToolBox
 
@@ -120,26 +119,23 @@ object ReflectionUtils {
       }
 
     def reflectClass(c: Class[_]) = {
-      val members =
-        try mirror.classSymbol(c).toType.decls
-        catch {
-          // a workaround for Scala bug #12190
-          case _: Symbols#CyclicReference => Nil
-          // error reading Scala signature
-          case e: RuntimeException
-            if e.getMessage.toLowerCase.contains("scala signature") => Nil
-        }
+      val maybeMember = util.Try {
+        val members = mirror.classSymbol(c).toType.decls
+        members
+          .filter(smb => (
+            smb.toString.endsWith(s" $fieldName")
+              && smb.isTerm
+              && !smb.isConstructor
+              && (!smb.isMethod || smb.asMethod.paramLists.forall(_.isEmpty))
+            ))
+          .minBy(!_.isMethod)
 
-      val maybeMember = members
-        .filter(smb => (
-          smb.toString.endsWith(s" $fieldName")
-            && smb.isTerm
-            && !smb.isConstructor
-            && (!smb.isMethod || smb.asMethod.paramLists.forall(_.isEmpty))
-          ))
-        .toArray
-        .sortBy(!_.isMethod) // method members first
-        .headOption
+        // Unless:
+        //   - `Symbols#CyclicReference` (a workaround for Scala bug #12190)
+        //   - `RuntimeException("scala signature")` (#80, #82)
+        //   - ... or any other runtime error during Scala reflection
+        // }
+      }.toOption
 
       maybeMember
         .map(m => {
