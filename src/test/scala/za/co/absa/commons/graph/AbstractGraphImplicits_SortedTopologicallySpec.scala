@@ -33,7 +33,7 @@ abstract class AbstractGraphImplicits_SortedTopologicallySpec(
 
   behavior of topologicalSortMethodName
 
-  it should "sort node collection in topological order (using a stable sort algorithm)" in {
+  it should "deterministically sort node collection in topological order" in {
     val originalCollection = Seq(
       4 -> Seq(5),
       2 -> Seq(4),
@@ -47,7 +47,7 @@ abstract class AbstractGraphImplicits_SortedTopologicallySpec(
         .map(_ => executeTopologicalSortMethod(originalCollection))
         .distinct
 
-    distinctCopiesOfSortedCollection.length should be(1) // verify that algorithm is stable
+    distinctCopiesOfSortedCollection.length should be(1) // verify that algorithm is deterministic
     distinctCopiesOfSortedCollection foreach (_ should contain theSameElementsAs originalCollection)
     distinctCopiesOfSortedCollection foreach (_ should be(topologicallySorted))
   }
