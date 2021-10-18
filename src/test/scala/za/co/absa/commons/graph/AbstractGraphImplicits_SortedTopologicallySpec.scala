@@ -33,7 +33,7 @@ abstract class AbstractGraphImplicits_SortedTopologicallySpec(
 
   behavior of topologicalSortMethodName
 
-  it should "sort node collection in topological order" in {
+  it should "deterministically sort node collection in topological order" in {
     val originalCollection = Seq(
       4 -> Seq(5),
       2 -> Seq(4),
@@ -42,10 +42,14 @@ abstract class AbstractGraphImplicits_SortedTopologicallySpec(
       5 -> Nil
     )
 
-    val sortedCollection = executeTopologicalSortMethod(originalCollection)
+    val distinctCopiesOfSortedCollection =
+      (1 to 1000)
+        .map(_ => executeTopologicalSortMethod(originalCollection))
+        .distinct
 
-    sortedCollection should contain theSameElementsAs originalCollection
-    sortedCollection should be(topologicallySorted)
+    distinctCopiesOfSortedCollection.length should be(1) // verify that algorithm is deterministic
+    distinctCopiesOfSortedCollection foreach (_ should contain theSameElementsAs originalCollection)
+    distinctCopiesOfSortedCollection foreach (_ should be(topologicallySorted))
   }
 
   it should "support disconnected graphs" in {

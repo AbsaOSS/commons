@@ -43,20 +43,32 @@ object GraphImplicits {
     def refIds(n: Node): Traversable[Id]
   }
 
+  object IdOrdering {
+    def none[A]: Ordering[A] = new Ordering[A] {
+      def compare(x: A, y: A) = 0
+    }
+  }
+
   implicit class DAGNodeTraversableOps[Node, M[X] <: Seq[X]](val xs: M[Node]) extends AnyVal {
 
-    def sortedTopologically[Id](reverse: Boolean = false)
-      (implicit
-        nim: DAGNodeIdMapping[Node, Id],
-        cbf: CanBuildFrom[M[Node], Node, M[Node]]): M[Node] = {
+    def sortedTopologically[Id](
+      reverse: Boolean = false
+    )(implicit
+      nim: DAGNodeIdMapping[Node, Id],
+      idOrdering: Ordering[Id] = IdOrdering.none[Id],
+      cbf: CanBuildFrom[M[Node], Node, M[Node]]
+    ): M[Node] = {
       sortedTopologicallyBy(nim.selfId, nim.refIds, reverse)
     }
 
-    def sortedTopologicallyBy[Id](
+    def sortedTopologicallyBy[Id <: Any](
       selfIdFn: Node => Id,
       refIdsFn: Node => Traversable[Id],
       reverse: Boolean = false
-    )(implicit cbf: CanBuildFrom[M[Node], Node, M[Node]]): M[Node] =
+    )(implicit
+      idOrdering: Ordering[Id] = IdOrdering.none[Id],
+      cbf: CanBuildFrom[M[Node], Node, M[Node]]
+    ): M[Node] =
       if (xs.size < 2) {
         // nothing to sort
         // return a clone instead of `xs` for semantic consistency reasons when a mutable collection is used
@@ -77,16 +89,14 @@ object GraphImplicits {
             nextId <- refIdsFn(item)
           } yield createEdge(item, nextId)
 
-        val sortResult = Graph
-          .from(
-            edges = edges,
-            nodes = xs)
-          .topologicalSort
+        val g = Graph.from(edges = edges, nodes = xs)
+        val sortResult = g.topologicalSort
 
         sortResult match {
           case Right(res) =>
             val b = cbf(xs)
-            b ++= res.toOuter
+            val ord = g.NodeOrdering((a, b) => idOrdering.compare(selfIdFn(a.value), selfIdFn(b.value)))
+            b ++= res.withLayerOrdering(ord).toOuter
             b.result()
           case Left(cycleNode) =>
             throw new IllegalArgumentException(s"Expected DAG but a cycle was detected on the node ID: ${selfIdFn(cycleNode.toOuter)}")
