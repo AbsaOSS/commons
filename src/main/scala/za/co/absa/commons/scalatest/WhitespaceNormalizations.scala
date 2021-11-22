@@ -19,8 +19,6 @@ package za.co.absa.commons.scalatest
 import org.scalactic.{AbstractStringUniformity, Uniformity}
 import za.co.absa.commons.scalatest.WhitespaceNormalizations.WhiteSpaceRegex
 
-import scala.collection.immutable.StringLike
-
 object WhitespaceNormalizations extends WhitespaceNormalizations {
   val WhiteSpaceRegex = "[\\s\\h]+"
 }
@@ -40,8 +38,10 @@ trait WhitespaceNormalizations {
 
   val lineWhiteSpaceRemoved: Uniformity[String] = new AbstractStringUniformity {
     override def normalized(s: String): String = {
-      (s: StringLike[String])
-        .lines
+      // method `linesIterator` is un-deprecated in Scala 2.13 due to collision with the JDK 11's `lines` method.
+      // noinspection ScalaDeprecation
+      s
+        .linesIterator
         .map(_.replaceAll(WhiteSpaceRegex, ""))
         .filter(_.nonEmpty)
         .toArray

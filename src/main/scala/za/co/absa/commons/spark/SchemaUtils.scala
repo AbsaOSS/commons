@@ -20,7 +20,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{ArrayType, DataType, StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame}
 
-object SchemaUtils {
+object SchemaUtils extends HofsAdapter {
   /**
    * Compares 2 array fields of a dataframe schema.
    *
@@ -117,7 +117,6 @@ object SchemaUtils {
    * @return Sorted DF to conform to schema
    */
   def getDataFrameSelector(schema: StructType): List[Column] = {
-    import za.co.absa.spark.hofs._
 
     def processArray(arrType: ArrayType, column: Column, name: String): Column = {
       arrType.elementType match {

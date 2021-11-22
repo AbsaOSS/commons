@@ -24,9 +24,11 @@ import za.co.absa.commons.graph.GraphImplicits_SortedTopologicallySpec._
 class GraphImplicits_SortedTopologicallySpec
   extends AbstractGraphImplicits_SortedTopologicallySpec(
     "sortedTopologically",
-    (xs: Seq[(TestNodeId, TestRefNodeIds)]) => {
+    (xs: collection.Seq[(TestNodeId, TestRefNodeIds)]) => {
       implicit val nim: DAGNodeIdMapping[TestNode, TestNodeId] = TestNodeIdMapping
-      xs.sortedTopologically()
+      // `toSeq` is required for Scala 2.13
+      // noinspection RedundantCollectionConversion
+      xs.toSeq.sortedTopologically()
     }
   )
 
@@ -36,7 +38,11 @@ object GraphImplicits_SortedTopologicallySpec {
 
     override def selfId(n: TestNode): TestNodeId = n._1
 
-    override def refIds(n: TestNode): Seq[TestNodeId] = n._2
+    override def refIds(n: TestNode): Seq[TestNodeId] = {
+      // `toSeq` is required for Scala 2.13
+      // noinspection RedundantCollectionConversion
+      n._2.toSeq
+    }
   }
 
 }

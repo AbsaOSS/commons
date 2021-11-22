@@ -21,5 +21,7 @@ import za.co.absa.commons.graph.GraphImplicits._
 class GraphImplicits_SortedTopologicallyBySpec
   extends AbstractGraphImplicits_SortedTopologicallySpec(
     "sortedTopologicallyBy",
-    _.sortedTopologicallyBy(_._1, _._2)
+    // `toSeq` is required for Scala 2.13
+    // noinspection RedundantCollectionConversion
+    _.toSeq.sortedTopologicallyBy(_._1, _._2)
   )
