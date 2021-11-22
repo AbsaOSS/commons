@@ -11,6 +11,27 @@ Selection of useful reusable components
 
 ---
 
+# Building
+
+### Switch the codebase to the required Scala version.
+By default, Scala 2.11 is used. To build _Commons_ for another Scala version, switch to the required Scala version first. 
+```shell
+# E.g. to switch to Scala 2.13 use
+mvn scala-cross-build:change-version -Pscala-2.13
+```
+
+### Build the project
+When building the project activate a Scala profile corresponding to the Scala version of the codebase.
+```shell
+# E.g. for Scala 2.13 use
+mvn clean install -Pscala-2.13
+```
+
+### Building for all supported Scala versions
+```shell
+./build-all.sh
+```
+
 # Collection utils
 
 ```scala
@@ -552,7 +573,17 @@ spark.listenerManager.register(myListener)
 
 ### Spark Schema Utils
 
-Provides methods for working with schemas, its comparison and alignment.  
+>
+>**Note:**
+>Different _Scala_ variants of the _Schema Utils_ are compiled against different _Spark_, _Json4s_ and _Jackson_ versions:
+>
+>| | Scala 2.11 | Scala 2.12 | Scala 2.13 | 
+>|---|---|---|---|
+>|Spark| 2.4 | 3.1 | 3.2 |
+>|Json4s| 3.5 | 3.7 | 3.7 |
+>|Jackson| 2.6 | 2.10 | 2.12 |
+
+_Spark Schema Utils_ provides methods for working with schemas, its comparison and alignment.  
 
 1. Schema comparison returning true/false. Ignores the order of columns
          

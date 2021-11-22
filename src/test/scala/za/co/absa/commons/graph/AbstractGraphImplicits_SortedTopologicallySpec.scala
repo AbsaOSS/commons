@@ -21,7 +21,7 @@ import org.scalatest.matchers._
 import org.scalatest.matchers.should.Matchers
 import za.co.absa.commons.graph.AbstractGraphImplicits_SortedTopologicallySpec._
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.{Seq, mutable}
 
 abstract class AbstractGraphImplicits_SortedTopologicallySpec(
   topologicalSortMethodName: String,
@@ -82,7 +82,7 @@ abstract class AbstractGraphImplicits_SortedTopologicallySpec(
 
   it should "always return another instance of mutable collections" in {
     val arr0 = Array.empty[TestNode]
-    val buf1 = ListBuffer(1 -> Nil)
+    val buf1 = mutable.ListBuffer(1 -> Nil)
     executeTopologicalSortMethod(arr0) should (have length 0 and not(be theSameInstanceAs arr0))
     executeTopologicalSortMethod(buf1) should (contain theSameElementsAs buf1 and not(be theSameInstanceAs buf1))
   }

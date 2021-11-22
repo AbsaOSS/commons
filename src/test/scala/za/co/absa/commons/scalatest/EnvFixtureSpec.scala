@@ -16,10 +16,9 @@
 
 package za.co.absa.commons.scalatest
 
-import org.apache.avro.reflect.MapEntry
-import org.scalatest.BeforeAndAfter
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.{BeforeAndAfter, Entry}
 
 import scala.collection.JavaConverters._
 
@@ -48,7 +47,7 @@ class EnvFixtureSpec extends AnyFlatSpec with Matchers with EnvFixture with Befo
       System.getenv.get(k) should equal(System.getenv(k))
       System.getenv.keySet should contain(k)
       System.getenv.values should contain(System.getenv(k))
-      System.getenv.entrySet should contain(new MapEntry(k, System.getenv(k)))
+      System.getenv.entrySet should contain(Entry(k, System.getenv(k)))
       System.getenv.values should have size System.getenv.keySet.size.toLong
       System.getenv.entrySet should have size System.getenv.keySet.size.toLong
     }
@@ -68,7 +67,7 @@ class EnvFixtureSpec extends AnyFlatSpec with Matchers with EnvFixture with Befo
     System.getenv("PATH") should equal(System.getenv.get("PATH"))
     System.getenv.keySet should contain("PATH")
     System.getenv.values should contain(System.getenv("PATH"))
-    System.getenv.entrySet should contain(new MapEntry("PATH", System.getenv("PATH")))
+    System.getenv.entrySet should contain(Entry("PATH", System.getenv("PATH")))
     System.getenv.values should have size System.getenv.keySet.size.toLong
     System.getenv.entrySet should have size System.getenv.keySet.size.toLong
   }
