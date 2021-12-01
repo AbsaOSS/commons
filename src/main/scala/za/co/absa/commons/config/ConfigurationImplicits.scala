@@ -37,6 +37,13 @@ object ConfigurationImplicits {
   implicit class ConfigurationRequiredWrapper[T <: Configuration](val conf: T) extends AnyVal {
 
     /**
+      * Gets a value of an object configuration property and checks whether property exists.
+      *
+      * @return A value of an object configuration property if exists, otherwise throws an exception.
+      */
+    def getRequiredObject[A <: AnyRef]: String => A = getRequired[AnyRef](conf.getProperty, null.!=)(_).asInstanceOf[A]
+
+    /**
       * Gets a value of string configuration property and checks whether property exists.
       *
       * @return A value of string configuration property if exists, otherwise throws an exception.
