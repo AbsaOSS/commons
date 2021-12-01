@@ -28,6 +28,18 @@ class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
 
   behavior of "ConfigurationRequiredWrapper"
 
+  it should "implement getRequiredObject()" in {
+    val dummyObj = new {}
+    val configuration = new MapConfiguration(Map("foo" -> dummyObj, "bar" -> 42, "qux" -> null).asJava)
+    configuration getRequiredObject[AnyRef] "foo" should be theSameInstanceAs dummyObj
+    configuration getRequiredObject[Integer] "bar" should be theSameInstanceAs Int.box(42)
+    intercept[ClassCastException](configuration getRequiredObject[String] "bar").getMessage should (
+      include("java.lang.Integer") and include("java.lang.String")
+      )
+    intercept[NoSuchElementException](configuration getRequiredObject[AnyRef] "qux").getMessage should include("qux")
+    intercept[NoSuchElementException](configuration getRequiredObject[AnyRef] "oops").getMessage should include("oops")
+  }
+
   it should "implement getRequiredString()" in {
     val configuration = new MapConfiguration(Map("foo" -> "bar", "bla" -> "").asJava)
     configuration getRequiredString "foo" should be("bar")
