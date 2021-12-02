@@ -16,12 +16,12 @@
 
 package za.co.absa.commons.reflect
 
-import org.apache.hadoop.classification.InterfaceAudience
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import za.co.absa.commons.reflect.ReflectionUtils.ModuleClassSymbolExtractor
 import za.co.absa.commons.reflect.ReflectionUtilsSpec._
+import za.co.absa.commons.reflection.CyclicAnnotationExample
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
@@ -129,7 +129,7 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
 
   // A workaround for https://github.com/scala/bug/issues/12190
   it should "fallback to Java reflection when Scala one fails" in {
-    @InterfaceAudience.Public
+    @CyclicAnnotationExample.CyclicAnnotation
     object Foo {
       val x = 42
     }
