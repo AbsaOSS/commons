@@ -47,7 +47,7 @@
 
     <groupId>za.co.absa.commons</groupId>
     <artifactId>commons_2.11</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
         <scm.url>http://github.com/AbsaOSS/commons/tree/master</scm.url>
@@ -60,7 +60,6 @@
         <default.scala.binary.version>2.11</default.scala.binary.version>
         <default.scala.version>${scala_2.11.version}</default.scala.version>
         <default.class-graph.version>${class-graph-112.version}</default.class-graph.version>
-        <default.spark.version>${spark-24.version}</default.spark.version>
         <default.json4s.version>${json4s-35.version}</default.json4s.version>
         <default.jackson.version>${jackson-26.version}</default.jackson.version>
 
@@ -82,13 +81,6 @@
         <class-graph-112.version>1.12.5</class-graph-112.version>
         <class-graph-113.version>1.13.3</class-graph-113.version>
         <class-graph.version>${default.class-graph.version}</class-graph.version>
-
-        <!-- Spark versions -->
-
-        <spark-24.version>2.4.4</spark-24.version>
-        <spark-31.version>3.1.2</spark-31.version>
-        <spark-32.version>3.2.0</spark-32.version>
-        <spark.version>${default.spark.version}</spark.version>
 
         <!-- Scala versions -->
 
@@ -170,18 +162,6 @@
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
             <version>1.10</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_${scala.binary.version}</artifactId>
-            <version>${spark.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.binary.version}</artifactId>
-            <version>${spark.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -294,10 +274,11 @@
             <plugin>
                 <groupId>com.github.wajda</groupId>
                 <artifactId>scala-cross-build-maven-plugin</artifactId>
-                <version>0.2.1</version>
+                <version>0.2.2</version>
                 <configuration>
                     <defaultScalaBinaryVersion>${default.scala.binary.version}</defaultScalaBinaryVersion>
                     <defaultScalaVersion>${default.scala.version}</defaultScalaVersion>
+                    <generatePomBackupFiles>false</generatePomBackupFiles>
                 </configuration>
             </plugin>
             <plugin>
@@ -387,18 +368,9 @@
                 <scala.binary.version>2.11</scala.binary.version>
                 <scala.version>${scala_2.11.version}</scala.version>
                 <class-graph.version>${class-graph-112.version}</class-graph.version>
-                <spark.version>${spark-24.version}</spark.version>
                 <json4s.version>${json4s-35.version}</json4s.version>
                 <jackson.version>${jackson-26.version}</jackson.version>
             </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>za.co.absa</groupId>
-                    <artifactId>spark-hofs_${scala.binary.version}</artifactId>
-                    <version>0.4.0</version>
-                    <optional>true</optional>
-                </dependency>
-            </dependencies>
         </profile>
 
         <profile>
@@ -407,7 +379,6 @@
                 <scala.binary.version>2.12</scala.binary.version>
                 <scala.version>${scala_2.12.version}</scala.version>
                 <class-graph.version>${class-graph-112.version}</class-graph.version>
-                <spark.version>${spark-31.version}</spark.version>
                 <json4s.version>${json4s-37.version}</json4s.version>
                 <jackson.version>${jackson-210.version}</jackson.version>
             </properties>
@@ -419,7 +390,6 @@
                 <scala.binary.version>2.13</scala.binary.version>
                 <scala.version>${scala_2.13.version}</scala.version>
                 <class-graph.version>${class-graph-113.version}</class-graph.version>
-                <spark.version>${spark-32.version}</spark.version>
                 <json4s.version>${json4s-37.version}</json4s.version>
                 <jackson.version>${jackson-212.version}</jackson.version>
             </properties>
