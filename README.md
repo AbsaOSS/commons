@@ -513,12 +513,12 @@ myVer.buildMeta  == ver"build.555"
       }
     ```
 
-1. `ConsoleStubs` - stubs console IO
+2. `ConsoleStubs` - stubs console IO
     ```scala
       captureStdOut(Console.out.print("foo")) should be("foo")
     ```
 
-1. `SystemExitFixture` - intercepts `System.exit()` and asserts status
+3. `SystemExitFixture` - intercepts `System.exit()` and asserts status
     ```scala
       captureExitStatus(System.exit(42)) should be(42)
     
@@ -529,7 +529,7 @@ myVer.buildMeta  == ver"build.555"
       }
     ```
    
-1. `EnvFixture` - adds an API to set an environment variable for the scope of a single test method
+4. `EnvFixture` - adds an API to set an environment variable for the scope of a single test method
     ```scala
     class MySpec ... with EnvFixture {
       it should "set FOO variable for this test body only" in {
@@ -540,7 +540,7 @@ myVer.buildMeta  == ver"build.555"
     }
     ```
 
-1. `WhitespaceNormalizations` - extends Scalatest DSL with some whitespace treatment methods
+5. `WhitespaceNormalizations` - extends Scalatest DSL with some whitespace treatment methods
     ```scala
       (
         """
@@ -554,6 +554,18 @@ myVer.buildMeta  == ver"build.555"
         should equal ("{ a: 111, b: { v: 42 } }")
         (after being trimmed and whitespaceNormalized)
       )
+    ```
+
+6. `CommonMatchers` - provides matchers, currently only URI matcher
+    ```scala
+      class MySpec ... with CommonMatchers {
+        it should "produce the correct URI" in {
+          val uri: String = ???
+   
+          uri should equalToUri("file:///foo.txt")
+          // compares using java.net.URI`s equals method
+        }
+      }
     ```
 
 # S3 Utils
