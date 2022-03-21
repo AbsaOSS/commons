@@ -79,7 +79,7 @@ import scala.language.implicitConversions
   * </p>
   **/
 trait ConfTyped {
-  protected val rootPrefix: String = null
+  protected def rootPrefix: String = null
 
   private def rootPrefixOpt: Option[Conf] = Option(rootPrefix).map(new Conf(_)(None))
 
