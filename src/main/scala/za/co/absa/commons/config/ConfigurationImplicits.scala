@@ -141,6 +141,13 @@ object ConfigurationImplicits {
   implicit class ConfigurationOptionalWrapper[T <: Configuration](val conf: T) extends AnyVal {
 
     /**
+     * Gets a value of an object configuration property.
+     *
+     * @return A Some wrapped value of object configuration property if exists, otherwise None.
+     */
+    def getOptionalObject[A <: AnyRef]: String => Option[A] = getOptional[AnyRef](conf.getProperty)(_).map(_.asInstanceOf[A])
+
+    /**
       * Gets a value of string configuration property.
       *
       * @return A Some wrapped value of string configuration property if exists, otherwise None.
