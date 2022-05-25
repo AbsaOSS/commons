@@ -20,6 +20,8 @@ import org.apache.commons.configuration.{BaseConfiguration, MapConfiguration}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.net.URI
+
 class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
 
   import ConfigurationImplicits._
@@ -141,6 +143,17 @@ class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
   }
 
   behavior of "ConfigurationOptionalWrapper"
+
+  it should "implement getOptionalObject()" in {
+    val configuration = new MapConfiguration(Map("foo" -> URI.create("http://www.example.com"), "bla" -> null, "bar" -> 42).asJava)
+    configuration getOptionalObject[URI] "foo" should be(Some(URI.create("http://www.example.com")))
+    configuration getOptionalObject[URI] "bla" should be(None)
+    configuration getOptionalObject[URI] "oops" should be(None)
+
+    intercept[ClassCastException](configuration.getOptionalObject[String]("bar").get).getMessage should (
+      include("java.lang.String") and include("java.lang.Integer")
+    )
+  }
 
   it should "implement getOptionalString()" in {
     val configuration = new MapConfiguration(Map("foo" -> "bar", "bla" -> "").asJava)
