@@ -19,6 +19,8 @@ package za.co.absa.commons.scalatest
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfter, Entry}
+import za.co.absa.commons.os.OperatingSystem
+import za.co.absa.commons.os.OperatingSystem.OperatingSystems
 
 import scala.collection.JavaConverters._
 
@@ -31,19 +33,25 @@ class EnvFixtureSpec extends AnyFlatSpec with Matchers with EnvFixture with Befo
     System.getenv.keySet()
   }
 
+  private val pathName = OperatingSystem.getCurrentOs match {
+    case OperatingSystems.WINDOWS => "Path" // this is what the variable actually by default looks like, at least on Win10
+    case _ => "PATH"
+  }
+
   it should "set environment variable" in {
     System.getenv("FOO") should be(null) // check the testing env doesn't exist
-    System.getenv("PATH") should not be empty // check the reference env exists
+    System.getenv(pathName) should not be empty // check the reference env exists
 
     setEnv("FOO", "42") // set testing env
 
     // check testing env is visible through the standard Java API
     System.getenv("FOO") should equal("42")
     // ... as well as the reference env
-    System.getenv("PATH") should not be empty
+    System.getenv(pathName) should not be empty
 
     // System.getenv(String) should be consistent with System.getenv.xxx()
-    Seq("FOO", "PATH").map { k =>
+    Seq("FOO", pathName).map { k =>
+      // on Windows, `System.getenv("pAth")` works fine, whereas `System.getenv.get(path)` requires correct case.
       System.getenv.get(k) should equal(System.getenv(k))
       System.getenv.keySet should contain(k)
       System.getenv.values should contain(System.getenv(k))
@@ -55,7 +63,7 @@ class EnvFixtureSpec extends AnyFlatSpec with Matchers with EnvFixture with Befo
 
   it should "clean testing environment variables after the test" in {
     System.getenv("FOO") should be(null) // check the testing env no longer exists
-    System.getenv("PATH") should not be empty // check the reference env still exists
+    System.getenv(pathName) should not be empty // check the reference env still exists
 
     // check consistency
     System.getenv.get("FOO") should be(null)
@@ -64,10 +72,10 @@ class EnvFixtureSpec extends AnyFlatSpec with Matchers with EnvFixture with Befo
     System.getenv.values should have size System.getenv.keySet.size.toLong
     System.getenv.entrySet should have size System.getenv.keySet.size.toLong
 
-    System.getenv("PATH") should equal(System.getenv.get("PATH"))
-    System.getenv.keySet should contain("PATH")
-    System.getenv.values should contain(System.getenv("PATH"))
-    System.getenv.entrySet should contain(Entry("PATH", System.getenv("PATH")))
+    System.getenv(pathName) should equal(System.getenv.get(pathName))
+    System.getenv.keySet should contain(pathName)
+    System.getenv.values should contain(System.getenv(pathName))
+    System.getenv.entrySet should contain(Entry(pathName, System.getenv(pathName)))
     System.getenv.values should have size System.getenv.keySet.size.toLong
     System.getenv.entrySet should have size System.getenv.keySet.size.toLong
   }
