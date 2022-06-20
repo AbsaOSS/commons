@@ -16,16 +16,12 @@
 package za.co.absa.commons.os
 
 
-object OperatingSystem {
+object OperatingSystem extends Enumeration {
+  val WINDOWS, LINUX, MAC, SOLARIS, OTHER = Value
 
   // adapted from https://stackoverflow.com/a/31547504/1773349
 
-  object OperatingSystems extends Enumeration {
-    val WINDOWS, LINUX, MAC, SOLARIS, OTHER = Value
-  }
-
-  def getOsByOsName(osName: String): OperatingSystems.Value = {
-    import OperatingSystem.OperatingSystems._
+  def getOsByOsName(osName: String): Value = {
 
     osName.toLowerCase match {
       case os if os.contains("win") => WINDOWS
@@ -36,7 +32,7 @@ object OperatingSystem {
     }
   }
 
-  def getCurrentOs: OperatingSystems.Value = {
+  def getCurrentOs: Value = {
     getOsByOsName(System.getProperty("os.name"))
   }
 

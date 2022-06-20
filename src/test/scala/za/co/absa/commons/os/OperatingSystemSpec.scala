@@ -18,17 +18,16 @@ package za.co.absa.commons.os
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import za.co.absa.commons.os.OperatingSystem.OperatingSystems
 
 
 class OperatingSystemSuite extends AnyFlatSpec with Matchers {
 
-  "OperatingSystem util" should "correctly find out OS" in {
-    OperatingSystem.getOsByOsName("Windows 10") shouldBe OperatingSystems.WINDOWS
-    OperatingSystem.getOsByOsName("Linux") shouldBe OperatingSystems.LINUX
-    OperatingSystem.getOsByOsName("Mac OS X") shouldBe OperatingSystems.MAC
-    OperatingSystem.getOsByOsName("SunOs") shouldBe OperatingSystems.SOLARIS
+  "OperatingSystem util" should "correctly determine OS" in {
+    OperatingSystem.getOsByOsName("Windows 10") shouldBe OperatingSystem.WINDOWS
+    OperatingSystem.getOsByOsName("Linux") shouldBe OperatingSystem.LINUX
+    OperatingSystem.getOsByOsName("Mac OS X") shouldBe OperatingSystem.MAC
+    OperatingSystem.getOsByOsName("SunOs") shouldBe OperatingSystem.SOLARIS
 
-    OperatingSystem.getOsByOsName("my own special os") shouldBe OperatingSystems.OTHER
+    OperatingSystem.getOsByOsName("my own special os") shouldBe OperatingSystem.OTHER
   }
 }
