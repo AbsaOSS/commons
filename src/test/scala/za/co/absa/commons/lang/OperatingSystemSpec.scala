@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.commons.os
+package za.co.absa.commons.lang
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.commons.os
-
+package za.co.absa.commons.lang
 
 object OperatingSystem extends Enumeration {
   val WINDOWS, LINUX, MAC, SOLARIS, OTHER = Value
