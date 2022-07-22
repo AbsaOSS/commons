@@ -104,74 +104,8 @@ object ReflectionUtils {
     * @tparam B expected type of the field value to return
     * @return a field value
     */
-  def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
-    @tailrec
-    def reflectClassHierarchy(c: Class[_]): Option[_] =
-      if (c == classOf[AnyRef]) None
-      else {
-        val maybeValue: Option[Any] = reflectClass(c)
-        if (maybeValue.isDefined) maybeValue
-        else {
-          val superClass = c.getSuperclass
-          if (superClass == null) None
-          else reflectClassHierarchy(superClass)
-        }
-      }
-
-    def reflectClass(c: Class[_]): Option[Any] =
-      scalaReflectClass(c).orElse(javaReflectClass(c))
-
-    /**
-     *  may return None because:
-     *  - `Symbols#CyclicReference` (Scala bug #12190)
-     *  - `RuntimeException("scala signature")` (#80, #82)
-     */
-    def scalaReflectClass(c: Class[_]): Option[Any] = util.Try {
-      val members = mirror.classSymbol(c).toType.decls
-      val m = members
-        .filter(smb => (
-          smb.toString.endsWith(s" $fieldName")
-            && smb.isTerm
-            && !smb.isConstructor
-            && (!smb.isMethod || smb.asMethod.paramLists.forall(_.isEmpty))
-          ))
-        .minBy(!_.isMethod)
-
-      val im = mirror.reflect(o)
-      if (m.isMethod) im.reflectMethod(m.asMethod).apply()
-      else im.reflectField(m.asTerm).get
-    }.toOption
-
-    def javaReflectClass(c: Class[_]): Option[Any] =
-      c.getDeclaredFields.collectFirst {
-        case f if f.getName == fieldName =>
-          f.setAccessible(true)
-          f.get(o)
-      }
-
-
-    def reflectInterfaces(c: Class[_]) = {
-      val altNames = allInterfacesOf(c)
-        .map(_.getName.replace('.', '$') + "$$" + fieldName)
-
-      c.getDeclaredFields.collectFirst {
-        case f if altNames contains f.getName =>
-          f.setAccessible(true)
-          f.get(o)
-      }
-    }
-
-    val declaringClass = implicitly[ClassTag[A]].runtimeClass
-    reflectClassHierarchy(declaringClass)
-      .orElse {
-        // The field might be declared in a trait.
-        reflectInterfaces(declaringClass)
-      }
-      .getOrElse(
-        throw new NoSuchFieldException(s"${declaringClass.getName}.$fieldName")
-      )
-      .asInstanceOf[B]
-  }
+  def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B =
+    new FieldValueExtractor[A, B](o, fieldName).extract()
 
   /**
     * A single type parameter alternative to {{{extractFieldValue[A, B](a, ...)}}} where {{{a.getClass == classOf[A]}}}
