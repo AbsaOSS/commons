@@ -136,6 +136,14 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     ReflectionUtils.extractFieldValue[Boolean](Foo, "x") should be(Foo.x)
   }
 
+  // this class must be outside the test to trigger the exception
+  case class WrappingClass(x: ClassWithCyclicAnnotation)
+
+  it should "fallback to Java reflection when Scala one fails via return type" in {
+    val obj = WrappingClass(new ClassWithCyclicAnnotation)
+    ReflectionUtils.extractFieldValue[ClassWithCyclicAnnotation](obj, "x") should not be null
+  }
+
   behavior of "ModuleClassSymbolExtractor"
 
   it should "extract objects" in {

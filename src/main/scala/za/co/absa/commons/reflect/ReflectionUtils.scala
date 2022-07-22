@@ -118,41 +118,37 @@ object ReflectionUtils {
         }
       }
 
-    def reflectClass(c: Class[_]) = {
-      val maybeMember = util.Try {
-        val members = mirror.classSymbol(c).toType.decls
-        members
-          .filter(smb => (
-            smb.toString.endsWith(s" $fieldName")
-              && smb.isTerm
-              && !smb.isConstructor
-              && (!smb.isMethod || smb.asMethod.paramLists.forall(_.isEmpty))
-            ))
-          .minBy(!_.isMethod)
+    def reflectClass(c: Class[_]): Option[Any] =
+      scalaReflectClass(c).orElse(javaReflectClass(c))
 
-        // Unless:
-        //   - `Symbols#CyclicReference` (a workaround for Scala bug #12190)
-        //   - `RuntimeException("scala signature")` (#80, #82)
-        //   - ... or any other runtime error during Scala reflection
-        // }
-      }.toOption
+    /**
+     *  may return None because:
+     *  - `Symbols#CyclicReference` (Scala bug #12190)
+     *  - `RuntimeException("scala signature")` (#80, #82)
+     */
+    def scalaReflectClass(c: Class[_]): Option[Any] = util.Try {
+      val members = mirror.classSymbol(c).toType.decls
+      val m = members
+        .filter(smb => (
+          smb.toString.endsWith(s" $fieldName")
+            && smb.isTerm
+            && !smb.isConstructor
+            && (!smb.isMethod || smb.asMethod.paramLists.forall(_.isEmpty))
+          ))
+        .minBy(!_.isMethod)
 
-      maybeMember
-        .map(m => {
-          val im = mirror.reflect(o)
-          if (m.isMethod) im.reflectMethod(m.asMethod).apply()
-          else im.reflectField(m.asTerm).get
-        })
-        .orElse {
-          // Sometimes certain Scala compiler generated fields aren't return by `TypeApi.members`.
-          // Trying Java reflection.
-          c.getDeclaredFields.collectFirst {
-            case f if f.getName == fieldName =>
-              f.setAccessible(true)
-              f.get(o)
-          }
-        }
-    }
+      val im = mirror.reflect(o)
+      if (m.isMethod) im.reflectMethod(m.asMethod).apply()
+      else im.reflectField(m.asTerm).get
+    }.toOption
+
+    def javaReflectClass(c: Class[_]): Option[Any] =
+      c.getDeclaredFields.collectFirst {
+        case f if f.getName == fieldName =>
+          f.setAccessible(true)
+          f.get(o)
+      }
+
 
     def reflectInterfaces(c: Class[_]) = {
       val altNames = allInterfacesOf(c)
