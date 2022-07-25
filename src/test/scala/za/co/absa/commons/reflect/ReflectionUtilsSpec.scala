@@ -21,7 +21,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import za.co.absa.commons.reflect.ReflectionUtils.ModuleClassSymbolExtractor
 import za.co.absa.commons.reflect.ReflectionUtilsSpec._
-import za.co.absa.commons.reflection.CyclicAnnotationExample
+import za.co.absa.commons.reflect.CyclicAnnotationExample
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
@@ -136,6 +136,12 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     ReflectionUtils.extractFieldValue[Boolean](Foo, "x") should be(Foo.x)
   }
 
+  it should "fallback to Java reflection when Scala one fails via return type" in {
+    val innerObj = new ClassWithCyclicAnnotation
+    val obj = WrappingClass(innerObj)
+    ReflectionUtils.extractFieldValue[ClassWithCyclicAnnotation](obj, "x") should be(innerObj)
+  }
+
   behavior of "ModuleClassSymbolExtractor"
 
   it should "extract objects" in {
@@ -239,4 +245,5 @@ object ReflectionUtilsSpec {
     lazy val z = 42
   }
 
+  case class WrappingClass(x: ClassWithCyclicAnnotation)
 }

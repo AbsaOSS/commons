@@ -104,78 +104,8 @@ object ReflectionUtils {
     * @tparam B expected type of the field value to return
     * @return a field value
     */
-  def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B = {
-    @tailrec
-    def reflectClassHierarchy(c: Class[_]): Option[_] =
-      if (c == classOf[AnyRef]) None
-      else {
-        val maybeValue: Option[Any] = reflectClass(c)
-        if (maybeValue.isDefined) maybeValue
-        else {
-          val superClass = c.getSuperclass
-          if (superClass == null) None
-          else reflectClassHierarchy(superClass)
-        }
-      }
-
-    def reflectClass(c: Class[_]) = {
-      val maybeMember = util.Try {
-        val members = mirror.classSymbol(c).toType.decls
-        members
-          .filter(smb => (
-            smb.toString.endsWith(s" $fieldName")
-              && smb.isTerm
-              && !smb.isConstructor
-              && (!smb.isMethod || smb.asMethod.paramLists.forall(_.isEmpty))
-            ))
-          .minBy(!_.isMethod)
-
-        // Unless:
-        //   - `Symbols#CyclicReference` (a workaround for Scala bug #12190)
-        //   - `RuntimeException("scala signature")` (#80, #82)
-        //   - ... or any other runtime error during Scala reflection
-        // }
-      }.toOption
-
-      maybeMember
-        .map(m => {
-          val im = mirror.reflect(o)
-          if (m.isMethod) im.reflectMethod(m.asMethod).apply()
-          else im.reflectField(m.asTerm).get
-        })
-        .orElse {
-          // Sometimes certain Scala compiler generated fields aren't return by `TypeApi.members`.
-          // Trying Java reflection.
-          c.getDeclaredFields.collectFirst {
-            case f if f.getName == fieldName =>
-              f.setAccessible(true)
-              f.get(o)
-          }
-        }
-    }
-
-    def reflectInterfaces(c: Class[_]) = {
-      val altNames = allInterfacesOf(c)
-        .map(_.getName.replace('.', '$') + "$$" + fieldName)
-
-      c.getDeclaredFields.collectFirst {
-        case f if altNames contains f.getName =>
-          f.setAccessible(true)
-          f.get(o)
-      }
-    }
-
-    val declaringClass = implicitly[ClassTag[A]].runtimeClass
-    reflectClassHierarchy(declaringClass)
-      .orElse {
-        // The field might be declared in a trait.
-        reflectInterfaces(declaringClass)
-      }
-      .getOrElse(
-        throw new NoSuchFieldException(s"${declaringClass.getName}.$fieldName")
-      )
-      .asInstanceOf[B]
-  }
+  def extractFieldValue[A: ClassTag, B](o: AnyRef, fieldName: String): B =
+    new FieldValueExtractor[A, B](o, fieldName).extract()
 
   /**
     * A single type parameter alternative to {{{extractFieldValue[A, B](a, ...)}}} where {{{a.getClass == classOf[A]}}}

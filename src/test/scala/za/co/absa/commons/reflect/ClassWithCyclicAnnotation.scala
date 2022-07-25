@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ABSA Group Limited
+ * Copyright 2022 ABSA Group Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package za.co.absa.commons.reflection;
+package za.co.absa.commons.reflect
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import za.co.absa.commons.reflect.CyclicAnnotationExample
 
 @CyclicAnnotationExample.CyclicAnnotation
-public class CyclicAnnotationExample {
-    private CyclicAnnotationExample() {
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface CyclicAnnotation {
-    }
-}
+class ClassWithCyclicAnnotation
