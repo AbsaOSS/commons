@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.commons.reflection;
+package za.co.absa.commons.reflect;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

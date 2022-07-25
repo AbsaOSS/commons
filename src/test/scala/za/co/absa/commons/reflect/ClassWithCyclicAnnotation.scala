@@ -16,9 +16,7 @@
 
 package za.co.absa.commons.reflect
 
-import za.co.absa.commons.reflection.CyclicAnnotationExample
+import za.co.absa.commons.reflect.CyclicAnnotationExample
 
 @CyclicAnnotationExample.CyclicAnnotation
-class ClassWithCyclicAnnotation {
-
-}
+class ClassWithCyclicAnnotation
