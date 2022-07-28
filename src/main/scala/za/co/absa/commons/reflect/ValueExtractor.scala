@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.{Mirror, runtimeMirror}
 
 @DeveloperApi
-class FieldValueExtractor[A: ClassTag, B](o: AnyRef, fieldName: String) {
+class ValueExtractor[A: ClassTag, B](o: AnyRef, fieldName: String) {
 
   private val mirror: Mirror = runtimeMirror(getClass.getClassLoader)
 
