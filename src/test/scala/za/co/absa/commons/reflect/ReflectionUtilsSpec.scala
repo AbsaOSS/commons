@@ -21,7 +21,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import za.co.absa.commons.reflect.ReflectionUtils.ModuleClassSymbolExtractor
 import za.co.absa.commons.reflect.ReflectionUtilsSpec._
-import za.co.absa.commons.reflect.CyclicAnnotationExample
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
@@ -132,14 +131,28 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     @CyclicAnnotationExample.CyclicAnnotation
     object Foo {
       val x = 42
+      def y = 666
+      def z() = 123
     }
-    ReflectionUtils.extractFieldValue[Boolean](Foo, "x") should be(Foo.x)
+    ReflectionUtils.extractFieldValue[Int](Foo, "x") should be(Foo.x)
+    ReflectionUtils.extractFieldValue[Int](Foo, "y") should be(Foo.y)
+    ReflectionUtils.extractFieldValue[Int](Foo, "z") should be(Foo.z)
   }
 
   it should "fallback to Java reflection when Scala one fails via return type" in {
     val innerObj = new ClassWithCyclicAnnotation
     val obj = WrappingClass(innerObj)
     ReflectionUtils.extractFieldValue[ClassWithCyclicAnnotation](obj, "x") should be(innerObj)
+  }
+
+  it should "extract field from java class" in {
+    val obj = new JavaClassExample(42)
+    ReflectionUtils.extractFieldValue[ClassWithCyclicAnnotation](obj, "value") should be(42)
+  }
+
+  it should "call method with zero parameters in java class" in {
+    val obj = new JavaClassExample(42)
+    ReflectionUtils.extractFieldValue[ClassWithCyclicAnnotation](obj, "getValuePlusOne") should be(43)
   }
 
   behavior of "ModuleClassSymbolExtractor"

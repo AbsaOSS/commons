@@ -83,6 +83,12 @@ class FieldValueExtractor[A: ClassTag, B](o: AnyRef, fieldName: String) {
       case f if f.getName == fieldName =>
         f.setAccessible(true)
         f.get(o)
+    } orElse {
+      c.getDeclaredMethods.collectFirst {
+        case m if m.getName == fieldName && m.getParameterCount == 0 =>
+          m.setAccessible(true)
+          m.invoke(o)
+      }
     }
 
 
