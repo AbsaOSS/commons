@@ -296,6 +296,9 @@
                     <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                     <junitxml>.</junitxml>
                     <filereports>WDF TestSuite.txt</filereports>
+                    <environmentVariables>
+                        <TEST_ENV_VAR_EnvFixtureSpec>some_initial_value</TEST_ENV_VAR_EnvFixtureSpec>
+                    </environmentVariables>
                 </configuration>
                 <executions>
                     <execution>
