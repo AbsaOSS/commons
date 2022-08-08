@@ -46,7 +46,7 @@
 
     <groupId>za.co.absa.commons</groupId>
     <artifactId>commons_2.11</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.7-SNAPSHOT</version>
 
     <properties>
         <scm.url>http://github.com/AbsaOSS/commons/tree/master</scm.url>
