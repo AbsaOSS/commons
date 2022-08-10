@@ -21,7 +21,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import za.co.absa.commons.reflect.ReflectionUtils.ModuleClassSymbolExtractor
 import za.co.absa.commons.reflect.ReflectionUtilsSpec._
-import za.co.absa.commons.reflect.CyclicAnnotationExample
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
@@ -51,44 +50,44 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     ReflectionUtils.extractProperties(new Bar("bbb", 42)) should be(Map("a" -> "bbb"))
   }
 
-  behavior of "extractFieldValue()"
+  behavior of "extractValue()"
 
   it should "return a value of a private field of a Scala object" in {
-    ReflectionUtils.extractFieldValue[Int](Foo, "privateVal") should be(42)
+    ReflectionUtils.extractValue[Int](Foo, "privateVal") should be(42)
   }
 
   it should "return a value of a private field of a Java object" in {
-    ReflectionUtils.extractFieldValue[Array[Char]]("foo", "value") should equal("foo".toCharArray)
+    ReflectionUtils.extractValue[Array[Char]]("foo", "value") should equal("foo".toCharArray)
   }
 
   it should "return values of compiler generated private fields" in {
     val bar = new Bar("Pi", 3.14)
-    ReflectionUtils.extractFieldValue[String](bar, "a") shouldEqual "Pi"
-    ReflectionUtils.extractFieldValue[Double](bar, "b") shouldEqual 3.14
+    ReflectionUtils.extractValue[String](bar, "a") shouldEqual "Pi"
+    ReflectionUtils.extractValue[Double](bar, "b") shouldEqual 3.14
   }
 
   it should "extract from a field declared in any of the superclasses" in {
     class SubBar(a: String, b: Double) extends Bar(a, b)
     val subSubBar = new SubBar("Pi", 3.14) {}
-    ReflectionUtils.extractFieldValue[String](subSubBar, "a") shouldEqual "Pi"
-    ReflectionUtils.extractFieldValue[Double](subSubBar, "b") shouldEqual 3.14
+    ReflectionUtils.extractValue[String](subSubBar, "a") shouldEqual "Pi"
+    ReflectionUtils.extractValue[Double](subSubBar, "b") shouldEqual 3.14
   }
 
   it should "extract from a field using a provided class tag" in {
     val subBar = new Bar("Pi", 3.14) {}
-    ReflectionUtils.extractFieldValue[Bar, String](subBar, "a") shouldEqual "Pi"
+    ReflectionUtils.extractValue[Bar, String](subBar, "a") shouldEqual "Pi"
   }
 
   it should "extract from a private field used in a lambda" in {
     class A(x: Int) { () => x }
-    ReflectionUtils.extractFieldValue[Int](new A(42), "x") should equal(42)
-    ReflectionUtils.extractFieldValue[A, Int](new A(42), "x") should equal(42)
+    ReflectionUtils.extractValue[Int](new A(42), "x") should equal(42)
+    ReflectionUtils.extractValue[A, Int](new A(42), "x") should equal(42)
   }
 
   it should "extract from a private field declared in a trait" in {
-    ReflectionUtils.extractFieldValue[Boolean](MyObject, "z") should be(true)
-    ReflectionUtils.extractFieldValue[Boolean](new MyClass, "z") should be(true)
-    ReflectionUtils.extractFieldValue[MyClass, Boolean](new MyClass, "z") should be(true)
+    ReflectionUtils.extractValue[Boolean](MyObject, "z") should be(true)
+    ReflectionUtils.extractValue[Boolean](new MyClass, "z") should be(true)
+    ReflectionUtils.extractValue[MyClass, Boolean](new MyClass, "z") should be(true)
   }
 
   //noinspection ScalaUnusedSymbol
@@ -99,14 +98,14 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     object O extends T {
       private lazy val zz: Seq[Nothing] = Seq.empty
     }
-    ReflectionUtils.extractFieldValue[Int](O, "z") should equal(42)
-    ReflectionUtils.extractFieldValue[Seq[_]](O, "zz") should equal(Seq.empty)
-    ReflectionUtils.extractFieldValue[Int](O, "bitmap$0") should equal(0x3)
+    ReflectionUtils.extractValue[Int](O, "z") should equal(42)
+    ReflectionUtils.extractValue[Seq[_]](O, "zz") should equal(Seq.empty)
+    ReflectionUtils.extractValue[Int](O, "bitmap$0") should equal(0x3)
   }
 
   it should "extract from a lazy val of outer classes" in {
-    ReflectionUtils.extractFieldValue[Boolean](Lazy, "z") should be(42)
-    ReflectionUtils.extractFieldValue[Boolean](Lazy, "bitmap$0") should be(true)
+    ReflectionUtils.extractValue[Boolean](Lazy, "z") should be(42)
+    ReflectionUtils.extractValue[Boolean](Lazy, "bitmap$0") should be(true)
   }
 
   it should "not confuse accessors with methods" in {
@@ -114,7 +113,7 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
       private def x[A: ClassTag]: Int = sys.error("don't call me")
     }
     intercept[NoSuchFieldException] {
-      ReflectionUtils.extractFieldValue[Int](AAA, "x")
+      ReflectionUtils.extractValue[Int](AAA, "x")
     }
   }
 
@@ -124,7 +123,7 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
 
       private def x: Int = 42
     }
-    ReflectionUtils.extractFieldValue[Int](AAA, "x") should be(42)
+    ReflectionUtils.extractValue[Int](AAA, "x") should be(42)
   }
 
   // A workaround for https://github.com/scala/bug/issues/12190
@@ -132,14 +131,28 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     @CyclicAnnotationExample.CyclicAnnotation
     object Foo {
       val x = 42
+      def y = 666
+      def z() = 123
     }
-    ReflectionUtils.extractFieldValue[Boolean](Foo, "x") should be(Foo.x)
+    ReflectionUtils.extractValue[Int](Foo, "x") should be(Foo.x)
+    ReflectionUtils.extractValue[Int](Foo, "y") should be(Foo.y)
+    ReflectionUtils.extractValue[Int](Foo, "z") should be(Foo.z)
   }
 
   it should "fallback to Java reflection when Scala one fails via return type" in {
     val innerObj = new ClassWithCyclicAnnotation
     val obj = WrappingClass(innerObj)
-    ReflectionUtils.extractFieldValue[ClassWithCyclicAnnotation](obj, "x") should be(innerObj)
+    ReflectionUtils.extractValue[ClassWithCyclicAnnotation](obj, "x") should be(innerObj)
+  }
+
+  it should "extract field from java class" in {
+    val obj = new JavaClassExample(42)
+    ReflectionUtils.extractValue[ClassWithCyclicAnnotation](obj, "value") should be(42)
+  }
+
+  it should "call method with zero parameters in java class" in {
+    val obj = new JavaClassExample(42)
+    ReflectionUtils.extractValue[ClassWithCyclicAnnotation](obj, "getValuePlusOne") should be(43)
   }
 
   behavior of "ModuleClassSymbolExtractor"

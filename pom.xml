@@ -467,6 +467,14 @@
                                 <goals>
                                     <goal>check-abi</goal>
                                 </goals>
+                                <configuration>
+                                    <filters>
+                                        <filter>
+                                            <name>MissingClassProblem</name>
+                                            <value>za.co.absa.commons.reflect.FieldValueExtractor</value>
+                                        </filter>
+                                    </filters>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

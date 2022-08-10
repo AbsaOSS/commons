@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.{Mirror, runtimeMirror}
 
 @DeveloperApi
-class FieldValueExtractor[A: ClassTag, B](o: AnyRef, fieldName: String) {
+class ValueExtractor[A: ClassTag, B](o: AnyRef, fieldName: String) {
 
   private val mirror: Mirror = runtimeMirror(getClass.getClassLoader)
 
@@ -83,6 +83,12 @@ class FieldValueExtractor[A: ClassTag, B](o: AnyRef, fieldName: String) {
       case f if f.getName == fieldName =>
         f.setAccessible(true)
         f.get(o)
+    } orElse {
+      c.getDeclaredMethods.collectFirst {
+        case m if m.getName == fieldName && m.getParameterCount == 0 =>
+          m.setAccessible(true)
+          m.invoke(o)
+      }
     }
 
 
