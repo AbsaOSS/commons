@@ -308,5 +308,17 @@ class StringExtensionSpec extends AnyFunSuite with Matchers {
     "X".coalesce("") shouldBe "X"
   }
 
+  test("StringOps.nonBlankOption - for blank string") {
+    (null: String).nonBlankOption should be(None)
+    "            ".nonBlankOption should be(None)
+  }
+
+  test("StringOps.nonBlankOption - for non blank string") {
+    " foo bar 42 ".nonBlankOption should be(Some(" foo bar 42 "))
+    "     .".nonBlankOption should be(Some("     ."))
+    ".      ".nonBlankOption should be(Some(".      "))
+    "     .      ".nonBlankOption should be(Some("     .      "))
+  }
+
 }
 

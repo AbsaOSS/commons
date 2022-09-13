@@ -166,6 +166,17 @@ object StringExtension {
       alternatives.foldLeft(string)(_.nonEmptyOrElse(_))
     }
 
+    /**
+     * Converts string into Option by returning
+     * Some(string) in case string is not null and contains any non-whitespace characters, None otherwise.
+     *
+     * @return Option containing string if its is non blank
+     */
+    def nonBlankOption: Option[String] =
+      if (string == null) None
+      else if (string.trim.isEmpty) None
+      else Some(string)
+
     private[lang] def joinWithSingleSeparator(another: String, sep: String): String = {
       val sb = new mutable.StringBuilder
       sb.append(string.stripSuffix(sep))
