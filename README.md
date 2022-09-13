@@ -32,7 +32,140 @@ mvn clean install -Pscala-2.13
 ./build-all.sh
 ```
 
-# Collection utils
+# Type extensions
+## AnyExtension
+```scala
+import za.co.absa.commons.lang.extensions.AnyExtension._
+
+// Optionally call a method in a chain
+new MyBuilder
+  .withX(42)
+  .withY(77)
+  .optionally(_.withZ, maybeZ) // <---- withZ is called with a `value` if `maybeZ` is `Some(value)`
+  .optionally(_.withABC(a, _, c), maybeB) // <---- it also works with n-ary methods
+
+// Alternatively `having()` method can be used. It does the same thing as `optionally()`,
+// but because of re-arranged method parameters it's easier for the compiler to infer types.
+// See: https://github.com/AbsaOSS/commons/issues/56
+new MyBuilder
+  .withX(42)
+  .withY(77)
+  .having(maybeZ)(_.withZ)
+```
+## ArrayExtension
+```scala
+import za.co.absa.commons.lang.extensions.ArrayExtension._
+
+val arr = Array(1, 2, 3)
+
+// removes duplicates in an array;
+// an argument to distinctBy is a function which projects each array value into another value
+// that is used to determine whether two elements are duplicated
+val duplicatesEliminated = arr.distinctBy(identity)
+```
+## IteratorExtension
+```scala
+import za.co.absa.commons.lang.extensions.IteratorExtension._
+
+val iter: Iterator[_] = ???
+val arr: Array[_] = ???
+
+// copy 42 items from the `iter` to the `arr` with array offset 7
+iter.fetchToArray(arr, 7, 42) // returns a number of actually copied items
+```
+## NonOptionExtension
+```scala
+import za.co.absa.commons.lang.extensions.NonOptionExtension._
+
+// returns the object as Some(_) if anyNonOptionObject is not null, None otherwise
+anyNonOptionObject.asOption
+```
+## OptionExtension
+```scala
+import za.co.absa.commons.lang.extensions.OptionExtension._
+
+val someOption = Some("abc")
+
+// returns Success("abc")
+someOption.toTry(new Exception)
+
+val noneOption = None
+val e = new Exception
+
+// returns Failure(e)
+someOption.toTry(e)
+```
+## SeqExtension
+```scala
+import za.co.absa.commons.lang.extensions.SeqExtension._
+
+Seq(1, 2, 2, 2, 1).groupConsecutiveBy[Int](a => a) // Seq(Seq(1), Seq(2, 2, 2), Seq(1))
+Seq(1, 2, 2, 2, 1).groupConsecutiveBy[Int](a => 1) // Seq(Seq(1, 2, 2, 2, 1))
+Seq(1, 24, 27, 2, 1).groupConsecutiveBy[Int](a => a.toString.length) // Seq(Seq(1), Seq(24, 27), Seq(2, 1))
+
+Seq(1, 2, 2, 2, 1).groupConsecutiveByPredicate(a => a == 2) // Seq(Seq(1), Seq(2, 2, 2), Seq(1))
+Seq(1, 1, 2, 2, 4, 1).groupConsecutiveByPredicate(a => a == 2) // Seq(Seq(1, 1), Seq(2), Seq(2), Seq(4), Seq(1))
+
+Seq(1, 24, 27, 2, 1).groupConsecutiveByOption[Int](
+  a => if(a.toString.length > 1) Some(a.toString.length) else None
+) // Seq(Seq(1), Seq(24, 27), Seq(2), Seq(1))
+```
+## StringExtension
+```scala
+import za.co.absa.commons.lang.extensions.StringExtension._
+
+"abcba".replaceChars(Map('a' -> 'b', 'b' -> 'a')) // "bacab"
+
+"Hello world".findFirstUnquoted(Set('w', 'e', 'l'), Set.empty) // Some(1)
+"Hello world".findFirstUnquoted(Set('w'), Set.empty) // Some(6)
+"Hello world".findFirstUnquoted(Set('a'), Set.empty) // None
+"Hello `w`orld".findFirstUnquoted(Set('w'), '`') // None
+"Hello `world".findFirstUnquoted(Set('w'), '`') // Some(7)
+"`Hello` \\'world".findFirstUnquoted(Set('w', 'e', 'l'), Set('\'', '`')) // Some(10)
+
+"Hello world".hasUnquoted(Set('w', 'e', 'l'), Set('`')) // true
+"`Hello world`".hasUnquoted(Set('w', 'e', 'l'), Set('`')) // false
+
+"Lorem i ipsum".countUnquoted(Set('o', 'i'), Set.empty) // Map('o' -> 1, 'i' -> 2)
+"Lorem `i` ipsum".countUnquoted(Set('o', 'i'), Set('`')) // Map('o' -> 1, 'i' -> 1)
+
+"aaa" / "123" // "aaa/123"
+"aaa/" / "123" // "aaa/123"
+
+"a".nonEmptyOrElse("b") // "a"
+"".nonEmptyOrElse("b") // "b"
+
+"".coalesce("A", "") // "A"
+"".coalesce("", "", "B", "", "C") // "B"
+"X".coalesce("Y", "Z") // "X"
+
+(null: String).nonBlankOption // None
+"            ".nonBlankOption // None
+" foo bar 42 ".nonBlankOption // Some(" foo bar 42 ")
+```
+## TraversableExtension
+```scala
+import za.co.absa.commons.lang.extensions.TraversableExtension._
+
+Traversable(1, 2, 3).asOption // Some(Traversable(1, 2, 3))
+Traversable().asOption // None
+```
+## TraversableOnceExtension
+```scala
+import za.co.absa.commons.lang.extensions.TraversableOnceExtension._
+
+List(1, 2).distinctBy(identity) // List(1, 2)
+List(1, 2, 1).distinctBy(identity) // List(1, 2)
+List(1, 2, 1, 0, 5).distinctBy(a => a % 2) // List(1, 2)
+```
+
+NOTE!!!!!!!!! add UrisConnection
+
+# Collection implicits
+
+**Warning**: these are deprecated.
+
+Use type-specific `...Extension` instead, for example, `za.co.absa.commons.lang.extensions.IteratorExtension`.
 
 ```scala
 import CollectionImplicits._
@@ -110,6 +243,10 @@ trait VegetarianMenu {
 ```
 
 # Option implicits
+**Warning**: these are deprecated.
+
+Use type-specific `...Extension` instead, for example, `za.co.absa.commons.lang.extensions.StringExtension`.
+
 ```scala
 // Strings
 (null: String).nonBlankOption // == None
@@ -138,7 +275,16 @@ new MyBuilder
   .withY(77)
   .having(maybeZ)(_.withZ)
   ...
+```
 
+# UrisConnectionStringParser
+Parses a connection string containing one or multiple URIs into a list of strings (each being one URI).
+Input URIs are supposed to have semi-colon-separated base URIs, and each can have multiple comma-separated hosts.
+```scala
+val connectionString = "https://localhost:8080,host2:8080/rest_api;http://localhost:9000/rest_api"
+
+UrisConnectionStringParser.parse(connectionString)
+// List("https://localhost:8080/rest_api", "https://host2:8080/rest_api", "http://localhost:9000/rest_api")
 ```
 
 # Commons Configuration
@@ -237,6 +383,10 @@ ReflectionUtils.objectsOf[Currency] // == Seq(classOf[EUR], classOf[USD], classO
 ##### Get `object` instance by it's full type name (similar to `Class.forName(...)`, but for objects)
 ```scala
 ReflectionUtils.objectForName[MySingleton]("com.example.MySingleton") // == MySingleton
+```
+##### `objectForName` with more descriptive exception message in case there is something wrong with provided name.
+```scala
+ReflectionUtils.objectForNameWithDescriptiveException[MySingleton]("com.example.MySingleton") // == MySingleton
 ```
 ##### Get private field value of an arbitrary class. (a typed variant of `field.get(o).asInstanceOf[T]`)
 ```scala
@@ -419,6 +569,8 @@ For example:
 ```
 
 # IO Utils
+
+## Temporary file/directory
 An easy way to create a temporary file or directory with the support for automatic recursive deletion (as `rm -rf`) on JVM shutdown.
 ### Usage
 ```scala
@@ -428,6 +580,19 @@ val myTmpDir = TempDirectory.deleteOnExit.path
 It also mimics Java IO API for a similar purpose
 ```scala
 TempFile("myPrefix", "mySuffix")
+```
+
+## LocalFileSystemUtils
+An object containing useful functions that operate on local file system.
+### Usage
+```scala
+val doesExist = LocalFileSystemUtils.localExists("/user/u1/somefile") // true if this file exists, false otherwise
+
+if(doesExist) {
+  val fileContent = LocalFileSystemUtils.readLocalFile("/user/u1/somefile") // full file as string
+}
+
+val tildeReplaced = LocalFileSystemUtils.replaceHome("~/Projects/somedir") // path with replaces tilde with home directory path
 ```
 
 # JSON (Json4s) Utils
