@@ -18,6 +18,7 @@ package za.co.absa.commons.lang
 
 import za.co.absa.commons.lang.TypeConstraints.not
 
+@deprecated("Use type-specific ...Extension instead")
 object OptionImplicits {
 
   implicit class StringWrapper(val s: String) extends AnyVal {
