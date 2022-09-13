@@ -148,6 +148,8 @@ class UrisConnectionStringParserSpec extends AnyWordSpec with Matchers {
     }
 
     "throw an exception" when {
+      val exceptionMessage = "Malformed connection string"
+
       "the connection string does not fit an http(s)://... pattern" in {
         val connectionString = "qwe://localhost/rest_api/api"
 
@@ -155,7 +157,7 @@ class UrisConnectionStringParserSpec extends AnyWordSpec with Matchers {
           UrisConnectionStringParser.parse(connectionString)
         }
 
-        exception.getMessage should be("Malformed connection string")
+        exception.getMessage should be(exceptionMessage)
       }
       "the connection string includes any url that does not fit an http(s)://... pattern" in {
         val connectionString = "http://localhost:8080/rest_api/api;qwe://localhost/rest_api/api"
@@ -164,7 +166,7 @@ class UrisConnectionStringParserSpec extends AnyWordSpec with Matchers {
           UrisConnectionStringParser.parse(connectionString)
         }
 
-        exception.getMessage should be("Malformed connection string")
+        exception.getMessage should be(exceptionMessage)
       }
       "the connection string includes whitespace characters in the hosts" in {
         val connectionString = "http://localhost:8080, localhost:9000/rest_api/api"
@@ -173,7 +175,7 @@ class UrisConnectionStringParserSpec extends AnyWordSpec with Matchers {
           UrisConnectionStringParser.parse(connectionString)
         }
 
-        exception.getMessage should be("Malformed connection string")
+        exception.getMessage should be(exceptionMessage)
       }
       "the connection string includes whitespace characters in the path" in {
         val connectionString = "http://localhost:8080,localhost:9000/rest_api /api"
@@ -182,7 +184,7 @@ class UrisConnectionStringParserSpec extends AnyWordSpec with Matchers {
           UrisConnectionStringParser.parse(connectionString)
         }
 
-        exception.getMessage should be("Malformed connection string")
+        exception.getMessage should be(exceptionMessage)
       }
     }
 
