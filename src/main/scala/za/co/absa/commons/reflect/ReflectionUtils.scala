@@ -94,7 +94,7 @@ object ReflectionUtils {
       val moduleSymbol = mirror.staticModule(name)
       mirror.reflectModule(moduleSymbol).instance.asInstanceOf[T]
     } catch {
-      case _: ClassNotFoundException => throw new ClassNotFoundException(s"Class '$name' is not a singleton")
+      case e: ClassNotFoundException => throw new ClassNotFoundException(s"Class '$name' is not a singleton", e)
     }
   }
 
