@@ -90,36 +90,11 @@ object ReflectionUtils {
    * @return a singleton instance of a class with given name
     */
   def objectForName[T <: AnyRef](name: String): T = {
-    val moduleSymbol = mirror.staticModule(name)
-    mirror.reflectModule(moduleSymbol).instance.asInstanceOf[T]
-  }
-
-  /**
-   * Returns an object instance with the specified name.
-   * Equivalent of Class.forName() for objects, as Class.forName() returns a Class instance by name,
-   * this method returns a Scala object instance by name.
-   * Provides a human-understandable description of what went wrong in case of exception.
-   *
-   * @param name fully qualified object instance name
-   * @return a singleton instance of a class with given name
-   */
-  @throws[IllegalArgumentException]
-  def objectForNameWithDescriptiveException[T <: AnyRef : ClassTag : TypeTag](name: String): T = {
-    Try(mirror.staticModule(name)) match {
-      case Success(module) =>
-        val reflectiveMirror = mirror.reflectModule(module)
-        Try(reflectiveMirror.instance) match {
-          case Success(instance) =>
-            instance match {
-              case singleton: T => singleton
-              case _ =>
-                throw new IllegalArgumentException(s"Class '$name' is not an instance of '${typeOf[T]}'")
-            }
-          case Failure(exception) =>
-            throw new IllegalArgumentException(s"Class '$name' is not a singleton", exception)
-        }
-      case Failure(exception) =>
-        throw new IllegalArgumentException(s"Class '$name' could not be found", exception)
+    try {
+      val moduleSymbol = mirror.staticModule(name)
+      mirror.reflectModule(moduleSymbol).instance.asInstanceOf[T]
+    } catch {
+      case _: ClassNotFoundException => throw new ClassNotFoundException(s"Class '$name' is not a singleton")
     }
   }
 

@@ -195,37 +195,11 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     ReflectionUtils.objectForName[AnyRef](MyObject.getClass.getName) should be theSameInstanceAs MyObject
   }
 
-  behavior of "objectForNameWithDescriptiveException()"
-
-  it should "return a 'static' Scala object instance by a full qualified name" in {
-    val result = ReflectionUtils.objectForNameWithDescriptiveException[AnyRef](MyObject.getClass.getName)
-
-    result should be theSameInstanceAs MyObject
-  }
-
-  it should "throw IllegalArgumentException with correct message if class doesn't exist" in {
-    val thrown = intercept[IllegalArgumentException] {
-      ReflectionUtils.objectForNameWithDescriptiveException[AnyRef]("doesntexist")
-    }
-
-    thrown.getMessage shouldEqual
-      "Class 'doesntexist' could not be found"
-  }
-
-  it should "throw IllegalArgumentException with correct message if class isn't an instance of provided type" in {
-    val thrown = intercept[IllegalArgumentException] {
-      ReflectionUtils.objectForNameWithDescriptiveException[Foo](MyObject.getClass.getName)
-    }
-
-    thrown.getMessage shouldEqual
-      s"Class '${MyObject.getClass.getName}' is not an instance of '${typeOf[Foo]}'"
-  }
-
-  it should "throw IllegalArgumentException with correct message if class isn't a singleton" in {
+  it should "throw ClassNotFoundException with correct message if class isn't a singleton" in {
     val barFullClassName = new Bar("", 0).getClass.getName
 
-    val thrown = intercept[IllegalArgumentException] {
-      ReflectionUtils.objectForNameWithDescriptiveException[Bar](barFullClassName)
+    val thrown = intercept[ClassNotFoundException] {
+      ReflectionUtils.objectForName[Bar](barFullClassName)
     }
 
     thrown.getMessage shouldEqual
