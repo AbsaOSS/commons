@@ -29,8 +29,8 @@ object OptionExtension {
      * @param failure an Exception to use in Failure in case Option is None
      * @return Try converted from Option
      */
-    def toTry(failure: Exception): Try[T] =
-      option.fold[Try[T]](Failure(failure))(Success(_))
+    def toTry(failure: => Exception): Try[T] =
+      option.map(Success(_)).getOrElse(Failure(failure))
 
   }
 
