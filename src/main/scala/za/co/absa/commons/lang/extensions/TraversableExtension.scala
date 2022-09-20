@@ -20,7 +20,10 @@ object TraversableExtension {
 
   implicit class TraversableOps[A <: Traversable[_]](val xs: A) extends AnyVal {
 
-    def asOption: Option[A] = if (xs.isEmpty) None else Some(xs)
+    /**
+     * Returns None if Traversable is null or is empty, otherwise returns Some(traversable).
+     */
+    def asOption: Option[A] = if (xs == null || xs.isEmpty) None else Some(xs)
 
   }
 
