@@ -125,24 +125,6 @@ object StringExtension {
     }
 
     /**
-     * Joins two strings with / while stripping single existing trailing/leading "/" in between:
-     * {{{
-     * "abc" / "123" -> "abc/123"
-     * "abc/" / "123" -> "abc/123"
-     * "abc" / "/123" -> "abc/123"
-     * "abc/" / "/123" -> "abc/123",
-     * but:
-     * "file:///" / "path" -> "file:///path",
-     * }}}
-     *
-     * @param another the second string we are appending after the `/` separator
-     * @return this/another (this has stripped trailing / if present, another has leading / stripped if present)
-     */
-    def /(another: String): String = { // scalastyle:ignore method.name
-      joinWithSingleSeparator(another, "/")
-    }
-
-    /**
      * Function to check if string is empty, if that is the case it returns default, otherwise the string itself.
      *
      * @param default string to use in case of emptiness
@@ -176,14 +158,6 @@ object StringExtension {
       if (string == null) None
       else if (string.trim.isEmpty) None
       else Some(string)
-
-    private[lang] def joinWithSingleSeparator(another: String, sep: String): String = {
-      val sb = new mutable.StringBuilder
-      sb.append(string.stripSuffix(sep))
-      sb.append(sep)
-      sb.append(another.stripPrefix(sep))
-      sb.mkString
-    }
 
     /**
      * Investigates if the character in the relation to previous characters and charsToFind
@@ -239,6 +213,36 @@ object StringExtension {
           s"Escape character '$escape 'is both between charsToFind and quoteChars. That's not allowed."
         )
       }
+    }
+
+  }
+
+  implicit class StringConcatenationOps(val string: String) extends AnyVal {
+
+    /**
+     * Joins two strings with / while stripping single existing trailing/leading "/" in between:
+     * {{{
+     * "abc" / "123" -> "abc/123"
+     * "abc/" / "123" -> "abc/123"
+     * "abc" / "/123" -> "abc/123"
+     * "abc/" / "/123" -> "abc/123",
+     * but:
+     * "file:///" / "path" -> "file:///path",
+     * }}}
+     *
+     * @param another the second string we are appending after the `/` separator
+     * @return this/another (this has stripped trailing / if present, another has leading / stripped if present)
+     */
+    def /(another: String): String = {
+      joinWithSingleSeparator(another, "/")
+    }
+
+    private[lang] def joinWithSingleSeparator(another: String, sep: String): String = {
+      val sb = new mutable.StringBuilder
+      sb.append(string.stripSuffix(sep))
+      sb.append(sep)
+      sb.append(another.stripPrefix(sep))
+      sb.mkString
     }
 
   }

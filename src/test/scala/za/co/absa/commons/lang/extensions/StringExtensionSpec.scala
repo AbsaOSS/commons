@@ -18,7 +18,7 @@ package za.co.absa.commons.lang.extensions
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import za.co.absa.commons.lang.extensions.StringExtension.StringOps
+import za.co.absa.commons.lang.extensions.StringExtension._
 
 import java.security.InvalidParameterException
 
@@ -279,14 +279,14 @@ class StringExtensionSpec extends AnyFunSuite with Matchers {
     assert("a$$bc$$".countUnquoted(charsToFind, quoteChars, '$') == expected)
   }
 
-  test("StringOps.joinWithSingleSeparator: string joining general") {
+  test("StringConcatenationOps.joinWithSingleSeparator: string joining general") {
     "abc#".joinWithSingleSeparator("#def", "#") shouldBe "abc#def"
     "abc###".joinWithSingleSeparator("def", "#") shouldBe "abc###def"
     "abcSEP".joinWithSingleSeparator("def", "SEP") shouldBe "abcSEPdef"
     "abcSEPSEP".joinWithSingleSeparator("SEPSEPdef", "SEP") shouldBe "abcSEPSEPSEPdef"
   }
 
-  test("StringOps./: string joining with /") {
+  test("StringConcatenationOps./: string joining with /") {
     "abc" / "123" shouldBe "abc/123"
     "aaa/" / "123" shouldBe "aaa/123"
     "bbb" / "/123" shouldBe "bbb/123"
