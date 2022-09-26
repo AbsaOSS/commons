@@ -17,7 +17,7 @@
 package za.co.absa.commons.io
 
 import java.io.File
-import java.nio.charset.StandardCharsets
+import java.nio.charset.{Charset, StandardCharsets}
 import java.nio.file.{Files, Paths}
 
 object LocalFileSystemUtils {
@@ -33,10 +33,11 @@ object LocalFileSystemUtils {
    * Reads a local file fully and returns its content.
    *
    * @param path A path to a file.
+   * @param charset A charset that is used in the file. By default UTF_8.
    * @return The file's content.
    */
-  def readLocalFile(path: String): String = {
-    Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8).toArray.mkString("\n")
+  def readLocalFile(path: String, charset: Charset = StandardCharsets.UTF_8): String = {
+    Files.readAllLines(Paths.get(path), charset).toArray.mkString("\n")
   }
 
   /**
