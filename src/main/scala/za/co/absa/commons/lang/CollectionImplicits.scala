@@ -21,7 +21,7 @@ import scala.collection.mutable
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-@deprecated("Use type-specific ...Extension instead")
+@deprecated("Use type-specific ...Extension instead", "1.1.0")
 object CollectionImplicits {
 
   implicit class IteratorOps[A](val iter: Iterator[A]) extends AnyVal {
