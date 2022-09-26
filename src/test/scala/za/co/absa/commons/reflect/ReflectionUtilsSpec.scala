@@ -195,6 +195,17 @@ class ReflectionUtilsSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     ReflectionUtils.objectForName[AnyRef](MyObject.getClass.getName) should be theSameInstanceAs MyObject
   }
 
+  it should "throw ClassNotFoundException with correct message if class isn't a singleton" in {
+    val barFullClassName = new Bar("", 0).getClass.getName
+
+    val thrown = intercept[ClassNotFoundException] {
+      ReflectionUtils.objectForName[Bar](barFullClassName)
+    }
+
+    thrown.getMessage shouldEqual
+      s"Class '$barFullClassName' is not a singleton"
+  }
+
   behavior of "caseClassCtorArgDefaultValue()"
 
   it should "return a case class constructor argument default value if declared" in {

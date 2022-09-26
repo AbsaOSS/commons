@@ -21,6 +21,7 @@ import scala.collection.concurrent.TrieMap
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
 import scala.tools.reflect.ToolBox
+import scala.util.{Failure, Success, Try}
 
 /**
   * Reflection utils
@@ -81,14 +82,20 @@ object ReflectionUtils {
   }
 
   /**
-    * Returns an object instance with the specified name.
-    * Similar to as Class.forName() returns a Class instance by name, this method returns a Scala object instance by name.
-    *
-    * @param name fully qualified object instance name
+   * Returns an object instance with the specified name.
+   * Equivalent of Class.forName() for objects, as Class.forName() returns a Class instance by name,
+   * this method returns a Scala object instance by name.
+   *
+   * @param name fully qualified object instance name
+   * @return a singleton instance of a class with given name
     */
   def objectForName[T <: AnyRef](name: String): T = {
-    val moduleSymbol = mirror.staticModule(name)
-    mirror.reflectModule(moduleSymbol).instance.asInstanceOf[T]
+    try {
+      val moduleSymbol = mirror.staticModule(name)
+      mirror.reflectModule(moduleSymbol).instance.asInstanceOf[T]
+    } catch {
+      case e: ClassNotFoundException => throw new ClassNotFoundException(s"Class '$name' is not a singleton", e)
+    }
   }
 
   /**

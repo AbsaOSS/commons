@@ -14,33 +14,23 @@
  * limitations under the License.
  */
 
-package za.co.absa.commons.lang
+package za.co.absa.commons.lang.extensions
 
-import za.co.absa.commons.lang.TypeConstraints.not
+object AnyExtension {
 
-@deprecated("Use type-specific ...Extension instead", "1.1.0")
-object OptionImplicits {
+  implicit class AnyOps[A <: Any](val a: A) extends AnyVal {
 
-  implicit class StringWrapper(val s: String) extends AnyVal {
-    def nonBlankOption: Option[String] =
-      if (s == null) None
-      else if (s.trim.isEmpty) None
-      else Some(s)
-  }
-
-  implicit class TraversableWrapper[A <: Traversable[_]](val xs: A) extends AnyVal {
-    def asOption: Option[A] = if (xs.isEmpty) None else Some(xs)
-  }
-
-  implicit class NonOptionWrapper[A <: Any : not[Option[_]]#λ](a: A) {
-    def asOption: Option[A] = Option(a)
-  }
-
-  implicit class AnyWrapper[A <: Any](val a: A) extends AnyVal {
+    /**
+     * Applies `applyFn` to the value with `maybeArg` as second argument in case `maybeArg` is not None,
+     * otherwise does nothing and returns the same value as was called on.
+     */
     def optionally[B](applyFn: (A, B) => A, maybeArg: Option[B]): A = maybeArg.map(applyFn(a, _)).getOrElse(a)
 
-    // Slightly another version of "optionally" that is more type inferer friendly
+    /**
+     * The same as [[optionally]], but with signature that is more type inference friendly.
+     */
     def having[B](maybeArg: Option[B])(applyFn: (A, B) => A): A = optionally(applyFn, maybeArg)
+
   }
 
 }
