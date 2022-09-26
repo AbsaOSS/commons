@@ -36,6 +36,7 @@ object LocalFileSystemUtils {
    * @param charset A charset that is used in the file. By default UTF_8.
    * @return The file's content.
    */
+  @deprecated("If possible, use more efficient org.apache.commons.io.FileUtils.readFileToString", "1.1.0")
   def readLocalFile(path: String, charset: Charset = StandardCharsets.UTF_8): String = {
     Files.readAllLines(Paths.get(path), charset).toArray.mkString("\n")
   }
