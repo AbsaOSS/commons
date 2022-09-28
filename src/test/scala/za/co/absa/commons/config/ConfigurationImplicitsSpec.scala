@@ -16,7 +16,7 @@
 
 package za.co.absa.commons.config
 
-import org.apache.commons.configuration.{BaseConfiguration, MapConfiguration}
+import org.apache.commons.configuration.{BaseConfiguration, ConversionException, MapConfiguration}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -224,5 +224,47 @@ class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
       }
       conf getOptionalString "oops" should be(None)
     }
+  }
+
+  behavior of "ConfigurationMapWrapper"
+
+  it should "implement convert config to map of Strings" in {
+    val configuration = new MapConfiguration(Map("foo" -> "1", "bar" -> "2").asJava)
+    val map = configuration.toMap[String]
+    map.apply("foo") should be("1")
+    map.apply("bar") should be("2")
+  }
+
+  it should "implement convert config to map of Integers" in {
+    val configuration = new MapConfiguration(Map("foo" -> "1", "bar" -> 2).asJava)
+    val map = configuration.toMap[Int]
+    map.apply("foo") should be(1)
+    map.apply("bar") should be(2)
+  }
+
+  it should "implement convert config to map of Longs" in {
+    val configuration = new MapConfiguration(Map("foo" -> "1", "bar" -> 2).asJava)
+    val map = configuration.toMap[Int]
+    map.apply("foo") should be(1L)
+    map.apply("bar") should be(2L)
+  }
+
+  it should "implement convert config to map of Booleans" in {
+    val configuration = new MapConfiguration(Map("foo" -> true, "bar" -> false).asJava)
+    val map = configuration.toMap[Boolean]
+    map.apply("foo") should be(true)
+    map.apply("bar") should be(false)
+  }
+
+  it should "implement convert config to map of AnyRefs" in {
+    val configuration = new MapConfiguration(Map("foo" -> "abc", "bar" -> 42).asJava)
+    val map = configuration.toMap[AnyRef]
+    map.apply("foo") should be("abc")
+    map.apply("bar") should be(42)
+  }
+
+  it should "throw when values in config doesn't match the requested type" in {
+    val configuration = new MapConfiguration(Map("foo" -> 42, "bar" -> false).asJava)
+    intercept[RuntimeException](configuration.toMap[Int])
   }
 }
