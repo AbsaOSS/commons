@@ -250,7 +250,7 @@ object ConfigurationImplicits {
         case t if t == classOf[Long] => (c: Configuration, k: String) => c.getRequiredLong(k)
         case t if t == classOf[Float] => (c: Configuration, k: String) => c.getRequiredFloat(k)
         case t if t == classOf[Double] => (c: Configuration, k: String) => c.getRequiredDouble(k)
-        case t if t == classOf[AnyRef]=> (c: Configuration, k: String) => c.getRequiredObject(k)
+        case t if t == classOf[AnyRef]=> (c: Configuration, k: String) => c.getProperty(k)
         case t => throw new UnsupportedOperationException(s"Type $t not supported")
       }
 
