@@ -20,7 +20,10 @@ import org.apache.commons.configuration.SubsetConfigurationMethods._
 import org.apache.commons.configuration.{Configuration, SubsetConfiguration}
 import org.apache.commons.lang.StringUtils._
 
+import scala.reflect.runtime.universe.{TypeTag, typeOf}
 import java.util.NoSuchElementException
+import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
 import scala.util.Try
 
 /**
@@ -226,5 +229,44 @@ object ConfigurationImplicits {
     }
 
   }
+
+  implicit class ConfigurationMapWrapper(val conf: Configuration) extends AnyVal {
+
+    /**
+     * Converts the configuration into map where keys are Strings and values are converted to U type.
+     * When the value key is not of proper type it throws.
+     *
+     * @tparam U type of values in returned map
+     * @return map representation of the configuration
+     */
+    def toMap[U: TypeTag]: Map[String, U] =
+      ConfigurationImplicits.toMap[U](conf)
+  }
+
+  /**
+   * This method needs to be defined outside of the Value class since Scala has issues with TypeTag in Value classes
+   */
+  private def toMap[U: TypeTag](conf: Configuration): Map[String, U] = {
+    val fun = typeOf[U] match {
+      case t if t =:= typeOf[String] => (c: Configuration, k: String) => c.getRequiredString(k)
+      case t if t =:= typeOf[Boolean] => (c: Configuration, k: String) => c.getRequiredBoolean(k)
+      case t if t =:= typeOf[BigDecimal] => (c: Configuration, k: String) => c.getRequiredBigDecimal(k)
+      case t if t =:= typeOf[Byte] => (c: Configuration, k: String) => c.getRequiredByte(k)
+      case t if t =:= typeOf[Short] => (c: Configuration, k: String) => c.getRequiredShort(k)
+      case t if t =:= typeOf[Int] => (c: Configuration, k: String) => c.getRequiredInt(k)
+      case t if t =:= typeOf[Long] => (c: Configuration, k: String) => c.getRequiredLong(k)
+      case t if t =:= typeOf[Float] => (c: Configuration, k: String) => c.getRequiredFloat(k)
+      case t if t =:= typeOf[Double] => (c: Configuration, k: String) => c.getRequiredDouble(k)
+      case t if t =:= typeOf[AnyRef]=> (c: Configuration, k: String) => c.getProperty(k)
+      case t if t =:= typeOf[Array[String]]=> (c: Configuration, k: String) => c.getRequiredStringArray(k)
+      case t => throw new UnsupportedOperationException(s"Type $t not supported")
+    }
+
+    conf
+      .getKeys.asScala
+      .map(k => k -> fun(conf, k).asInstanceOf[U])
+      .toMap
+  }
+
 
 }

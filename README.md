@@ -300,6 +300,9 @@ conf.getRequiredInt("property.key")
 // return Some(value) or None
 conf.getOptionalInt("property.key")
 
+// return Map("conf.key1" -> 123, "conf.key2" -> 456)
+conf.toMap[Int]
+
 ```
 Available for String, Array[String], Boolean, BigDecimal, Byte, Short, Int, Float, Long and Double.
 
