@@ -248,17 +248,17 @@ object ConfigurationImplicits {
    */
   private def toMap[U: TypeTag](conf: Configuration): Map[String, U] = {
     val fun = typeOf[U] match {
-      case t if t == typeOf[String] => (c: Configuration, k: String) => c.getRequiredString(k)
-      case t if t == typeOf[Boolean] => (c: Configuration, k: String) => c.getRequiredBoolean(k)
-      case t if t == typeOf[BigDecimal] => (c: Configuration, k: String) => c.getRequiredBigDecimal(k)
-      case t if t == typeOf[Byte] => (c: Configuration, k: String) => c.getRequiredByte(k)
-      case t if t == typeOf[Short] => (c: Configuration, k: String) => c.getRequiredShort(k)
-      case t if t == typeOf[Int] => (c: Configuration, k: String) => c.getRequiredInt(k)
-      case t if t == typeOf[Long] => (c: Configuration, k: String) => c.getRequiredLong(k)
-      case t if t == typeOf[Float] => (c: Configuration, k: String) => c.getRequiredFloat(k)
-      case t if t == typeOf[Double] => (c: Configuration, k: String) => c.getRequiredDouble(k)
-      case t if t == typeOf[AnyRef]=> (c: Configuration, k: String) => c.getProperty(k)
-      case t if t == typeOf[Array[String]]=> (c: Configuration, k: String) => c.getRequiredStringArray(k)
+      case t if t =:= typeOf[String] => (c: Configuration, k: String) => c.getRequiredString(k)
+      case t if t =:= typeOf[Boolean] => (c: Configuration, k: String) => c.getRequiredBoolean(k)
+      case t if t =:= typeOf[BigDecimal] => (c: Configuration, k: String) => c.getRequiredBigDecimal(k)
+      case t if t =:= typeOf[Byte] => (c: Configuration, k: String) => c.getRequiredByte(k)
+      case t if t =:= typeOf[Short] => (c: Configuration, k: String) => c.getRequiredShort(k)
+      case t if t =:= typeOf[Int] => (c: Configuration, k: String) => c.getRequiredInt(k)
+      case t if t =:= typeOf[Long] => (c: Configuration, k: String) => c.getRequiredLong(k)
+      case t if t =:= typeOf[Float] => (c: Configuration, k: String) => c.getRequiredFloat(k)
+      case t if t =:= typeOf[Double] => (c: Configuration, k: String) => c.getRequiredDouble(k)
+      case t if t =:= typeOf[AnyRef]=> (c: Configuration, k: String) => c.getProperty(k)
+      case t if t =:= typeOf[Array[String]]=> (c: Configuration, k: String) => c.getRequiredStringArray(k)
       case t => throw new UnsupportedOperationException(s"Type $t not supported")
     }
 

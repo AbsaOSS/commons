@@ -244,7 +244,7 @@ class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
 
   it should "implement convert config to map of Longs" in {
     val configuration = new MapConfiguration(Map("foo" -> "1", "bar" -> 2).asJava)
-    val map = configuration.toMap[Int]
+    val map = configuration.toMap[Long]
     map.apply("foo") should be(1L)
     map.apply("bar") should be(2L)
   }
