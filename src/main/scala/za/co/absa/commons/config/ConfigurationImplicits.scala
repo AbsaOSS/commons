@@ -239,26 +239,34 @@ object ConfigurationImplicits {
      * @tparam U type of values in returned map
      * @return map representation of the configuration
      */
-    def toMap[U: ClassTag]: Map[String, U] = {
-      val fun = implicitly[ClassTag[U]].runtimeClass match {
-        case t if t == classOf[String] => (c: Configuration, k: String) => c.getRequiredString(k)
-        case t if t == classOf[Boolean] => (c: Configuration, k: String) => c.getRequiredBoolean(k)
-        case t if t == classOf[BigDecimal] => (c: Configuration, k: String) => c.getRequiredBigDecimal(k)
-        case t if t == classOf[Byte] => (c: Configuration, k: String) => c.getRequiredByte(k)
-        case t if t == classOf[Short] => (c: Configuration, k: String) => c.getRequiredShort(k)
-        case t if t == classOf[Int] => (c: Configuration, k: String) => c.getRequiredInt(k)
-        case t if t == classOf[Long] => (c: Configuration, k: String) => c.getRequiredLong(k)
-        case t if t == classOf[Float] => (c: Configuration, k: String) => c.getRequiredFloat(k)
-        case t if t == classOf[Double] => (c: Configuration, k: String) => c.getRequiredDouble(k)
-        case t if t == classOf[AnyRef]=> (c: Configuration, k: String) => c.getProperty(k)
-        case t => throw new UnsupportedOperationException(s"Type $t not supported")
-      }
-
-      conf
-        .getKeys.asScala
-        .map(k => k -> fun(conf, k).asInstanceOf[U])
-        .toMap
-    }
+    def toMap[U: TypeTag]: Map[String, U] =
+      ConfigurationImplicits.toMap[U](conf)
   }
+
+  /**
+   * This method needs to be defined outside of the Value class since Scala has issues with TypeTag in Value classes
+   */
+  private def toMap[U: TypeTag](conf: Configuration): Map[String, U] = {
+    val fun = typeOf[U] match {
+      case t if t == typeOf[String] => (c: Configuration, k: String) => c.getRequiredString(k)
+      case t if t == typeOf[Boolean] => (c: Configuration, k: String) => c.getRequiredBoolean(k)
+      case t if t == typeOf[BigDecimal] => (c: Configuration, k: String) => c.getRequiredBigDecimal(k)
+      case t if t == typeOf[Byte] => (c: Configuration, k: String) => c.getRequiredByte(k)
+      case t if t == typeOf[Short] => (c: Configuration, k: String) => c.getRequiredShort(k)
+      case t if t == typeOf[Int] => (c: Configuration, k: String) => c.getRequiredInt(k)
+      case t if t == typeOf[Long] => (c: Configuration, k: String) => c.getRequiredLong(k)
+      case t if t == typeOf[Float] => (c: Configuration, k: String) => c.getRequiredFloat(k)
+      case t if t == typeOf[Double] => (c: Configuration, k: String) => c.getRequiredDouble(k)
+      case t if t == typeOf[AnyRef]=> (c: Configuration, k: String) => c.getProperty(k)
+      case t if t == typeOf[Array[String]]=> (c: Configuration, k: String) => c.getRequiredStringArray(k)
+      case t => throw new UnsupportedOperationException(s"Type $t not supported")
+    }
+
+    conf
+      .getKeys.asScala
+      .map(k => k -> fun(conf, k).asInstanceOf[U])
+      .toMap
+  }
+
 
 }

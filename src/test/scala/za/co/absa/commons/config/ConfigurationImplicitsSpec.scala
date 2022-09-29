@@ -263,6 +263,19 @@ class ConfigurationImplicitsSpec extends AnyFlatSpec with Matchers {
     map.apply("bar") should be(42)
   }
 
+  it should "implement convert config to map of Arrays of Strings" in {
+    val configuration = new MapConfiguration(Map("foo" -> "bar, zar, tar", "bla" -> "a").asJava)
+    val map = configuration.toMap[Array[String]]
+
+    map.apply("foo") should be(Array("bar", "zar", "tar"))
+    map.apply("bla") should be(Array("a"))
+  }
+
+  it should "throw when one of the arrays is missing" in {
+    val configuration = new MapConfiguration(Map("foo" -> "bar, zar, tar", "bla" -> "").asJava)
+    intercept[NoSuchElementException](configuration.toMap[Array[String]]).getMessage should include("bla")
+  }
+
   it should "throw when values in config doesn't match the requested type" in {
     val configuration = new MapConfiguration(Map("foo" -> 42, "bar" -> false).asJava)
     intercept[RuntimeException](configuration.toMap[Int])
