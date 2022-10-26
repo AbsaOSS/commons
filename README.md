@@ -32,6 +32,16 @@ mvn clean install -Pscala-2.13
 ./build-all.sh
 ```
 
+### Measuring code coverage
+```shell
+./mvn clean verify -Pcode-coverage
+```
+Code coverage will be generated on path:
+```aidl
+{local-path}\commons\target\jacoco
+```
+
+
 # Type extensions
 ## AnyExtension
 ```scala
