@@ -37,9 +37,9 @@ mvn clean install -Pscala-2.13
 ./mvn clean verify -Pcode-coverage
 ```
 Code coverage will be generated on path:
+```
 {local-path}\commons\target\jacoco
 ```
-
 
 # Type extensions
 ## AnyExtension
