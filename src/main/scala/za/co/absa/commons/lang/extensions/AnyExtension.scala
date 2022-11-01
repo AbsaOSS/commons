@@ -31,6 +31,24 @@ object AnyExtension {
      */
     def having[B](maybeArg: Option[B])(applyFn: (A, B) => A): A = optionally(applyFn, maybeArg)
 
+    /**
+     * Conditionally apply the given function on a decoratee object, WHEN the given condition holds.
+     *
+     * @param cond    a boolean value indicating if the condition holds
+     * @param applyFn a function to apply
+     * @return when a given condition is true, apply the function and return its result, otherwise returns the original decoratee object
+     */
+    def when(cond: Boolean)(applyFn: A => A): A = if (cond) applyFn(a) else a
+
+    /**
+     * Logically opposite to the `when()`.
+     * Conditionally apply the given function on a decoratee object, UNLESS the given condition holds.
+     *
+     * @param cond    a boolean value indicating if the condition holds
+     * @param applyFn a function to apply
+     * @return when a given condition is true, apply the function and return its result, otherwise returns the original decoratee object
+     */
+    def unless(cond: Boolean)(applyFn: A => A): A = when(!cond)(applyFn)
   }
 
 }

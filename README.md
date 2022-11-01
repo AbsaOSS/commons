@@ -60,6 +60,18 @@ new MyBuilder
   .withX(42)
   .withY(77)
   .having(maybeZ)(_.withZ)
+  
+// Conditionally call a method in a chain
+new MyBuilder
+  .withX(42)
+  .withY(77)
+  .when(shouldIncludeZ)(_.withZ(88))
+
+// ...same as `when()` but with inverted condition
+new MyBuilder
+  .withX(42)
+  .withY(77)
+  .unless(shouldExcludeZ)(_.withZ(88))
 ```
 ## ArrayExtension
 ```scala
