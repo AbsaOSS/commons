@@ -26,6 +26,7 @@ class AnyExtensionSpec extends AnyFunSpec with Matchers with MockitoSugar {
   import AnyExtension._
 
   describe("AnyOps") {
+
     describe("optionally()") {
 
       it("should do nothing when maybeArg is None") {
@@ -56,7 +57,29 @@ class AnyExtensionSpec extends AnyFunSpec with Matchers with MockitoSugar {
         aInt.optionally[Float]((i, b) => b.toInt, Some(0.0F)) shouldEqual 0
         aList.optionally[Float]((l, b) => List(b.toInt), Some(5.0F)) shouldEqual List(5)
       }
+    }
 
+    describe("when()") {
+
+      it("should only call a method when `cond` is true") {
+        val neverFn = mock[Int => Int]
+
+        (1 when true) (_ + 2) should be(3)
+        (1 when false) (neverFn) should be(1)
+
+        Mockito.verifyNoInteractions(neverFn)
+      }
+    }
+
+    describe("unless()") {
+
+      it("should only call a method when `cond` is false") {
+        val neverFn = mock[Int => Int]
+
+        (1 unless false) (_ + 2) should be(3)
+        (1 unless true) (neverFn) should be(1)
+        Mockito.verifyNoInteractions(neverFn)
+      }
     }
   }
 
