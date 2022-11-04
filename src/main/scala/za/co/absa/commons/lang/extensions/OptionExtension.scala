@@ -32,6 +32,15 @@ object OptionExtension {
     def toTry(failure: => Exception): Try[T] =
       option.map(Success(_)).getOrElse(Failure(failure))
 
+    /**
+     * Gets the `option` value or throws the provided exception
+     *
+     * @param exception the exception to throw in case the `option` is None
+     * @return
+     */
+    def getOrThrow(exception: => Throwable): T = {
+      option.getOrElse(throw exception)
+    }
   }
 
 }

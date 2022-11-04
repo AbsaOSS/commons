@@ -109,12 +109,17 @@ val someOption = Some("abc")
 
 // returns Success("abc")
 someOption.toTry(new Exception)
+// returns "abc"
+someOption.getOrThrow(new Exception)
 
 val noneOption = None
 val e = new Exception
 
 // returns Failure(e)
-someOption.toTry(e)
+noneOption.toTry(e)
+// throws the exception
+noneOption.getOrThrow(e)
+
 ```
 ## SeqExtension
 ```scala

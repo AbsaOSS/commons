@@ -42,4 +42,23 @@ class OptionExtensionSpec extends AnyFunSuite with Matchers {
     assert(result match { case Failure(e) => e.getMessage == "exception occurred" })
   }
 
+  test("OptionOps.getOrThrow - case Some") {
+    val option = Some("abc")
+    val expected = "abc"
+
+    val actual = option.getOrThrow(new Exception)
+
+    assert(expected == actual)
+  }
+
+  test("OptionOps.getOrThrow - case None") {
+    val option = None
+
+    val exception = intercept[IllegalArgumentException] {
+      option.getOrThrow(new IllegalArgumentException("exception occurred"))
+    }
+
+    assert(exception.getMessage == "exception occurred")
+  }
+
 }
