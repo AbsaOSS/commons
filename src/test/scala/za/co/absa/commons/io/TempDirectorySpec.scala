@@ -52,9 +52,7 @@ class TempDirectorySpec extends AnyFlatSpec with Matchers {
     val tempDirectoryPath: String = tempDirectory.toString
     val expectedPath = tempDirectory.path.toAbsolutePath.toString.replace("\\", "/")
 
-    expectedPath should equal(tempDirectoryPath)
-    new File(tempDirectoryPath).exists() should be(true)
-    tempDirectoryPath.contains("\\") should be(false)
+    tempDirectoryPath should equal(expectedPath)
   }
 
   behavior of "`toURI`"
@@ -63,8 +61,7 @@ class TempDirectorySpec extends AnyFlatSpec with Matchers {
     val tempDirectory = TempDirectory().deleteOnExit()
     val expectedURIString = s"file:/${tempDirectory.toString}/".replace("//", "/")
 
-    expectedURIString should equal(tempDirectory.toURI.toString)
-    new File(tempDirectory.toURI).exists() should be(true)
+    tempDirectory.toURI.toString should equal(expectedURIString)
   }
 
   behavior of "`delete`"
