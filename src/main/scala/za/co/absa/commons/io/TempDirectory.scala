@@ -80,7 +80,7 @@ class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
    *
    * @return string representation of current TempDirectory instance
    */
-  override def toString: String = path.toFile.toString.replace("\\", "/")
+  override def toString: String = path.toString.replace("\\", "/")
 }
 
 object TempDirectory {

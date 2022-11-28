@@ -36,7 +36,7 @@ class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
    *
    * @return string representation of current TempFile instance
    */
-  override def toString: String = path.toFile.toString.replace("\\", "/")
+  override def toString: String = path.toString.replace("\\", "/")
 }
 
 object TempFile {
