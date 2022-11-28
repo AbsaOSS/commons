@@ -18,6 +18,7 @@ package za.co.absa.commons.io
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import java.io.File
 
 class TempFileSpec extends AnyFlatSpec with Matchers {
   behavior of "`apply`"
@@ -40,4 +41,20 @@ class TempFileSpec extends AnyFlatSpec with Matchers {
     name2 should endWith("bar")
     name3 should (startWith("foo") and endWith("bar"))
   }
+
+  it should "return tempFile as string" in {
+    val tempFilePath: String = TempFile().deleteOnExit().toString
+
+    new File(tempFilePath).exists() should be(true)
+    tempFilePath.contains("\\") should be(false)
+  }
+
+  it should "return valid URI" in {
+    val tempFile = TempFile().deleteOnExit()
+    val expectedURIString = s"file:/${tempFile.toString}"
+
+    expectedURIString should equal(tempFile.toURI.toString)
+    new File(tempFile.toURI).exists() should be(true)
+  }
+
 }
