@@ -16,6 +16,7 @@
 
 package za.co.absa.commons.io
 
+import java.net.URI
 import java.nio.file.{Files, Path}
 
 class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
@@ -26,6 +27,16 @@ class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
     path.toFile.deleteOnExit()
     this
   }
+
+  def toURI: URI = path.toFile.toURI
+
+  /**
+   * The TempFile object will be converted to String type.
+   * Automated "\ -> /" conversion will be performed to reach stable outputs across different OS.
+   *
+   * @return string representation of current TempFile instance
+   */
+  override def toString: String = path.toString.replace("\\", "/")
 }
 
 object TempFile {
