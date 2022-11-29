@@ -16,11 +16,12 @@
 
 package za.co.absa.commons.io
 
+import org.apache.commons.io.FileUtils
+
 import java.io.IOException
 import java.net.URI
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
-import org.apache.commons.io.FileUtils
 
 /**
   * Represents a temporary directory
@@ -29,9 +30,9 @@ import org.apache.commons.io.FileUtils
   * @param suffix   name suffix
   * @param pathOnly if <code>true</code>, no physical directory will be created on the file system
   */
-class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
-  val path: Path = Files.createTempFile(prefix, suffix)
-  Files.delete(path)
+class TempDirectory private[io](prefix: String, suffix: String, pathOnly: Boolean, tmpPathFactory: (String, String) => Path) {
+  val path: Path = tmpPathFactory(prefix, suffix)
+  Files.deleteIfExists(path)
   if (!pathOnly) Files.createDirectory(path)
 
   private lazy val hook = new Thread() {
@@ -85,5 +86,5 @@ class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
 
 object TempDirectory {
   def apply(prefix: String = "", suffix: String = "", pathOnly: Boolean = false): TempDirectory =
-    new TempDirectory(prefix, suffix, pathOnly)
+    new TempDirectory(prefix, suffix, pathOnly, Files.createTempFile(_, _))
 }

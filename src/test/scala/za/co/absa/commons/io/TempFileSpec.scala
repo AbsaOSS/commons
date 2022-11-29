@@ -18,7 +18,10 @@ package za.co.absa.commons.io
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import java.io.File
+
+import java.net.URI
+import java.nio.file.Paths
+import scala.util.Properties
 
 class TempFileSpec extends AnyFlatSpec with Matchers {
   behavior of "`apply`"
@@ -45,21 +48,27 @@ class TempFileSpec extends AnyFlatSpec with Matchers {
   behavior of "`asString`"
 
   it should "return valid string path" in {
-    val tempFile = TempFile().deleteOnExit()
-    val tempFilePath: String = tempFile.asString
-    val expectedPath = tempFile.path.toAbsolutePath.toString.replace("\\", "/")
+    val tempFile = new TempFile(
+      prefix = "",
+      suffix = "",
+      pathOnly = false,
+      tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_filename")
+    ).deleteOnExit()
 
-    tempFilePath should equal(expectedPath)
+    tempFile.asString should equal(s"${Properties.tmpDir}/fake_tmp_filename")
   }
 
   behavior of "`toURI`"
 
   it should "return valid URI" in {
-    val tempFile = TempFile().deleteOnExit()
-    val expectedURIString = s"file:/${tempFile.path.toAbsolutePath.toString.replace("\\", "/")}"
-      .replace("//", "/")
+    val tempFile = new TempFile(
+      prefix = "",
+      suffix = "",
+      pathOnly = false,
+      tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_filename")
+    ).deleteOnExit()
 
-    tempFile.toURI.toString should equal(expectedURIString)
+    tempFile.toURI should equal(new URI(s"file:${Properties.tmpDir}/fake_tmp_filename"))
   }
 
 }

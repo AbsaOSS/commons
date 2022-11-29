@@ -19,9 +19,9 @@ package za.co.absa.commons.io
 import java.net.URI
 import java.nio.file.{Files, Path}
 
-class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
-  val path: Path = Files.createTempFile(prefix, suffix)
-  if (pathOnly) Files.delete(path)
+class TempFile private[io](prefix: String, suffix: String, pathOnly: Boolean, tmpPathFactory: (String, String) => Path) {
+  val path: Path = tmpPathFactory(prefix, suffix)
+  if (pathOnly) Files.deleteIfExists(path)
 
   def deleteOnExit(): this.type = {
     path.toFile.deleteOnExit()
@@ -41,5 +41,5 @@ class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
 
 object TempFile {
   def apply(prefix: String = "", suffix: String = "", pathOnly: Boolean = false): TempFile =
-    new TempFile(prefix, suffix, pathOnly)
+    new TempFile(prefix, suffix, pathOnly, Files.createTempFile(_, _))
 }
