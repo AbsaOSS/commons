@@ -598,8 +598,14 @@ For example:
 An easy way to create a temporary file or directory with the support for automatic recursive deletion (as `rm -rf`) on JVM shutdown.
 ### Usage
 ```scala
-val myTmpFile = TempFile.deleteOnExit.path
-val myTmpDir = TempDirectory.deleteOnExit.path
+val myTmpFile: Path = TempFile.deleteOnExit.path
+val myTmpDir: Path = TempDirectory.deleteOnExit.path
+
+val myTmpFile: String = TempFile.deleteOnExit.asString
+val myTmpDir: String = TempDirectory.deleteOnExit.asSTring
+
+val myTmpFile: URI = TempFile.deleteOnExit.toURI
+val myTmpDir: URI = TempDirectory.deleteOnExit.toURI
 ```
 It also mimics Java IO API for a similar purpose
 ```scala

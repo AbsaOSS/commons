@@ -45,11 +45,11 @@ class TempDirectorySpec extends AnyFlatSpec with Matchers {
     name3 should (startWith("foo") and endWith("bar"))
   }
 
-  behavior of "`toString`"
+  behavior of "`asString`"
 
   it should "return valid string path" in {
     val tempDirectory = TempDirectory().deleteOnExit()
-    val tempDirectoryPath: String = tempDirectory.toString
+    val tempDirectoryPath: String = tempDirectory.asString
     val expectedPath = tempDirectory.path.toAbsolutePath.toString.replace("\\", "/")
 
     tempDirectoryPath should equal(expectedPath)
@@ -59,7 +59,7 @@ class TempDirectorySpec extends AnyFlatSpec with Matchers {
 
   it should "return valid URI" in {
     val tempDirectory = TempDirectory().deleteOnExit()
-    val expectedURIString = s"file:/${tempDirectory.toString}/".replace("//", "/")
+    val expectedURIString = s"file:/${tempDirectory.path.toAbsolutePath.toString.replace("\\", "/")}/"
 
     tempDirectory.toURI.toString should equal(expectedURIString)
   }
