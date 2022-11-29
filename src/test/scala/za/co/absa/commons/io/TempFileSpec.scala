@@ -56,7 +56,9 @@ class TempFileSpec extends AnyFlatSpec with Matchers {
 
   it should "return valid URI" in {
     val tempFile = TempFile().deleteOnExit()
-    val expectedURIString = s"file:/${tempFile.path.toAbsolutePath.toString.replace("\\", "/")}"
+    val expectedURIString = s"file:/${tempFile.path.toAbsolutePath.toString
+      .replace("\\", "/")
+      .replace("//", "/")}"
 
     tempFile.toURI.toString should equal(expectedURIString)
   }
