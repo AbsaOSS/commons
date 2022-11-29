@@ -605,6 +605,15 @@ It also mimics Java IO API for a similar purpose
 ```scala
 TempFile("myPrefix", "mySuffix")
 ```
+Method to get OS stable outputs
+```scala
+val myTmpFile = TempFile.deleteOnExit.asString
+val myTmpDir = TempDirectory.deleteOnExit.asString
+
+val myTmpFileURI = TempFile.deleteOnExit.asURI
+val myTmpDirURI = TempDirectory.deleteOnExit.asURI
+```
+
 
 ## LocalFileSystemUtils
 An object containing useful functions that operate on local file system.

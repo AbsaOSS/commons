@@ -29,6 +29,8 @@ class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
   }
 
   /**
+   * The file path will converted to URI type.
+   *
    * @return path as URI
    */
   def asURI: URI = path.toFile.toURI

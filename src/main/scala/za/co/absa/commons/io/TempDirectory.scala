@@ -68,6 +68,8 @@ class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
   }
 
   /**
+   * The directory path will converted to URI type.
+   *
    * @return path as URI
    */
   def asURI: URI = path.toFile.toURI
