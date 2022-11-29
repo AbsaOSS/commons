@@ -42,23 +42,23 @@ class TempFileSpec extends AnyFlatSpec with Matchers {
     name3 should (startWith("foo") and endWith("bar"))
   }
 
-  behavior of "`toString`"
+  behavior of "`asString`"
 
   it should "return valid string path" in {
     val tempFile = TempFile().deleteOnExit()
-    val tempFilePath: String = tempFile.toString
+    val tempFilePath: String = tempFile.asString
     val expectedPath = tempFile.path.toAbsolutePath.toString.replace("\\", "/")
 
     tempFilePath should equal(expectedPath)
   }
 
-  behavior of "`toURI`"
+  behavior of "`asURI`"
 
   it should "return valid URI" in {
     val tempFile = TempFile().deleteOnExit()
-    val expectedURIString = s"file:/${tempFile.toString}".replace("//", "/")
+    val expectedURIString = s"file:/${tempFile.asString}".replace("//", "/")
 
-    tempFile.toURI.toString should equal(expectedURIString)
+    tempFile.asURI.toString should equal(expectedURIString)
   }
 
 }

@@ -68,19 +68,17 @@ class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
   }
 
   /**
-   * The directory path will converted to URI type.
-   *
    * @return path as URI
    */
-  def toURI: URI = path.toFile.toURI
+  def asURI: URI = path.toFile.toURI
 
   /**
-   * The TempDirectory object will be converted to String type.
+   * Create OS stable string representation of The TempDirectory instance.
    * Automated "\ -> /" conversion will be performed to reach stable outputs across different OS.
    *
-   * @return string representation of current TempDirectory instance
+   * @return path as formatted string
    */
-  override def toString: String = path.toString.replace("\\", "/")
+  def asString: String = path.toString.replace("\\", "/")
 }
 
 object TempDirectory {

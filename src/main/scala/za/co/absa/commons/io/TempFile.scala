@@ -28,15 +28,18 @@ class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
     this
   }
 
-  def toURI: URI = path.toFile.toURI
+  /**
+   * @return path as URI
+   */
+  def asURI: URI = path.toFile.toURI
 
   /**
-   * The TempFile object will be converted to String type.
-   * Automated "\ -> /" conversion will be performed to reach stable outputs across different OS.
+   * Create OS stable string representation of The TempFile instance.
+   * Automated "\ -> /" conversion will be performed to reach stable outputs on Windows OS.
    *
-   * @return string representation of current TempFile instance
+   * @return path as formatted string
    */
-  override def toString: String = path.toString.replace("\\", "/")
+  def asString: String = path.toString.replace("\\", "/")
 }
 
 object TempFile {
