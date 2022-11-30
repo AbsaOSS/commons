@@ -18,6 +18,7 @@ package za.co.absa.commons.io
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import za.co.absa.commons.lang.OperatingSystem
 
 import java.net.URI
 import java.nio.file.Paths
@@ -55,7 +56,7 @@ class TempFileSpec extends AnyFlatSpec with Matchers {
       tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_filename")
     ).deleteOnExit()
 
-    tempFile.asString should equal(s"${Properties.tmpDir}/fake_tmp_filename")
+    tempFile.asString should equal(s"${Properties.tmpDir}fake_tmp_filename".replace("\\", "/"))
   }
 
   behavior of "`toURI`"
@@ -68,7 +69,13 @@ class TempFileSpec extends AnyFlatSpec with Matchers {
       tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_filename")
     ).deleteOnExit()
 
-    tempFile.toURI should equal(new URI(s"file:${Properties.tmpDir}/fake_tmp_filename"))
+    val sep = OperatingSystem.getCurrentOs match {
+      case OperatingSystem.WINDOWS => "/"
+      case _ => ""
+    }
+    val expectedTmpPath = s"file:$sep${Properties.tmpDir}fake_tmp_filename".replace("\\", "/")
+
+    tempFile.toURI should equal(new URI(expectedTmpPath))
   }
 
 }

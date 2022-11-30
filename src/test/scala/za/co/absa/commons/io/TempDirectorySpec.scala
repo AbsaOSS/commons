@@ -18,6 +18,7 @@ package za.co.absa.commons.io
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import za.co.absa.commons.lang.OperatingSystem
 
 import java.io.File
 import java.net.URI
@@ -55,16 +56,16 @@ class TempDirectorySpec extends AnyFlatSpec with Matchers {
       prefix = "",
       suffix = "",
       pathOnly = false,
-      tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_filename")
+      tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_dirname")
     ).deleteOnExit()
 
-    tempDirectory.asString should equal(s"${Properties.tmpDir}/fake_tmp_filename")
+    tempDirectory.asString should equal(s"${Properties.tmpDir}fake_tmp_dirname".replace("\\", "/"))
   }
 
   behavior of "`toURI`"
 
   it should "return valid URI" in {
-    val fakeTmpPath = Paths.get(Properties.tmpDir, "fake_tmp_filename")
+    val fakeTmpPath = Paths.get(Properties.tmpDir, "fake_tmp_dirname")
     val tempDirectory = new TempDirectory(
       prefix = "",
       suffix = "",
@@ -72,7 +73,13 @@ class TempDirectorySpec extends AnyFlatSpec with Matchers {
       tmpPathFactory = (_, _) => fakeTmpPath
     ).deleteOnExit()
 
-    tempDirectory.toURI should equal(new URI(s"file:${Properties.tmpDir}/fake_tmp_filename/"))
+    val sep = OperatingSystem.getCurrentOs match {
+      case OperatingSystem.WINDOWS => "/"
+      case _ => ""
+    }
+    val expectedTmpPath = s"file:$sep${Properties.tmpDir}fake_tmp_dirname/".replace("\\", "/")
+
+    tempDirectory.toURI should equal(new URI(expectedTmpPath))
   }
 
   behavior of "`delete`"
