@@ -59,7 +59,7 @@ class TempFileSpec extends AnyFlatSpec with Matchers {
   it should "return valid URI" in {
     val tempFile = TempFile(prefix = "fake_tmp_").deleteOnExit()
 
-    tempFile.toURI shouldNot be(null)
+    Option(tempFile.toURI) should not be empty
     tempFile.toURI shouldBe a[URI]
     tempFile.toURI.toString should startWith("file:")
     tempFile.toURI.toString should include("/fake_tmp_")
