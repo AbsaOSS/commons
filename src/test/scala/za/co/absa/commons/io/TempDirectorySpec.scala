@@ -16,10 +16,11 @@
 
 package za.co.absa.commons.io
 
-import java.io.File
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.io.File
+import java.net.URI
 
 
 class TempDirectorySpec extends AnyFlatSpec with Matchers {
@@ -45,23 +46,23 @@ class TempDirectorySpec extends AnyFlatSpec with Matchers {
     name3 should (startWith("foo") and endWith("bar"))
   }
 
-  behavior of "`toString`"
+  behavior of "`asString`"
 
-  it should "return valid string path" in {
-    val tempDirectory = TempDirectory().deleteOnExit()
-    val tempDirectoryPath: String = tempDirectory.toString
-    val expectedPath = tempDirectory.path.toAbsolutePath.toString.replace("\\", "/")
+  it should "return valid string path with unix slashes" in {
+    val tempDirectory = TempDirectory(prefix = "fake_tmp_").deleteOnExit()
 
-    tempDirectoryPath should equal(expectedPath)
+    tempDirectory.asString should include("/fake_tmp_")
   }
 
   behavior of "`toURI`"
 
   it should "return valid URI" in {
-    val tempDirectory = TempDirectory().deleteOnExit()
-    val expectedURIString = s"file:/${tempDirectory.toString}/".replace("//", "/")
+    val tempDirectory = TempDirectory(prefix = "fake_tmp_").deleteOnExit()
 
-    tempDirectory.toURI.toString should equal(expectedURIString)
+    Option(tempDirectory.toURI) should not be empty
+    tempDirectory.toURI shouldBe a[URI]
+    tempDirectory.toURI.toString should startWith("file:")
+    tempDirectory.toURI.toString should include("/fake_tmp_")
   }
 
   behavior of "`delete`"

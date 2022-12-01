@@ -31,12 +31,12 @@ class TempFile private(prefix: String, suffix: String, pathOnly: Boolean) {
   def toURI: URI = path.toFile.toURI
 
   /**
-   * The TempFile object will be converted to String type.
-   * Automated "\ -> /" conversion will be performed to reach stable outputs across different OS.
+   * The TempFile object will be converted to string representation which is stable and
+   * equal on all platforms.
    *
    * @return string representation of current TempFile instance
    */
-  override def toString: String = path.toString.replace("\\", "/")
+  def asString: String = path.toString.replace("\\", "/")
 }
 
 object TempFile {

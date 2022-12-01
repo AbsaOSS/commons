@@ -16,11 +16,12 @@
 
 package za.co.absa.commons.io
 
+import org.apache.commons.io.FileUtils
+
 import java.io.IOException
 import java.net.URI
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
-import org.apache.commons.io.FileUtils
 
 /**
   * Represents a temporary directory
@@ -31,7 +32,7 @@ import org.apache.commons.io.FileUtils
   */
 class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
   val path: Path = Files.createTempFile(prefix, suffix)
-  Files.delete(path)
+  Files.deleteIfExists(path)
   if (!pathOnly) Files.createDirectory(path)
 
   private lazy val hook = new Thread() {
@@ -75,12 +76,12 @@ class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
   def toURI: URI = path.toFile.toURI
 
   /**
-   * The TempDirectory object will be converted to String type.
-   * Automated "\ -> /" conversion will be performed to reach stable outputs across different OS.
+   * The TempDirectory object will be converted to string representation which is stable and
+   * equal on all platforms.
    *
    * @return string representation of current TempDirectory instance
    */
-  override def toString: String = path.toString.replace("\\", "/")
+  def asString: String = path.toString.replace("\\", "/")
 }
 
 object TempDirectory {
