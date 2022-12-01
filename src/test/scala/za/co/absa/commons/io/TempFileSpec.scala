@@ -49,33 +49,21 @@ class TempFileSpec extends AnyFlatSpec with Matchers {
   behavior of "`asString`"
 
   it should "return valid string path" in {
-    val tempFile = new TempFile(
-      prefix = "",
-      suffix = "",
-      pathOnly = false,
-      tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_filename")
-    ).deleteOnExit()
+    val tempFile = TempFile(prefix = "fake_tmp_").deleteOnExit()
 
-    tempFile.asString should equal(s"${Properties.tmpDir}fake_tmp_filename".replace("\\", "/"))
+    tempFile.asString should include("/fake_tmp_")
   }
 
   behavior of "`toURI`"
 
   it should "return valid URI" in {
-    val tempFile = new TempFile(
-      prefix = "",
-      suffix = "",
-      pathOnly = false,
-      tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_filename")
-    ).deleteOnExit()
+    val tempFile = TempFile(prefix = "fake_tmp_").deleteOnExit()
 
-    val sep = OperatingSystem.getCurrentOs match {
-      case OperatingSystem.WINDOWS => "/"
-      case _ => ""
-    }
-    val expectedTmpPath = s"file:$sep${Properties.tmpDir}fake_tmp_filename".replace("\\", "/")
+    tempFile.toURI shouldNot be(null)
+    tempFile.toURI shouldBe a[URI]
+    tempFile.toURI.toString should startWith("file:")
+    tempFile.toURI.toString should include("/fake_tmp_")
 
-    tempFile.toURI should equal(new URI(expectedTmpPath))
   }
 
 }

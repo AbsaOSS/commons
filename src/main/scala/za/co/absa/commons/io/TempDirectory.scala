@@ -30,8 +30,8 @@ import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
   * @param suffix   name suffix
   * @param pathOnly if <code>true</code>, no physical directory will be created on the file system
   */
-class TempDirectory private[io](prefix: String, suffix: String, pathOnly: Boolean, tmpPathFactory: (String, String) => Path) {
-  val path: Path = tmpPathFactory(prefix, suffix)
+class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
+  val path: Path = Files.createTempFile(prefix, suffix)
   Files.deleteIfExists(path)
   if (!pathOnly) Files.createDirectory(path)
 
@@ -86,5 +86,5 @@ class TempDirectory private[io](prefix: String, suffix: String, pathOnly: Boolea
 
 object TempDirectory {
   def apply(prefix: String = "", suffix: String = "", pathOnly: Boolean = false): TempDirectory =
-    new TempDirectory(prefix, suffix, pathOnly, Files.createTempFile(_, _))
+    new TempDirectory(prefix, suffix, pathOnly)
 }

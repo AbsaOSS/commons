@@ -18,12 +18,9 @@ package za.co.absa.commons.io
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import za.co.absa.commons.lang.OperatingSystem
 
 import java.io.File
 import java.net.URI
-import java.nio.file.Paths
-import scala.util.Properties
 
 
 class TempDirectorySpec extends AnyFlatSpec with Matchers {
@@ -51,35 +48,21 @@ class TempDirectorySpec extends AnyFlatSpec with Matchers {
 
   behavior of "`asString`"
 
-  it should "return valid string path" in {
-    val tempDirectory = new TempDirectory(
-      prefix = "",
-      suffix = "",
-      pathOnly = false,
-      tmpPathFactory = (_, _) => Paths.get(Properties.tmpDir, "fake_tmp_dirname")
-    ).deleteOnExit()
+  it should "return valid string path with unix slashes" in {
+    val tempDirectory = TempDirectory(prefix = "fake_tmp_").deleteOnExit()
 
-    tempDirectory.asString should equal(s"${Properties.tmpDir}fake_tmp_dirname".replace("\\", "/"))
+    tempDirectory.asString should include("/fake_tmp_")
   }
 
   behavior of "`toURI`"
 
   it should "return valid URI" in {
-    val fakeTmpPath = Paths.get(Properties.tmpDir, "fake_tmp_dirname")
-    val tempDirectory = new TempDirectory(
-      prefix = "",
-      suffix = "",
-      pathOnly = false,
-      tmpPathFactory = (_, _) => fakeTmpPath
-    ).deleteOnExit()
+    val tempDirectory = TempDirectory(prefix = "fake_tmp_").deleteOnExit()
 
-    val sep = OperatingSystem.getCurrentOs match {
-      case OperatingSystem.WINDOWS => "/"
-      case _ => ""
-    }
-    val expectedTmpPath = s"file:$sep${Properties.tmpDir}fake_tmp_dirname/".replace("\\", "/")
-
-    tempDirectory.toURI should equal(new URI(expectedTmpPath))
+    tempDirectory.toURI shouldNot be(null)
+    tempDirectory.toURI shouldBe a[URI]
+    tempDirectory.toURI.toString should startWith("file:")
+    tempDirectory.toURI.toString should include("/fake_tmp_")
   }
 
   behavior of "`delete`"
