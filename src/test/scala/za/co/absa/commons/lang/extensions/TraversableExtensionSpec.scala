@@ -25,6 +25,27 @@ class TraversableExtensionSpec extends AnyFunSpec with Matchers with MockitoSuga
   import TraversableExtension._
 
   describe("TraversableOps") {
+    describe("toNonEmptyOption()") {
+
+      it("should return None if the traversable is null") {
+        val traversable: Traversable[Int] = null
+
+        traversable.toNonEmptyOption shouldEqual None
+      }
+
+      it("should return None if the traversable is empty") {
+        val traversable: Traversable[Int] = List[Int]()
+
+        traversable.toNonEmptyOption shouldEqual None
+      }
+
+      it("should return Some(traversable) if the traversable is not empty") {
+        val traversable: Traversable[Int] = List[Int](1, 2, 3)
+
+        traversable.toNonEmptyOption shouldEqual Some(traversable)
+      }
+    }
+
     describe("asOption()") {
 
       it("should return None if the traversable is null") {
@@ -44,7 +65,6 @@ class TraversableExtensionSpec extends AnyFunSpec with Matchers with MockitoSuga
 
         traversable.asOption shouldEqual Some(traversable)
       }
-
     }
   }
 

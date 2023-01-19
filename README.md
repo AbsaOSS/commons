@@ -99,7 +99,7 @@ iter.fetchToArray(arr, 7, 42) // returns a number of actually copied items
 import za.co.absa.commons.lang.extensions.NonOptionExtension._
 
 // returns the object as Some(_) if anyNonOptionObject is not null, None otherwise
-anyNonOptionObject.asOption
+anyNonOptionObject.toOption
 ```
 ## OptionExtension
 ```scala
@@ -168,8 +168,8 @@ import za.co.absa.commons.lang.extensions.StringExtension._
 ```scala
 import za.co.absa.commons.lang.extensions.TraversableExtension._
 
-Traversable(1, 2, 3).asOption // Some(Traversable(1, 2, 3))
-Traversable().asOption // None
+Traversable(1, 2, 3).toNonEmptyOption // Some(Traversable(1, 2, 3))
+Traversable().toNonEmptyOption // None
 ```
 ## TraversableOnceExtension
 ```scala
@@ -180,7 +180,6 @@ List(1, 2, 1).distinctBy(identity) // List(1, 2)
 List(1, 2, 1, 0, 5).distinctBy(a => a % 2) // List(1, 2)
 ```
 
-NOTE!!!!!!!!! add UrisConnection
 
 # Collection implicits
 
