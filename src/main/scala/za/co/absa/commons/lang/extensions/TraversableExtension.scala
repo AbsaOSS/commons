@@ -21,9 +21,20 @@ object TraversableExtension {
   implicit class TraversableOps[A <: Traversable[_]](val xs: A) extends AnyVal {
 
     /**
-     * Returns None if Traversable is null or is empty, otherwise returns Some(traversable).
+     * @return None if Traversable is null or is empty, otherwise returns Some(traversable).
      */
+    @deprecated("Use toNonEmptyOption instead")
     def asOption: Option[A] = if (xs == null || xs.isEmpty) None else Some(xs)
+
+    /**
+     * Converts Traversable to non empty option.
+     *
+     * Use method from [[za.co.absa.commons.lang.extensions.NonOptionExtension]] to just wrap the Traversable in Option
+     * without the emptiness check.
+     *
+     * @return None if Traversable is null or is empty, otherwise returns Some(traversable).
+     */
+    def toNonEmptyOption: Option[A] = if (xs == null || xs.isEmpty) None else Some(xs)
 
   }
 

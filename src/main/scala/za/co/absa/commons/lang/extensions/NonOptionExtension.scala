@@ -22,8 +22,10 @@ object NonOptionExtension {
 
   implicit class NonOptionOps[A <: Any : not[Option[_]]#λ](a: A) {
 
+    @deprecated("Use toOption instead")
     def asOption: Option[A] = Option(a)
 
+    def toOption: Option[A] = Option(a)
   }
 
 }
