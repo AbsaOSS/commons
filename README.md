@@ -34,7 +34,7 @@ mvn clean install -Pscala-2.13
 
 ### Measuring code coverage
 ```shell
-./mvn clean verify -Pcode-coverage
+./mvn clean verify -Pcode-coverage 
 ```
 Code coverage will be generated on path:
 ```

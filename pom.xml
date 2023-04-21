@@ -553,9 +553,9 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.jacoco</groupId>
+                        <groupId>za.co.absa.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.8</version>
+                        <version>0.8.9</version>
                         <executions>
                             <execution>
                                 <id>jacoco-prepare-agent</id>
@@ -569,7 +569,9 @@
                                     <goal>report</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
+                                    <title>${project.name} - ${scala.version}</title>
+                                    <doMethodFiltration>true</doMethodFiltration>
+                                    <doScalaMethodFiltration>true</doScalaMethodFiltration>
                                 </configuration>
                             </execution>
                         </executions>
