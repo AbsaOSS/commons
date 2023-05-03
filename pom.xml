@@ -90,6 +90,9 @@
         <!-- Controlled by `scala-cross-build` plugin -->
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
+
+        <!-- Test -->
+        <jacoco.version>0.8.10</jacoco.version>
     </properties>
 
     <scm>
@@ -555,7 +558,7 @@
                     <plugin>
                         <groupId>za.co.absa.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.9</version>
+                        <version>${jacoco.version}</version>
                         <executions>
                             <execution>
                                 <id>jacoco-prepare-agent</id>
