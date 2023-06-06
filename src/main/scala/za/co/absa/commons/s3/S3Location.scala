@@ -41,11 +41,11 @@ object SimpleS3Location {
    */
   private val S3LocationRx: Regex = "^(s3[an]?)://([-a-z0-9.]{3,63})/(.*)$".r
 
-  implicit class SimpleS3LocationExt(val path: String) extends AnyVal {
+  def apply(path: String): SimpleS3Location = {
+    path.toSimpleS3Location.getOrElse(throw new IllegalArgumentException(s"Could not parse S3 location from $path!"))
+  }
 
-    def apply(path: String): SimpleS3Location = {
-      path.toSimpleS3Location.getOrElse(throw new IllegalArgumentException(s"Could not parse S3 location from $path!"))
-    }
+  implicit class SimpleS3LocationExt(val path: String) extends AnyVal {
 
     def toSimpleS3Location: Option[SimpleS3Location] = PartialFunction.condOpt(path) {
       case S3LocationRx(protocol, bucketName, relativePath) =>
@@ -54,15 +54,15 @@ object SimpleS3Location {
 
     def isValidS3Path: Boolean = S3LocationRx.pattern.matcher(path).matches
 
-    def ensureS3LocationEndsWithoutSlash(path: String): SimpleS3Location = {
-      val parsedS3Location = this.apply(path)
+    def ensureS3LocationEndsWithoutSlash: SimpleS3Location = {
+      val parsedS3Location = apply(path)
 
-      if (parsedS3Location.path.endsWith("/")) parsedS3Location.copy(path=path.dropRight(1))
+      if (parsedS3Location.path.endsWith("/")) parsedS3Location.copy(path=parsedS3Location.path.dropRight(1))
       else parsedS3Location
     }
 
-    def ensureS3LocationEndsWithSlash(path: String): SimpleS3Location = {
-      val parsedS3Location = this.apply(path)
+    def ensureS3LocationEndsWithSlash: SimpleS3Location = {
+      val parsedS3Location = apply(path)
 
       if (parsedS3Location.path.endsWith("/")) parsedS3Location
       else {
