@@ -30,6 +30,7 @@ class S3LocationSpec extends AnyFlatSpec with Matchers {
   it should "correctly express the s3 string" in {
     SimpleS3Location("s3", "mybucket-123", "path/to/file.ext").asSimpleS3LocationString shouldBe "s3://mybucket-123/path/to/file.ext"
     SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/").asSimpleS3LocationString shouldBe "s3n://mybucket-123/path/to/ends/with/slash/"
+    SimpleS3Location("s3n", "mybucket-123", "path/to/ends/without/slash").asSimpleS3LocationString shouldBe "s3n://mybucket-123/path/to/ends/without/slash"
     SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext").asSimpleS3LocationString shouldBe "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext"
   }
 
@@ -48,6 +49,7 @@ class S3LocationSpec extends AnyFlatSpec with Matchers {
   it should "check path using isValidS3Path" in {
     "s3://mybucket-123/path/to/file.ext".isValidS3Path shouldBe true
     "s3n://mybucket-123/path/to/ends/with/slash/".isValidS3Path shouldBe true
+    "s3n://mybucket-123/path/to/ends/without/slash".isValidS3Path shouldBe true
     "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".isValidS3Path shouldBe true
 
     "s3x://mybucket-123/path/to/file/on/invalid/prefix".isValidS3Path shouldBe false

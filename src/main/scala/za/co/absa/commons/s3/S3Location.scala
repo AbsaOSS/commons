@@ -69,7 +69,7 @@ object SimpleS3Location {
         val lastPartOfS3Path = parsedS3Location.path.split("/").last
         if (lastPartOfS3Path.contains("."))
           throw new IllegalArgumentException(
-            s"Could not add '/' into S3 location because it contains file location: ${parsedS3Location.path}")
+            s"Could not add '/' into S3 location because it contains file location: ${parsedS3Location.path}"
           )
 
         parsedS3Location.copy(path=parsedS3Location.path + "/")
