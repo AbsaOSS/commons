@@ -43,16 +43,38 @@ object SimpleS3Location {
 
   implicit class SimpleS3LocationExt(val path: String) extends AnyVal {
 
+    def apply(path: String): SimpleS3Location = {
+      path.toSimpleS3Location.getOrElse(throw new IllegalArgumentException(s"Could not parse S3 location from $path!"))
+    }
+
     def toSimpleS3Location: Option[SimpleS3Location] = PartialFunction.condOpt(path) {
       case S3LocationRx(protocol, bucketName, relativePath) =>
         SimpleS3Location(protocol, bucketName, relativePath)
     }
 
     def isValidS3Path: Boolean = S3LocationRx.pattern.matcher(path).matches
-  }
 
-  def apply(path: String): SimpleS3Location = {
-    path.toSimpleS3Location.getOrElse(throw new IllegalArgumentException(s"Could not parse S3 location from $path!"))
+    def ensureS3LocationEndsWithoutSlash(path: String): SimpleS3Location = {
+      val parsedS3Location = this.apply(path)
+
+      if (parsedS3Location.path.endsWith("/")) parsedS3Location.copy(path=path.dropRight(1))
+      else parsedS3Location
+    }
+
+    def ensureS3LocationEndsWithSlash(path: String): SimpleS3Location = {
+      val parsedS3Location = this.apply(path)
+
+      if (parsedS3Location.path.endsWith("/")) parsedS3Location
+      else {
+        val lastPartOfS3Path = parsedS3Location.path.split("/").last
+        if (lastPartOfS3Path.contains("."))
+          throw new IllegalArgumentException(
+            s"Could not add '/' into S3 location because it contains file location: ${parsedS3Location.path}")
+          )
+
+        parsedS3Location.copy(path=parsedS3Location.path + "/")
+      }
+    }
   }
 }
 
