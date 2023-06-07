@@ -60,20 +60,20 @@ class S3LocationSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "add trailing '/' to the end of the S3 path if there isn't one yet" in {
-    "s3n://mybucket-123/".ensureS3LocationEndsWithSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "/")
-    "s3n://mybucket-123/asd".ensureS3LocationEndsWithSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd/")
-    "s3n://mybucket-123/asd/".ensureS3LocationEndsWithSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd/")
-    "s3n://mybucket-123/path/to/ends/with/slash".ensureS3LocationEndsWithSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
-    "s3n://mybucket-123/path/to/ends/with/slash/".ensureS3LocationEndsWithSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
-    the [IllegalArgumentException] thrownBy "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".ensureS3LocationEndsWithSlash
+    "s3n://mybucket-123/".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "/")
+    "s3n://mybucket-123/asd".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd/")
+    "s3n://mybucket-123/asd/".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd/")
+    "s3n://mybucket-123/path/to/ends/with/slash".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
+    "s3n://mybucket-123/path/to/ends/with/slash/".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
+    the [IllegalArgumentException] thrownBy "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".withTrailSlash
   }
 
   it should "remove trailing '/' from the end of the S3 path, even if there is one already" in {
-    "s3n://mybucket-123/".ensureS3LocationEndsWithoutSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "")
-    "s3n://mybucket-123/asd".ensureS3LocationEndsWithoutSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd")
-    "s3n://mybucket-123/asd/".ensureS3LocationEndsWithoutSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd")
-    "s3n://mybucket-123/path/to/ends/with/slash".ensureS3LocationEndsWithoutSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash")
-    "s3n://mybucket-123/path/to/ends/with/slash/".ensureS3LocationEndsWithoutSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash")
-    "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".ensureS3LocationEndsWithoutSlash shouldBe SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext")
+    "s3n://mybucket-123/".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "")
+    "s3n://mybucket-123/asd".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd")
+    "s3n://mybucket-123/asd/".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd")
+    "s3n://mybucket-123/path/to/ends/with/slash".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash")
+    "s3n://mybucket-123/path/to/ends/with/slash/".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash")
+    "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".withoutTrailSlash shouldBe SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext")
   }
 }

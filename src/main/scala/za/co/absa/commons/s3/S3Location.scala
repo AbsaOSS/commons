@@ -54,15 +54,15 @@ object SimpleS3Location {
 
     def isValidS3Path: Boolean = S3LocationRx.pattern.matcher(path).matches
 
-    def ensureS3LocationEndsWithoutSlash: SimpleS3Location = {
-      val parsedS3Location = apply(path)
+    def withoutTrailSlash: SimpleS3Location = {
+      val parsedS3Location = SimpleS3Location(path)
 
       if (parsedS3Location.path.endsWith("/")) parsedS3Location.copy(path=parsedS3Location.path.dropRight(1))
       else parsedS3Location
     }
 
-    def ensureS3LocationEndsWithSlash: SimpleS3Location = {
-      val parsedS3Location = apply(path)
+    def withTrailSlash: SimpleS3Location = {
+      val parsedS3Location = SimpleS3Location(path)
 
       if (parsedS3Location.path.endsWith("/")) parsedS3Location
       else {
