@@ -785,6 +785,9 @@ s3loc.bucketName // holds "mybucket-123"
 s3loc.path // holds "path/to/file.ext"
 
 "s3x://bogus#$%/xxx".toSimpleS3Location // yields None
+
+"s3a://mybucket.some/my/path1".withTrailSlash // yields SimpleS3Location("s3a", "mybucket.some", "my/path1/")
+"s3a://mybucket.some/my/path1/".withoutTrailSlash // yields SimpleS3Location("s3a", "mybucket.some", "my/path1")
 ```
 
 
