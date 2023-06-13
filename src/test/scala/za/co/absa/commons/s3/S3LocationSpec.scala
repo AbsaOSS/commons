@@ -21,6 +21,19 @@ import SimpleS3Location.SimpleS3LocationExt
 
 class S3LocationSpec extends AnyFlatSpec with Matchers {
 
+  "SimpleS3Location" should "parse S3 path into individual attributes" in {
+    SimpleS3Location("s3://mybucket-123/path/to/file.ext").protocol shouldBe "s3"
+    SimpleS3Location("s3://mybucket-123/path/to/file.ext").bucketOrAccessPointAlias shouldBe "mybucket-123"
+    SimpleS3Location("s3://mybucket-123/path/to/file.ext").path shouldBe "path/to/file.ext"
+  }
+
+  "SimpleS3LocationExt" should "parse S3 path into individual attributes" in {
+    SimpleS3LocationExt("s3://mybucket-123/path/to/file.ext").toSimpleS3Location shouldBe
+      Some(SimpleS3Location("s3", "mybucket-123", "path/to/file.ext"))
+
+    SimpleS3LocationExt("s3://mybucket-123/path/to/file.ext").isValidS3Path shouldBe true
+  }
+
   "S3Location" should "parse S3 path from String apply" in {
     the [IllegalArgumentException] thrownBy SimpleS3Location("s3a://mybucket-123")
     SimpleS3Location("s3://mybucket-123/path/to/file.ext") shouldBe SimpleS3Location("s3", "mybucket-123", "path/to/file.ext")
@@ -34,6 +47,8 @@ class S3LocationSpec extends AnyFlatSpec with Matchers {
     SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/").asSimpleS3LocationString shouldBe "s3n://mybucket-123/path/to/ends/with/slash/"
     SimpleS3Location("s3n", "mybucket-123", "path/to/ends/without/slash").asSimpleS3LocationString shouldBe "s3n://mybucket-123/path/to/ends/without/slash"
     SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext").asSimpleS3LocationString shouldBe "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext"
+    SimpleS3Location("s3", "mybucket-123", "path/to/file.ext").asS3ALocationString shouldBe "s3a://mybucket-123/path/to/file.ext"
+    SimpleS3Location("s3a", "mybucket-123", "path/to/file.ext").asS3LocationString shouldBe "s3://mybucket-123/path/to/file.ext"
   }
 
   "StringS3LocationExt" should "parse S3 path from String using toS3Location" in {

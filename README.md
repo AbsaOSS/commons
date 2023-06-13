@@ -781,7 +781,7 @@ import za.co.absa.commons.s3.SimpleS3Location._
 
 val s3loc: S3Location = "s3://mybucket-123/path/to/file.ext".toSimpleS3Location.get
 s3loc.protocol // holds "s3"
-s3loc.bucketName // holds "mybucket-123"
+s3loc.bucketOrAccessPointAlias // holds "mybucket-123"
 s3loc.path // holds "path/to/file.ext"
 
 "s3x://bogus#$%/xxx".toSimpleS3Location // yields None
