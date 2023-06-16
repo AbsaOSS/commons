@@ -22,16 +22,18 @@ import SimpleS3Location.SimpleS3LocationExt
 class S3LocationSpec extends AnyFlatSpec with Matchers {
 
   "SimpleS3Location" should "parse S3 path into individual attributes" in {
-    SimpleS3Location("s3://mybucket-123/path/to/file.ext").protocol shouldBe "s3"
-    SimpleS3Location("s3://mybucket-123/path/to/file.ext").bucketOrAccessPointAlias shouldBe "mybucket-123"
-    SimpleS3Location("s3://mybucket-123/path/to/file.ext").path shouldBe "path/to/file.ext"
+    val testLocation = SimpleS3Location("s3://mybucket-123/path/to/file.ext")
+
+    testLocation.protocol shouldBe "s3"
+    testLocation.bucketOrAccessPointAlias shouldBe "mybucket-123"
+    testLocation.path shouldBe "path/to/file.ext"
   }
 
   "SimpleS3LocationExt" should "parse S3 path into individual attributes" in {
-    SimpleS3LocationExt("s3://mybucket-123/path/to/file.ext").toSimpleS3Location shouldBe
-      Some(SimpleS3Location("s3", "mybucket-123", "path/to/file.ext"))
+    val testLocation = SimpleS3LocationExt("s3://mybucket-123/path/to/something.txt")
 
-    SimpleS3LocationExt("s3://mybucket-123/path/to/file.ext").isValidS3Path shouldBe true
+    testLocation.toSimpleS3Location shouldBe Some(SimpleS3Location("s3", "mybucket-123", "path/to/something.txt"))
+    testLocation.isValidS3Path shouldBe true
   }
 
   "S3Location" should "parse S3 path from String apply" in {
@@ -65,7 +67,7 @@ class S3LocationSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "check path using isValidS3Path" in {
-    "s3://mybucket-123/path/to/file.ext".isValidS3Path shouldBe true
+    "s3://mybucket-123/path/to/valid-file.ext".isValidS3Path shouldBe true
     "s3n://mybucket-123/path/to/ends/with/slash/".isValidS3Path shouldBe true
     "s3n://mybucket-123/path/to/ends/without/slash".isValidS3Path shouldBe true
     "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".isValidS3Path shouldBe true
