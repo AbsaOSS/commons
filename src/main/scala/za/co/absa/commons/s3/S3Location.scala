@@ -19,7 +19,7 @@ import scala.util.matching.Regex
 
 trait S3Location {
   def protocol: String
-  def bucketOrAccessPointAlias: String
+  def bucketName: String  // note that this can represent a bucket name or S3 Access Point Alias, which is an alias to the bucket name
   def path: String
 
   /**
@@ -28,7 +28,7 @@ trait S3Location {
    *
    * @return formatted s3 string
    */
-  def asSimpleS3LocationString: String = s"$protocol://$bucketOrAccessPointAlias/$path"
+  def asSimpleS3LocationString: String = s"$protocol://$bucketName/$path"
 
   /**
    * Some utils might require specific protocol, or for some operations it might make sense to use specific protocol.
@@ -36,14 +36,15 @@ trait S3Location {
    *
    * @return @return formatted s3 string with concrete protocol
    */
-  def asS3LocationString: String = s"s3://$bucketOrAccessPointAlias/$path"
-  def asS3ALocationString: String = s"s3a://$bucketOrAccessPointAlias/$path"
+  def asS3LocationString: String = s"s3://$bucketName/$path"
+  def asS3ALocationString: String = s"s3a://$bucketName/$path"
 }
 
 object SimpleS3Location {
 
   /**
    * Generally usable regex for validating S3 path, e.g. `s3://my-cool-bucket1/path/to/file/on/s3.txt`
+   * S3 path can be represented by a S3 bucket name or S3 Access Point Alias that can be used as a reference to a bucket.
    * Protocols `s3`, `s3n`, and `s3a` are allowed.
    *
    * - Bucket naming rules are defined at
@@ -102,4 +103,4 @@ object SimpleS3Location {
   }
 }
 
-case class SimpleS3Location(protocol: String, bucketOrAccessPointAlias: String, path: String) extends S3Location
+case class SimpleS3Location(protocol: String, bucketName: String, path: String) extends S3Location

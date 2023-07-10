@@ -25,7 +25,7 @@ class S3LocationSpec extends AnyFlatSpec with Matchers {
     val testLocation = SimpleS3Location("s3://mybucket-123/path/to/file.ext")
 
     testLocation.protocol shouldBe "s3"
-    testLocation.bucketOrAccessPointAlias shouldBe "mybucket-123"
+    testLocation.bucketName shouldBe "mybucket-123"
     testLocation.path shouldBe "path/to/file.ext"
   }
 
