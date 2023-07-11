@@ -769,8 +769,8 @@ Provides simple means of checking a string to appear to be a valid S3 Location a
 That way, one can easily obtain the `protocol`, `bucketName`, and `path`.
 - recognized `protocol`s are `s3`, `s3n` and `s3a`
 - `bucketName` is checked according to the
-  [official naming rules](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules)
-  (aphanum chars / `.` / `-`, min length: 3, max length: 63)
+  [official S3 Bucket naming rules](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules)
+  and [official S3 Access Point Alias naming rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-access-points.html)
 - `path` content is not checked in any way
 
 ```scala
@@ -785,6 +785,9 @@ s3loc.bucketName // holds "mybucket-123"
 s3loc.path // holds "path/to/file.ext"
 
 "s3x://bogus#$%/xxx".toSimpleS3Location // yields None
+
+"s3a://mybucket.some/my/path1".withTrailSlash // yields SimpleS3Location("s3a", "mybucket.some", "my/path1/")
+"s3a://mybucket.some/my/path1/".withoutTrailSlash // yields SimpleS3Location("s3a", "mybucket.some", "my/path1")
 ```
 
 

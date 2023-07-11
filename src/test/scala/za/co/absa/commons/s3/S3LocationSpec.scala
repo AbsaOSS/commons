@@ -21,21 +21,42 @@ import SimpleS3Location.SimpleS3LocationExt
 
 class S3LocationSpec extends AnyFlatSpec with Matchers {
 
+  "SimpleS3Location" should "parse S3 path into individual attributes" in {
+    val testLocation = SimpleS3Location("s3://mybucket-123/path/to/file.ext")
+
+    testLocation.protocol shouldBe "s3"
+    testLocation.bucketName shouldBe "mybucket-123"
+    testLocation.path shouldBe "path/to/file.ext"
+  }
+
+  "SimpleS3LocationExt" should "parse S3 path into individual attributes" in {
+    val testLocation = SimpleS3LocationExt("s3://mybucket-123/path/to/something.txt")
+
+    testLocation.toSimpleS3Location shouldBe Some(SimpleS3Location("s3", "mybucket-123", "path/to/something.txt"))
+    testLocation.isValidS3Path shouldBe true
+  }
+
   "S3Location" should "parse S3 path from String apply" in {
+    the [IllegalArgumentException] thrownBy SimpleS3Location("s3a://mybucket-123")
     SimpleS3Location("s3://mybucket-123/path/to/file.ext") shouldBe SimpleS3Location("s3", "mybucket-123", "path/to/file.ext")
     SimpleS3Location("s3n://mybucket-123/path/to/ends/with/slash/") shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
+    SimpleS3Location("s3n://mybucket-123/path/to/ends/without/slash") shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/without/slash")
     SimpleS3Location("s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext") shouldBe SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext")
   }
 
   it should "correctly express the s3 string" in {
     SimpleS3Location("s3", "mybucket-123", "path/to/file.ext").asSimpleS3LocationString shouldBe "s3://mybucket-123/path/to/file.ext"
     SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/").asSimpleS3LocationString shouldBe "s3n://mybucket-123/path/to/ends/with/slash/"
+    SimpleS3Location("s3n", "mybucket-123", "path/to/ends/without/slash").asSimpleS3LocationString shouldBe "s3n://mybucket-123/path/to/ends/without/slash"
     SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext").asSimpleS3LocationString shouldBe "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext"
+    SimpleS3Location("s3", "mybucket-123", "path/to/file.ext").asS3ALocationString shouldBe "s3a://mybucket-123/path/to/file.ext"
+    SimpleS3Location("s3a", "mybucket-123", "path/to/file.ext").asS3LocationString shouldBe "s3://mybucket-123/path/to/file.ext"
   }
 
   "StringS3LocationExt" should "parse S3 path from String using toS3Location" in {
     "s3://mybucket-123/path/to/file.ext".toSimpleS3Location shouldBe Some(SimpleS3Location("s3", "mybucket-123", "path/to/file.ext"))
     "s3n://mybucket-123/path/to/ends/with/slash/".toSimpleS3Location shouldBe Some(SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/"))
+    "s3n://mybucket-123/path/to/ends/without/slash".toSimpleS3Location shouldBe Some(SimpleS3Location("s3n", "mybucket-123", "path/to/ends/without/slash"))
     "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".toSimpleS3Location shouldBe Some(SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext"))
   }
 
@@ -46,12 +67,30 @@ class S3LocationSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "check path using isValidS3Path" in {
-    "s3://mybucket-123/path/to/file.ext".isValidS3Path shouldBe true
+    "s3://mybucket-123/path/to/valid-file.ext".isValidS3Path shouldBe true
     "s3n://mybucket-123/path/to/ends/with/slash/".isValidS3Path shouldBe true
+    "s3n://mybucket-123/path/to/ends/without/slash".isValidS3Path shouldBe true
     "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".isValidS3Path shouldBe true
 
     "s3x://mybucket-123/path/to/file/on/invalid/prefix".isValidS3Path shouldBe false
     "s3://bb/some/path/but/bucketname/too/short".isValidS3Path shouldBe false
   }
 
+  it should "add trailing '/' to the end of the S3 path if there isn't one yet" in {
+    "s3n://mybucket-123/".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "/")
+    "s3n://mybucket-123/asd".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd/")
+    "s3n://mybucket-123/asd/".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd/")
+    "s3n://mybucket-123/path/to/ends/with/slash".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
+    "s3n://mybucket-123/path/to/ends/with/slash/".withTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash/")
+    the [IllegalArgumentException] thrownBy "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".withTrailSlash
+  }
+
+  it should "remove trailing '/' from the end of the S3 path, even if there is one already" in {
+    "s3n://mybucket-123/".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "")
+    "s3n://mybucket-123/asd".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd")
+    "s3n://mybucket-123/asd/".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "asd")
+    "s3n://mybucket-123/path/to/ends/with/slash".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash")
+    "s3n://mybucket-123/path/to/ends/with/slash/".withoutTrailSlash shouldBe SimpleS3Location("s3n", "mybucket-123", "path/to/ends/with/slash")
+    "s3a://mybucket-123.asdf.cz/path-to-$_file!@#$.ext".withoutTrailSlash shouldBe SimpleS3Location("s3a", "mybucket-123.asdf.cz", "path-to-$_file!@#$.ext")
+  }
 }
