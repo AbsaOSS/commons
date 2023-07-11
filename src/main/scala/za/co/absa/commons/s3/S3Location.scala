@@ -82,22 +82,28 @@ object SimpleS3Location {
     def withoutTrailSlash: SimpleS3Location = {
       val parsedS3Location = SimpleS3Location(path)
 
-      if (parsedS3Location.path.endsWith("/")) parsedS3Location.copy(path=parsedS3Location.path.dropRight(1))
+      if (parsedS3Location.path.endsWith("/")) parsedS3Location.copy(path = parsedS3Location.path.dropRight(1))
       else parsedS3Location
     }
 
     def withTrailSlash: SimpleS3Location = {
       val parsedS3Location = SimpleS3Location(path)
 
-      if (parsedS3Location.path.endsWith("/")) parsedS3Location
+      if (parsedS3Location.path.endsWith("/")) {
+        parsedS3Location
+      }
       else {
         val lastPartOfS3Path = parsedS3Location.path.split("/").last
+
+        // If there is no dot in the path, then it still can be a file, but hopefully not vice versa,
+        // i.e. if there is a dot then it shouldn't be a path. But strictly speaking, presence (or the lack) of the dot
+        // character does not prove or disprove that a given location is a file or not.
         if (lastPartOfS3Path.contains("."))
           throw new IllegalArgumentException(
             s"Could not add '/' into S3 location because it contains file location: ${parsedS3Location.path}"
           )
 
-        parsedS3Location.copy(path=parsedS3Location.path + "/")
+        parsedS3Location.copy(path = s"${parsedS3Location.path}/")
       }
     }
   }
