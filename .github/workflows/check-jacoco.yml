@@ -50,6 +50,7 @@ jobs:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
             **/target/site/jacoco/jacoco.xml
+          title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
           sensitivity: "detail"
           comment-mode: 'single'
           debug: 'true'
