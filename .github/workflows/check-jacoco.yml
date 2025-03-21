@@ -65,6 +65,7 @@ jobs:
           title: Old JaCoCo code coverage report - Scala ${{ matrix.scala }}
           update-comment: true
 
+
       - name: Get the Coverage info
         run: |
           echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
