@@ -31,23 +31,41 @@ jobs:
         scala: [ 2.11, 2.12 ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
       - name: Build and run tests
         run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
-      - name: Add coverage to PR
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.3
+
+      - uses: kishaningithub/setup-python-amazon-linux@v1
         with:
-          paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 0.0
-          min-coverage-changed-files: 80.0
-          title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
-          update-comment: true
+          python-version: '3.12'
+
+      - name: Add JaCoCo Report in PR comments
+        id: jacoco
+        uses: MoranaApps/jacoco-report@feature/4-Integrate-with-1st-project
+        with:
+          token: '${{ secrets.GITHUB_TOKEN }}'
+          paths: |
+            **/target/site/jacoco/jacoco.xml
+          sensitivity: "detail"
+          comment-mode: 'single'
+          debug: 'true'
+
+#      - name: Add coverage to PR
+#        id: jacoco
+#        uses: madrapps/jacoco-report@v1.3
+#        with:
+#          paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          min-coverage-overall: 0.0
+#          min-coverage-changed-files: 80.0
+#          title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
+#          update-comment: true
+
+
       - name: Get the Coverage info
         run: |
           echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"

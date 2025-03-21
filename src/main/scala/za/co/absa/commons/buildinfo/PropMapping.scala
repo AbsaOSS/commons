@@ -26,4 +26,5 @@ case class PropMapping(
 
 object PropMapping {
   final val Default: PropMapping = PropMapping()
+
 }
