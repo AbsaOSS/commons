@@ -53,15 +53,6 @@ jobs:
           title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
           sensitivity: "detail"
           comment-mode: 'single'
+          min-coverage-overall: 80.0
+          min-coverage-changed-files: 80.0
           debug: 'true'
-
-      - name: Get the Coverage info
-        run: |
-          echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
-          echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
-      - name: Fail PR if changed files coverage is less than 80%
-        if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            core.setFailed('Changed files coverage is less than 80%!')
