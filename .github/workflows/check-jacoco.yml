@@ -55,7 +55,7 @@ jobs:
           debug: 'true'
 
       - name: Add coverage to PR
-        id: jacoco
+        id: jacoco-old
         uses: madrapps/jacoco-report@v1.3
         with:
           paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
