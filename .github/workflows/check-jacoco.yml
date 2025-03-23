@@ -45,7 +45,7 @@ jobs:
 
       - name: Add JaCoCo Report in PR comments
         id: jacoco
-        uses: MoranaApps/jacoco-report@feature/6-Improve-gh-action-output-for-modules
+        uses: MoranaApps/jacoco-report@v0.2.0
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
