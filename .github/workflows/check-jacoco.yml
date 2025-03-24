@@ -55,4 +55,3 @@ jobs:
           comment-mode: 'single'
           min-coverage-overall: 80.0
           min-coverage-changed-files: 80.0
-          debug: 'true'
