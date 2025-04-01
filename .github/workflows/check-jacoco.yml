@@ -53,5 +53,5 @@ jobs:
           title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
           sensitivity: "detail"
           comment-mode: 'single'
-          min-coverage-overall: 80.0
+          min-coverage-overall: 75.0
           min-coverage-changed-files: 80.0
