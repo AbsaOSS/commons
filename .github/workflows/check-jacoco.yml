@@ -39,6 +39,22 @@ jobs:
       - name: Build and run tests
         run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
 
+      - name: Save PR JaCoCo report
+        run: cp **/target/site/jacoco/jacoco.xml pr-jacoco.xml
+
+      - name: Checkout master branch into separate folder
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: master-code
+
+      - name: Build and run tests (master branch)
+        working-directory: master-code
+        run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
+
+      - name: Save master JaCoCo report
+        run: cp master-code/**/target/site/jacoco/jacoco.xml master-jacoco.xml
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -49,7 +65,9 @@ jobs:
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
-            **/target/site/jacoco/jacoco.xml
+            **/target/site/jacoco/pr-jacoco.xml
+          baseline-paths: |
+            **/target/site/jacoco/master-jacoco.xml
           title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
           sensitivity: "detail"
           comment-mode: 'single'
