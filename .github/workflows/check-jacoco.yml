@@ -55,15 +55,16 @@ jobs:
         with:
           python-version: '3.12'
       - name: Add JaCoCo Report in PR comments
-        working-directory: pr_code
         id: jacoco
-        uses: MoranaApps/jacoco-report@master
+        uses: MoranaApps/jacoco-report@feature/3-Introduce-GH-Action-workspace-restriction
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
             **/target/site/jacoco/jacoco.xml
+          exclude-paths: |
+            master_code/**
           baseline-paths: |
-            ./../master_code/**/target/site/jacoco/jacoco.xml
+            master_code/**/target/site/jacoco/jacoco.xml
           title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
           sensitivity: "detail"
           comment-mode: 'single'
