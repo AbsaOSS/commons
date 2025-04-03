@@ -30,6 +30,20 @@ object LocalFileSystemUtils {
   }
 
   /**
+   * Check if a given files exists on the local file system
+   */
+  def localExists2(path: String): Boolean = {
+    new File(path).exists()
+  }
+
+  /**
+   * Check if a given files exists on the local file system
+   */
+  def localExists3(path: String): Boolean = {
+    new File(path).exists()
+  }
+
+  /**
    * Reads a local file fully and returns its content.
    *
    * @param path A path to a file.

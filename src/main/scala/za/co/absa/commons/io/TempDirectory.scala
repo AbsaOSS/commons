@@ -51,6 +51,28 @@ class TempDirectory private(prefix: String, suffix: String, pathOnly: Boolean) {
   }
 
   /**
+    * The directory will be recursively deleted on JVM shutdown.
+    *
+    * @return this [[TempDirectory]] instance
+    */
+  def deleteOnExit2(): this.type = synchronized {
+    Runtime.getRuntime.removeShutdownHook(hook)
+    Runtime.getRuntime.addShutdownHook(hook)
+    this
+  }
+
+  /**
+    * The directory will be recursively deleted on JVM shutdown.
+    *
+    * @return this [[TempDirectory]] instance
+    */
+  def deleteOnExit3(): this.type = synchronized {
+    Runtime.getRuntime.removeShutdownHook(hook)
+    Runtime.getRuntime.addShutdownHook(hook)
+    this
+  }
+
+  /**
     * Recursively delete directory.
     */
   def delete(): Unit = synchronized {
