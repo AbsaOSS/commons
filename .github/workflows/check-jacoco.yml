@@ -43,10 +43,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: master
-          path: master_code
+          path: ./../master_code
 
       - name: Build and run tests (master branch)
-        working-directory: master_code
+        working-directory: ./../master_code
         run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
 
       - uses: actions/setup-python@v5
@@ -60,10 +60,8 @@ jobs:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
             **/target/site/jacoco/jacoco.xml
-          exclude-paths: |
-            **/master_code/**
-#          baseline-paths: |
-#            master_code/**/target/site/jacoco/jacoco.xml
+          baseline-paths: |
+            ./../master_code/**/target/site/jacoco/jacoco.xml
           title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
           sensitivity: "detail"
           comment-mode: 'single'
