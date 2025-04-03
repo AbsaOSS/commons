@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PR jacoco report xml ${{ matrix.scala }}
-          path: /target/site/jacoco/jacoco.csv
+          path: target/site/jacoco/jacoco.xml
 
       - name: Checkout master branch into separate folder
         uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Master jacoco report xml ${{ matrix.scala }}
-          path: master_code/target/site/jacoco/jacoco.csv
+          path: master_code/target/site/jacoco/jacoco.xml
 
       - uses: actions/setup-python@v5
         with:
