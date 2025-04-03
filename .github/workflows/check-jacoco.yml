@@ -39,6 +39,12 @@ jobs:
       - name: Build and run tests
         run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
 
+      - name: Upload CSV as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PR jacoco report xml ${{ matrix.scala }}
+          path: /**/target/site/jacoco/jacoco.csv
+
       - name: Checkout master branch into separate folder
         uses: actions/checkout@v4
         with:
@@ -47,6 +53,12 @@ jobs:
       - name: Build and run tests (master branch)
         working-directory: master_code
         run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
+
+      - name: Upload CSV as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Master jacoco report xml ${{ matrix.scala }}
+          path: master_code/**/target/site/jacoco/jacoco.csv
 
       - uses: actions/setup-python@v5
         with:
