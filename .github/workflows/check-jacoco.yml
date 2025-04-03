@@ -32,28 +32,30 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          path: pr_code
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
       - name: Build and run tests
+        working-directory: pr_code
         run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
 
       - name: Checkout master branch into separate folder
         uses: actions/checkout@v4
         with:
           ref: master
-          path: ./../master_code
-
+          path: master_code
       - name: Build and run tests (master branch)
-        working-directory: ./../master_code
+        working-directory: master_code
         run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Add JaCoCo Report in PR comments
+        working-directory: pr_code
         id: jacoco
         uses: MoranaApps/jacoco-report@master
         with:
