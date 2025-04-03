@@ -60,7 +60,7 @@ jobs:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
             **/target/site/jacoco/jacoco.xml
-          exclude-paths:
+          exclude-paths: |
             **/master_code/**
 #          baseline-paths: |
 #            master_code/**/target/site/jacoco/jacoco.xml
