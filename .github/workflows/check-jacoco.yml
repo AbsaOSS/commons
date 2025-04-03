@@ -62,8 +62,8 @@ jobs:
             **/target/site/jacoco/jacoco.xml
           exlude-paths: |
             master_code/**
-          baseline-paths: |
-            master_code/**/target/site/jacoco/jacoco.xml
+#          baseline-paths: |
+#            master_code/**/target/site/jacoco/jacoco.xml
           title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
           sensitivity: "detail"
           comment-mode: 'single'
