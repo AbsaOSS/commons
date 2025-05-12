@@ -39,17 +39,41 @@ jobs:
       - name: Build and run tests
         run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
 
+      - name: Upload Jacoco report as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PR jacoco report xml ${{ matrix.scala }}
+          path: target/site/jacoco/jacoco.xml
+
+      - name: Checkout master branch into separate folder
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: master_code
+      - name: Build and run tests (master branch)
+        working-directory: master_code
+        run: mvn clean verify -Pcode-coverage,scala-${{ matrix.scala }} --no-transfer-progress
+
+      - name: Upload Jacoco report as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Master jacoco report xml ${{ matrix.scala }}
+          path: master_code/target/site/jacoco/jacoco.xml
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Add JaCoCo Report in PR comments
         id: jacoco
-        uses: MoranaApps/jacoco-report@v0.2.1
+        uses: MoranaApps/jacoco-report@v1.3.0
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
             **/target/site/jacoco/jacoco.xml
+          exclude-paths: |
+            master_code/**
+          baseline-paths: |
+            master_code/**/target/site/jacoco/jacoco.xml
           title: JaCoCo code coverage report - Scala ${{ matrix.scala }}
           sensitivity: "detail"
           comment-mode: 'single'
