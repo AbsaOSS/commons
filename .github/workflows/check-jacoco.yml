@@ -65,7 +65,7 @@ jobs:
           python-version: '3.12'
       - name: Add JaCoCo Report in PR comments
         id: jacoco
-        uses: MoranaApps/jacoco-report@v1.0.0
+        uses: MoranaApps/jacoco-report@v1.3.0
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
