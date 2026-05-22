@@ -5,6 +5,10 @@ on:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
     branches: [ master ]
 
+concurrency:
+  group: release-notes-check-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-release-notes:
     runs-on: ubuntu-latest
