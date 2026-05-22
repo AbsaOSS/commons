@@ -1,0 +1,109 @@
+name: Draft Release
+on:
+  workflow_dispatch:
+    inputs:
+      tag-name:
+        description: 'Name of git tag to be created, and then draft release created. Syntax: "v[0-9]+.[0-9]+.[0-9]+".'
+        required: false
+      from-tag-name:
+        description: >-
+          Name of the git tag from which to detect changes from.
+          Default value: latest tag. Syntax: "v[0-9]+.[0-9]+.[0-9]+".
+        required: false
+
+jobs:
+  release-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.14'
+
+      - name: Check format of received target tag
+        id: check-version-tag
+        uses: AbsaOSS/version-tag-check@4145e48bf3f77a5afff2ec9afdd8afb6b53bce34
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          github-repository: ${{ github.repository }}
+          version-tag: ${{ github.event.inputs.tag-name }}
+
+      - name: Check format of received from tag
+        if: ${{ github.event.inputs.from-tag-name }}
+        id: check-version-from-tag
+        uses: AbsaOSS/version-tag-check@4145e48bf3f77a5afff2ec9afdd8afb6b53bce34
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          github-repository: ${{ github.repository }}
+          version-tag: ${{ github.event.inputs.from-tag-name }}
+          should-exist: true
+
+      - name: Generate Release Notes
+        id: generate_release_notes
+        uses: AbsaOSS/generate-release-notes@da535383f54a6532adb84e88d3b6e5c7236132df
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release-notes-title: "## [Rr]elease [Nn]otes"
+          tag-name: ${{ github.event.inputs.tag-name }}
+          from-tag-name: ${{ github.event.inputs.from-tag-name }}
+          chapters: |
+            - { title: New Features 🎉, label: enhancement, order: 20 }
+            - { title: Bugfixes 🛠, label: bug, order: 30 }
+            - { title: Dependencies ⚙️, label: dependencies, order: 50 }
+            - { title: No entry 🚫, label: duplicate, hidden: true, order: 99 }
+          warnings: true
+          print-empty-chapters: false
+          row-format-issue: '{type}: {number} _{title}_ by {developers} in {pull-requests}'
+          row-format-pr: '{number} _{title}_ by {developers}'
+
+      - name: Create and push tag (standalone)
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const tag = core.getInput('tag-name')
+            const ref = `refs/tags/${tag}`;
+            const sha = context.sha; // The SHA of the commit to tag
+            const tagMessage = `${tag} released by GitHub Action`;
+
+            const tagObject = await github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: tag,
+              message: tagMessage,
+              object: sha,
+              type: 'commit',
+              tagger: {
+                name: context.actor,
+                email: `${context.actor}@users.noreply.github.com`,
+                date: new Date().toISOString()
+              }
+            });
+
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: ref,
+              sha: tagObject.data.sha
+            });
+
+            console.log(`Tag created: ${tag}`);
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          tag-name: ${{ github.event.inputs.tag-name }}
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{ github.event.inputs.tag-name }}
+          body: ${{ steps.generate_release_notes.outputs.release-notes }}
+          tag_name: ${{ github.event.inputs.tag-name }}
+          draft: true
+          prerelease: false
