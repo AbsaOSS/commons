@@ -13,6 +13,8 @@ on:
 
 permissions:
   contents: write
+  issues: read
+  pull-requests: read
 
 jobs:
   release-draft:
@@ -74,23 +76,13 @@ jobs:
           script: |
             const tag = process.env.TAG_NAME;
             const ref = `refs/tags/${tag}`;
-            const sha = context.sha; // The SHA of the commit to tag
-            const tagMessage = `${tag} released by GitHub Action`;
-
-            const tagObject = await github.rest.git.createTag({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag: tag,
-              message: tagMessage,
-              object: sha,
-              type: 'commit'
-            });
-
+            const sha = context.sha;
+            
             await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: ref,
-              sha: tagObject.data.sha
+              sha: sha
             });
 
             console.log(`Tag created: ${tag}`);
