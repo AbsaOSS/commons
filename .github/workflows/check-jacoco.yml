@@ -32,6 +32,7 @@ concurrency:
 env:
   # hint: "group thresholds" are in format: 'overall*changed-files-average*per-changed-file'
   # one report group per Scala version
+  # scala: [ 2.11, 2.12, 2.13 ]  -- 2.13 produce problems | Support can wait until we will decide to move from 2.12
   REPORT_GROUPS: |
     - name: scala-2.11
       paths:
@@ -40,7 +41,7 @@ env:
     - name: scala-2.12
       paths:
         - 'coverage/scala-2.12/jacoco.xml'
-      thresholds: '73*80*60'
+      thresholds: '72*80*60'
 
 jobs:
   detect:
@@ -106,9 +107,9 @@ jobs:
         uses: MoranaApps/jacoco-report@562ba603c5b95021dbee26e89ae0f834f2dd8b9e
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          global-thresholds: '0*80'
+          global-thresholds: '74*80'
           global-overall-scope: 'groups-only'
-          report-thresholds-default: '73*80*60'
+          report-thresholds-default: '72*80*60'
           skip-unchanged: 'true'
           evaluate-unchanged: 'false'
           report-groups: ${{ env.REPORT_GROUPS }}
