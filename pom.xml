@@ -420,6 +420,114 @@
             </build>
         </profile>
 
+        <profile>
+            <id>code-coverage</id>
+            <build>
+                <plugins>
+                    <!--
+                      Neutralize the JaCoCo fork inherited from the parent root-pom
+                      `code-coverage` profile (za.co.absa.jacoco:jacoco-maven-plugin with
+                      doScalaMethodFiltration). Method filtration is now provided by the
+                      MoranaApps JMF plugin below, driven by `jmf-rules.txt`.
+                    -->
+                    <plugin>
+                        <groupId>za.co.absa.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>jacoco-report</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Standard JaCoCo agent -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.15</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <propertyName>jacoco.argLine</propertyName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- JaCoCo Method Filter: annotate boilerplate, then build filtered report -->
+                    <plugin>
+                        <groupId>io.github.moranaapps</groupId>
+                        <artifactId>jacoco-method-filter-maven-plugin</artifactId>
+                        <version>2.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>jmf-rewrite</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>rewrite</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jmf-report</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <reportName>${project.name} - scala:${scala.version}</reportName>
+                                    <reportFormats>html,xml</reportFormats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Overlay the filtered (annotated) classes over the compiled ones before tests run -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <executions>
+                            <execution>
+                                <id>overlay-filtered-classes</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                    <overwrite>true</overwrite>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}/classes-filtered</directory>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Wire the JaCoCo agent into the ScalaTest runner -->
+                    <plugin>
+                        <groupId>org.scalatest</groupId>
+                        <artifactId>scalatest-maven-plugin</artifactId>
+                        <configuration>
+                            <argLine>${jacoco.argLine}</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
     </profiles>
 
 </project>
