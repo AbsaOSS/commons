@@ -20,7 +20,7 @@ object SubsetConfigurationMethods {
 
   implicit class SubsetConfigurationOps(val conf: SubsetConfiguration) extends AnyVal {
 
-    // The `SubsetConfiguration.getParentKey()` method is protected.
+    // The `SubsetConfiguration.getParentKey()` method is protected
     // We have to use reflection call due to IllegalAccessError in some environments.
     // See: https://github.com/AbsaOSS/commons/issues/75
     def getParentKey: String => String = {
