@@ -27,7 +27,7 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 /**
-  * object contains extension methods for the [[org.apache.commons.configuration.Configuration Configuration]] interface.
+  * The object contains extension methods for the [[org.apache.commons.configuration.Configuration Configuration]] interface.
   */
 object ConfigurationImplicits {
 
